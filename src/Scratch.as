@@ -23,15 +23,22 @@
 // This is the top-level application.
 
 package {
-import blocks.*;
-
 import com.adobe.utils.StringUtil;
 
-import extensions.ExtensionDevManager;
-import extensions.ExtensionManager;
-
-import flash.display.*;
-import flash.events.*;
+import flash.display.DisplayObject;
+import flash.display.Graphics;
+import flash.display.Shape;
+import flash.display.Sprite;
+import flash.display.StageAlign;
+import flash.display.StageDisplayState;
+import flash.display.StageScaleMode;
+import flash.events.ErrorEvent;
+import flash.events.Event;
+import flash.events.IOErrorEvent;
+import flash.events.KeyboardEvent;
+import flash.events.MouseEvent;
+import flash.events.SecurityErrorEvent;
+import flash.events.UncaughtErrorEvent;
 import flash.external.ExternalInterface;
 import flash.geom.Point;
 import flash.geom.Rectangle;
@@ -42,33 +49,69 @@ import flash.net.LocalConnection;
 import flash.net.URLLoader;
 import flash.net.URLLoaderDataFormat;
 import flash.net.URLRequest;
-import flash.system.*;
-import flash.text.*;
-import flash.utils.*;
+import flash.system.Capabilities;
+import flash.system.System;
+import flash.text.TextField;
+import flash.text.TextFieldAutoSize;
+import flash.text.TextFormat;
+import flash.utils.ByteArray;
+import flash.utils.getTimer;
 
-import interpreter.*;
+import mx.utils.URLUtil;
+
+import blocks.Block;
+
+import extensions.ExtensionDevManager;
+import extensions.ExtensionManager;
+
+import interpreter.Interpreter;
 
 import logging.Log;
 import logging.LogEntry;
 import logging.LogLevel;
 
-import mx.utils.URLUtil;
-
 import render3d.DisplayObjectContainerIn3D;
 
-import scratch.*;
+import scratch.BlockMenus;
+import scratch.PaletteBuilder;
+import scratch.ReadyLabel;
+import scratch.ScratchCostume;
+import scratch.ScratchObj;
+import scratch.ScratchRuntime;
+import scratch.ScratchSound;
+import scratch.ScratchSprite;
+import scratch.ScratchStage;
 
 import svgeditor.tools.SVGTool;
 
-import translation.*;
+import translation.Translator;
 
-import ui.*;
-import ui.media.*;
-import ui.parts.*;
+import ui.BlockPalette;
+import ui.CameraDialog;
+import ui.LoadProgress;
+import ui.media.MediaInfo;
+import ui.media.MediaLibrary;
+import ui.media.MediaPane;
+import ui.parts.ImagesPart;
+import ui.parts.LibraryPart;
+import ui.parts.ScriptsPart;
+import ui.parts.SoundsPart;
+import ui.parts.StagePart;
+import ui.parts.TabsPart;
+import ui.parts.TopBarPart;
 
-import uiwidgets.*;
+import uiwidgets.BlockColorEditor;
+import uiwidgets.CursorTool;
+import uiwidgets.DialogBox;
+import uiwidgets.IconButton;
+import uiwidgets.Menu;
+import uiwidgets.ScriptsPane;
 
-import util.*;
+import util.Base64Encoder;
+import util.GestureHandler;
+import util.ProjectIO;
+import util.Server;
+import util.Transition;
 
 import watchers.ListWatcher;
 
@@ -1113,6 +1156,35 @@ public class Scratch extends Sprite {
 		m.addLine();
 		m.addItem('Edit block colors', editBlockColors);
 	}
+	//edit by xuhy 
+	
+	public function showCOMMenu(b:*):void {
+		var m:Menu = new Menu(null, 'More', CSS.topBarColor(), 28);
+		m.addItem('Undelete', runtime.undelete, runtime.canUndelete());
+		m.addLine();
+		m.addItem('Small stage layout', toggleSmallStage, true, stageIsContracted);
+		m.addItem('Turbo mode', toggleTurboMode, true, interp.turboMode);
+		addComMenuItems(b, m);
+		var p:Point = b.localToGlobal(new Point(0, 0));
+		m.showOnStage(stage, b.x, topBarPart.bottom() - 1);
+	}
+	
+	protected function addComMenuItems(b:*, m:Menu):void {
+		m.addLine();
+		m.addItem('Edit block colors', editBlockColors);
+	}
+	
+	
+	public function showMYHMenu(b:*):void{
+		var m:Menu = new Menu(null,'More',CSS.topBarColor(), 28);
+	}
+	
+	public function showForumHelpMenu(b:*)void {
+		var
+	}
+	
+	
+	
 
 	protected function editBlockColors():void {
 		var d:DialogBox = new DialogBox();

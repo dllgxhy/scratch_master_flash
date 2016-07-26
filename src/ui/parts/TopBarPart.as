@@ -93,7 +93,7 @@ public class TopBarPart extends UIPart {
 			Scratch.app.showFileMenu(Menu.dummyButton());
 			Scratch.app.showEditMenu(Menu.dummyButton());
 		}
-		return ['File', 'Edit', 'Tips', 'Duplicate', 'Delete', 'Grow', 'Shrink', 'Block help', 'Offline Editor'];
+		return ['File', 'Edit', 'Tips','COM','MYH','Forum/Help', 'Duplicate', 'Delete', 'Grow', 'Shrink', 'Block help', 'Offline Editor'];
 	}
 
 	protected function removeTextButtons():void {
@@ -208,6 +208,9 @@ public class TopBarPart extends UIPart {
 	protected function addTextButtons():void {
 		addChild(fileMenu = makeMenuButton('File', app.showFileMenu, true));
 		addChild(editMenu = makeMenuButton('Edit', app.showEditMenu, true));
+		addChild(editMenu = makeMenuButton('COM', app.showCOMMenu, true));
+		addChild(editMenu = makeMenuButton('MYH', app.showMYHMenu, true));
+		addChild(editMenu = makeMenuButton('Forum/Help', app.showForumHelpMenu, true));
 	}
 
 	private function addToolButtons():void {
