@@ -65,9 +65,9 @@ public class ImageEdit extends Sprite {
 	private var svgEditorMask:Shape;
 	private var currentCursor:String;
 
-	protected function get segmentationTool():BitmapBackgroundTool {
-		return currentTool as BitmapBackgroundTool;
-	}
+//	protected function get segmentationTool():BitmapBackgroundTool {
+//		return currentTool as BitmapBackgroundTool;
+//	}
 
 	private function get objectTransformer():ObjectTransformer {
 		return currentTool as ObjectTransformer;
@@ -680,11 +680,11 @@ public class ImageEdit extends Sprite {
 			case 'paintbucket':
 				currentTool = new PaintBucketTool(this);
 				break;
-			case 'magicEraser':
-			{
-				currentTool = new BitmapBackgroundTool(this);
-				break;
-			}
+//			case 'magicEraser':
+//			{
+//				currentTool = new BitmapBackgroundTool(this);
+//				break;
+//			}
 		}
 
 		if (currentTool is SVGEditTool) {
@@ -720,7 +720,7 @@ public class ImageEdit extends Sprite {
 		// Make sure the tool selected is visible!
 		if (toolButtons.hasOwnProperty(newMode) && currentTool)
 			(toolButtons[newMode] as IconButton).setDisabled(false);
-		imagesPart.refreshUndoButtons();
+//		imagesPart.refreshUndoButtons();
 	}
 
 	protected function updateDrawPropsForTool(newMode:String):void {
@@ -730,9 +730,9 @@ public class ImageEdit extends Sprite {
 			drawPropsUI.toggleShapeUI(false);
 
 		drawPropsUI.toggleFillUI(newMode == 'vpaintbrush' || newMode == 'paintbucket');
-		if (!(this is SVGEdit)) {
-			drawPropsUI.toggleSegmentationUI(newMode == 'magicEraser', currentTool as BitmapBackgroundTool)
-		}
+//		if (!(this is SVGEdit)) {
+//			drawPropsUI.toggleSegmentationUI(newMode == 'magicEraser', currentTool as BitmapBackgroundTool)
+//		}
 		drawPropsUI.showSmoothnessUI(newMode == 'path');
 		if (newMode == 'path') {
 			var strokeWidth:Number = drawPropsUI.settings.strokeWidth;
@@ -819,11 +819,11 @@ public class ImageEdit extends Sprite {
 		isScene = forStage;
 		if (toolButtons['setCenter']) (toolButtons['setCenter'] as IconButton).setDisabled(isScene);
 		loadCostume(targetCostume);
-		if (segmentationTool) {
-			segmentationTool.initState();
-			//refreshSegmentationMode();
-		}
-		if (imagesPart) imagesPart.refreshUndoButtons();
+//		if (segmentationTool) {
+//			segmentationTool.initState();
+//			//refreshSegmentationMode();
+//		}
+//		if (imagesPart) imagesPart.refreshUndoButtons();
 
 		if (currentTool is SVGEditTool)
 			(currentTool as SVGEditTool).setObject(null);
@@ -908,23 +908,24 @@ public class ImageEdit extends Sprite {
 				(targetCostume.undoListIndex < (targetCostume.undoList.length - 1)) &&
 				!targetCostume.segmentationState.lastMask;
 	}
-
+/*
 	public function canUndoSegmentation():Boolean {
 		return segmentationTool && targetCostume.segmentationState.canUndo();
 	}
 
+	
 	public function canRedoSegmentation():Boolean {
 		return segmentationTool && targetCostume.segmentationState.canRedo() && !canRedo();
 	}
-
+*/
 	public function undo(ignore:* = null):void {
 
 		//This is handled as a special case since clearSelection will commit a
 		//segmentation earlier than desired
-		if (canUndoSegmentation()) {
-			undoSegmentation();
-			return;
-		}
+//		if (canUndoSegmentation()) {
+//			undoSegmentation();
+//			return;
+//		}
 		clearSelection();
 		if (canUndo()) {
 			var undoRec:Array = targetCostume.undoList[--targetCostume.undoListIndex];
@@ -934,10 +935,10 @@ public class ImageEdit extends Sprite {
 
 	public function redo(ignore:* = null):void {
 
-		if (canRedoSegmentation()) {
+/*		if (canRedoSegmentation()) {
 			redoSegmentation();
 			return;
-		}
+		}*/
 		clearSelection();
 		if (canRedo()) {
 			var undoRec:Array = targetCostume.undoList[++targetCostume.undoListIndex];
@@ -955,7 +956,7 @@ public class ImageEdit extends Sprite {
 		}
 		targetCostume.undoListIndex = targetCostume.undoList.length;
 		targetCostume.undoList.push([imgData, rotationCenterX, rotationCenterY]);
-		imagesPart.refreshUndoButtons();
+//		imagesPart.refreshUndoButtons();
 	}
 
 	private function installUndoRecord(undoRec:Array):void {
@@ -973,7 +974,7 @@ public class ImageEdit extends Sprite {
 		if (data is BitmapData) targetCostume.setBitmapData(data, undoRec[1], undoRec[2]);
 
 		imagesPart.editor.restoreUndoState(undoRec);
-		imagesPart.refreshUndoButtons();
+//		imagesPart.refreshUndoButtons();
 	}
 
 	protected function restoreUndoState(undoRec:Array):void { }
@@ -1020,7 +1021,7 @@ public class ImageEdit extends Sprite {
 		// Overridden by BitmapEdit to snap to the nearest pixel.
 		return toolsP;
 	}
-
+/*
 	public function undoSegmentation():void {
 		if (segmentationTool) {
 			targetCostume.prevSegmentationState();
@@ -1045,6 +1046,6 @@ public class ImageEdit extends Sprite {
 			}
 			imagesPart.refreshUndoButtons();
 		}
-	}
+	}*/
 }
 }

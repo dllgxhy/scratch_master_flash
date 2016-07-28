@@ -138,7 +138,7 @@ public class PaletteBuilder {
 			nextY += 5;
 		}
 
-		addExtensionButtons();
+//		addExtensionButtons();
 		for each (var ext:* in app.extensionManager.enabledExtensions()) {
 			addExtensionSeparator(ext);
 			addBlocksForExtension(ext);
@@ -146,7 +146,7 @@ public class PaletteBuilder {
 
 		updateCheckboxes();
 	}
-
+/*
 	protected function addExtensionButtons():void {
 		addAddExtensionButton();
 		if (Scratch.app.isExtensionDevMode) {
@@ -155,7 +155,7 @@ public class PaletteBuilder {
 				addItem(extensionDevManager.makeLoadExperimentalExtensionButton());
 			}
 		}
-	}
+	}*/
 
 	protected function addAddExtensionButton():void {
 		addItem(new Button(Translator.map('Add an Extension'), showAnExtension, false, '/help/studio/tips/blocks/add-an-extension/'));
@@ -393,8 +393,8 @@ public class PaletteBuilder {
 		m.addItem(Translator.map('About') + ' ' + ext.displayName + ' ' + Translator.map('extension') + '...', showAbout, !!ext.url);
 		m.addItem('Remove extension blocks', hideExtension);
 
-		var extensionDevManager:ExtensionDevManager = Scratch.app.extensionManager as ExtensionDevManager;
-
+//		var extensionDevManager:ExtensionDevManager = Scratch.app.extensionManager as ExtensionDevManager;
+/*
 		if (!ext.isInternal && extensionDevManager) {
 			m.addLine();
 			var localFileName:String = extensionDevManager.getLocalFileName(ext);
@@ -408,7 +408,7 @@ public class PaletteBuilder {
 					extensionDevManager.stopWatchingExtensionFile();
 				});
 			}
-		}
+		}*/
 
 		return m;
 	}
@@ -440,7 +440,7 @@ public class PaletteBuilder {
 		app.palette.addChild(indicator);
 
 		nextY += titleButton.height + 10;
-
+/*
 		var extensionDevManager:ExtensionDevManager = Scratch.app.extensionManager as ExtensionDevManager;
 		if (extensionDevManager) {
 			// Show if this extension is being updated by a file
@@ -451,7 +451,7 @@ public class PaletteBuilder {
 
 				nextY += extensionEditStatus.textHeight + 3;
 			}
-		}
+		}*/
 	}
 
 	[Embed(source='../assets/reload.png')]
@@ -460,13 +460,13 @@ public class PaletteBuilder {
 	protected function addLineForExtensionTitle(titleButton:IconButton, ext:ScratchExtension):void {
 		var x:int = titleButton.width + 12;
 		var w:int = pwidth - x - 48;
-		var extensionDevManager:ExtensionDevManager = Scratch.app.extensionManager as ExtensionDevManager;
-		var dirty:Boolean = extensionDevManager && extensionDevManager.isLocalExtensionDirty(ext);
-		if (dirty)
-			w -= 15;
+//		var extensionDevManager:ExtensionDevManager = Scratch.app.extensionManager as ExtensionDevManager;
+//		var dirty:Boolean = extensionDevManager && extensionDevManager.isLocalExtensionDirty(ext);
+//		if (dirty)
+//			w -= 15;
 		addLine(x, nextY + 9, w);
 
-		if (dirty) {
+/*		if (dirty) {
 			var reload:Bitmap = new reloadIcon();
 			reload.scaleX = 0.75;
 			reload.scaleY = 0.75;
@@ -492,7 +492,7 @@ public class PaletteBuilder {
 			reloadBtn.addEventListener(MouseEvent.ROLL_OUT, function (e:MouseEvent):void {
 				reloadBtn.transform.colorTransform = new ColorTransform();
 			});
-		}
+		}*/
 	}
 
 	private function addBlocksForExtension(ext:ScratchExtension):void {

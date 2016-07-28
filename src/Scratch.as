@@ -404,12 +404,12 @@ public class Scratch extends Sprite {
 	}
 
 	protected function initExtensionManager():void {
-		if (isExtensionDevMode) {
-			extensionManager = new ExtensionDevManager(this);
-		}
-		else {
+//		if (isExtensionDevMode) {
+//			extensionManager = new ExtensionDevManager(this);
+//		}
+//		else {
 			extensionManager = new ExtensionManager(this);
-		}
+//		}
 	}
 
 	protected function initServer():void {
@@ -1179,8 +1179,8 @@ public class Scratch extends Sprite {
 		var m:Menu = new Menu(null,'More',CSS.topBarColor(), 28);
 	}
 	
-	public function showForumHelpMenu(b:*)void {
-		var
+	public function showForumHelpMenu(b:*):void {
+//		var
 	}
 	
 	

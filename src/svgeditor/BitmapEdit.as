@@ -249,9 +249,9 @@ public class BitmapEdit extends ImageEdit {
 				// User was editing an object and switched tools, bake the object
 				bakeIntoBitmap();
 				saveToCostume();
-				if(segmentationTool){
+/*				if(segmentationTool){
 					segmentationTool.refresh();
-				}
+				}*/
 			}
 		}
 	}
@@ -363,15 +363,15 @@ public class BitmapEdit extends ImageEdit {
 
 	protected override function flipAll(vertical:Boolean):void {
 		workArea.getBitmap().bitmapData = flipBitmap(vertical, workArea.getBitmap().bitmapData);
-		if(segmentationTool && targetCostume.segmentationState.lastMask){
+/*		if(segmentationTool && targetCostume.segmentationState.lastMask){
 			targetCostume.segmentationState.recordForUndo();
 			targetCostume.nextSegmentationState();
 			targetCostume.segmentationState.flip(vertical);
 			segmentationTool.refreshSegmentation();
 		}
-		else{
+		else{*/
 			saveToCostume();
-		}
+//		}
 	}
 
 	public static function flipBitmap(vertical:Boolean, oldBM:BitmapData):BitmapData{
@@ -426,9 +426,9 @@ public class BitmapEdit extends ImageEdit {
 	override protected function clearSelection():void {
 		// Re-activate the tool that (looks like) it's currently active
 		// If there's an uncommitted action, this will commit it in the same way that changing the tool would.
-		if(!segmentationTool){
-			setToolMode(lastToolMode ? lastToolMode : toolMode, true);
-		}
+//		if(!segmentationTool){
+//			setToolMode(lastToolMode ? lastToolMode : toolMode, true);
+//		}
 	}
 
 	public override function canClearCanvas():Boolean {

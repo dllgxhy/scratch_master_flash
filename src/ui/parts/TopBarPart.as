@@ -81,10 +81,10 @@ public class TopBarPart extends UIPart {
 			addChild(exportButton = new Button('Save Project', function():void { app.exportProjectToFile(); }));
 			addChild(extensionLabel = makeLabel('My Extension', offlineNoticeFormat, 2, 2));
 
-			var extensionDevManager:ExtensionDevManager = Scratch.app.extensionManager as ExtensionDevManager;
-			if (extensionDevManager) {
-				addChild(loadExperimentalButton = extensionDevManager.makeLoadExperimentalExtensionButton());
-			}
+//			var extensionDevManager:ExtensionDevManager = Scratch.app.extensionManager as ExtensionDevManager;
+//			if (extensionDevManager) {
+//				addChild(loadExperimentalButton = extensionDevManager.makeLoadExperimentalExtensionButton());
+//			}
 		}
 	}
 
@@ -197,10 +197,10 @@ public class TopBarPart extends UIPart {
 			extensionLabel.visible = hasExperimental;
 			loadExperimentalButton.visible = !hasExperimental;
 
-			var extensionDevManager:ExtensionDevManager = app.extensionManager as ExtensionDevManager;
-			if (extensionDevManager) {
-				extensionLabel.text = extensionDevManager.getExperimentalExtensionNames().join(', ');
-			}
+//			var extensionDevManager:ExtensionDevManager = app.extensionManager as ExtensionDevManager;
+//			if (extensionDevManager) {
+//				extensionLabel.text = extensionDevManager.getExperimentalExtensionNames().join(', ');
+//			}
 		}
 		fixLayout();
 	}

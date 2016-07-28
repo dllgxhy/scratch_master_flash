@@ -27,7 +27,7 @@ import flash.geom.*;
 import flash.text.TextField;
 import flash.text.TextFormat;
 
-import svgeditor.tools.BitmapBackgroundTool;
+//import svgeditor.tools.BitmapBackgroundTool;
 
 import translation.Translator;
 
@@ -204,7 +204,7 @@ public class DrawPropertyUI extends Sprite {
 		shapeBtnFill.setOn(currentValues.filledShape);
 		shapeBtnHollow.setOn(!currentValues.filledShape);
 	}
-
+/*
 	public function toggleSegmentationUI(enabled:Boolean, tool:BitmapBackgroundTool):void {
 		if (tool && enabled) {
 			tool.removeEventListener(BitmapBackgroundTool.UPDATE_REQUIRED, updateSegmentationUI);
@@ -215,7 +215,7 @@ public class DrawPropertyUI extends Sprite {
 		}
 		segmentationUI.visible = enabled;
 		colorPicker.visible = !enabled;
-	}
+	}*/
 
 	public function showSmoothnessUI(flag:Boolean, forDrawing:Boolean = true):void {
 		smoothnessUI.visible = flag;
@@ -547,7 +547,7 @@ public class DrawPropertyUI extends Sprite {
 
 	private function updateSegmentationUI(e:Event = null):void {
 		if (editor && editor.imagesPart) {
-			editor.imagesPart.refreshUndoButtons();
+//			editor.imagesPart.refreshUndoButtons();
 		}
 	}
 
