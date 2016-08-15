@@ -65,8 +65,8 @@ public class Translator {
 		function gotPOFile(data:ByteArray):void {
 			if (data) {
 				dictionary = parsePOData(data);
-				setFontsFor(lang); // also sets currentLang
 				checkBlockTranslations();
+				setFontsFor(lang);
 			}
 			Scratch.app.translationChanged();
 		}
@@ -124,7 +124,7 @@ public class Translator {
 		rightToLeft = rtlLanguages.indexOf(lang) > -1;
 		rightToLeftMath = ('ar' == lang);
 		Block.setFonts(10, 9, true, 0); // default font settings
-		if (font12.indexOf(lang) > -1) Block.setFonts(12, 11, false, 0);
+		if (font12.indexOf(lang) > -1) Block.setFonts(11, 10, false, 0);
 		if (font13.indexOf(lang) > -1) Block.setFonts(13, 12, false, 0);
 	}
 

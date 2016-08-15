@@ -390,7 +390,7 @@ public class ImagesPart extends UIPart {
 		var p:Point = new Point(240, 180);
 		editor.addCostume(c, p);
 	}
-/*
+
 	public function refreshUndoButtons():void {
 		if(undoButton){
 			undoButton.setDisabled(!(editor.canUndo() || editor.canUndoSegmentation()), 0.5);
@@ -409,7 +409,7 @@ public class ImagesPart extends UIPart {
 			}
 		}
 	}
-*/
+
 	public function setCanCrop(enabled:Boolean):void {
 		if (enabled) {
 			cropButton.alpha = 1;

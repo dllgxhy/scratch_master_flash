@@ -21,7 +21,7 @@ package render3d {
 import flash.display.BitmapData;
 
 public class ScratchTextureBitmap extends BitmapData
-{SCRATCH::allow3d{
+{/*SCRATCH::allow3d*/{
 
 	import flash.display3D.*;
 	import flash.display3D.textures.Texture;
@@ -38,7 +38,7 @@ public class ScratchTextureBitmap extends BitmapData
 	private var dirty:Boolean;
 	public function ScratchTextureBitmap(width:int, height:int, transparent:Boolean=true, fillColor:uint=4.294967295E9)
 	{
-//		super(width, height, transparent, fillColor);
+		super(width, height, transparent, fillColor);
 		rectPacker = new RectanglePacker(width, height);
 		rectangles = {};
 		dirty = false;

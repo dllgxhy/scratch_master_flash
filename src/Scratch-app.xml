@@ -31,7 +31,7 @@
 
 	<!-- The name that is displayed in the AIR application installer. 
 	May have multiple values for each language. See samples or xsd schema file. Optional. -->
-	<name/>
+	<name>AS-Block（猫友汇）</name>
 	
 	<!-- A string value of the format <0-999>.<0-999>.<0-999> that represents application version which can be used to check for application upgrade. 
 	Values can also be 1-part or 2-part. It is not necessary to have a 3-part value.
@@ -51,9 +51,8 @@
 	<!-- Copyright information. Optional -->
 	<copyright>
 	————————————
-	南京最沃电子科技有限公司
 	深圳少年创客科技有限公司
-	————联合推出————
+	————推出————
 	</copyright>
 
 	<!-- Publisher ID. Used if you're updating an application created prior to 1.5.3 -->
@@ -63,7 +62,7 @@
 	<initialWindow>
 		<!-- The main SWF or HTML file of the application. Required. -->
 		<!-- Note: In Flash Builder, the SWF reference is set automatically. -->
-		<content>Scratch.swf</content>
+		<content>[此值将由 Flash Builder 在输出 app.xml 中覆盖]</content>
 		
 		<!-- The title of the main window. Optional. -->
 		<title>AS-Block（猫友汇）</title>
@@ -267,8 +266,6 @@
         <!-- <colorDepth></colorDepth> -->
     <!-- </android> -->
 	<!-- End of the schema for adding the android specific tags in AndroidManifest.xml file -->
-
-
 
 
 

@@ -25,7 +25,7 @@
 package ui.parts {
 import assets.Resources;
 
-import extensions.ExtensionDevManager;
+//import extensions.ExtensionDevManager;
 
 import flash.display.*;
 import flash.events.MouseEvent;
@@ -43,6 +43,9 @@ public class TopBarPart extends UIPart {
 
 	protected var fileMenu:IconButton;
 	protected var editMenu:IconButton;
+	protected var comMenu:IconButton;
+	protected var myMenu:IconButton;
+	protected var helpMenu:IconButton;
 
 	private var copyTool:IconButton;
 	private var cutTool:IconButton;
@@ -92,14 +95,20 @@ public class TopBarPart extends UIPart {
 		if (Scratch.app) {
 			Scratch.app.showFileMenu(Menu.dummyButton());
 			Scratch.app.showEditMenu(Menu.dummyButton());
+			Scratch.app.showCOMMenu(Menu.dummyButton());//���˵�����COM��_wh
+//			Scratch.app.showMYMenu(Menu.dummyButton());//���˵�����è�ѻ���_wh
+//			Scratch.app.showHelpMenu(Menu.dummyButton());//���˵�������̳������_wh
 		}
-		return ['File', 'Edit', 'Tips','COM','MYH','Forum/Help', 'Duplicate', 'Delete', 'Grow', 'Shrink', 'Block help', 'Offline Editor'];
+		return ['File', 'Edit', 'COM','MYH','Forum/Help','Tips', 'Duplicate', 'Delete', 'Grow', 'Shrink', 'Block help', 'Offline Editor'];
 	}
 
 	protected function removeTextButtons():void {
 		if (fileMenu.parent) {
 			removeChild(fileMenu);
 			removeChild(editMenu);
+			removeChild(comMenu);//���˵�����COM��_wh
+			removeChild(myMenu);//���˵�����COM��_wh
+			removeChild(helpMenu);//���˵�����COM��_wh
 		}
 	}
 
@@ -142,6 +151,8 @@ public class TopBarPart extends UIPart {
 		nextX += languageButton.width + buttonSpace;
 
 		// new/more/tips buttons
+		const buttonSpace:int = 12;
+		nextX = languageButton.x + languageButton.width + 13;
 		fileMenu.x = nextX;
 		fileMenu.y = buttonY;
 		nextX += fileMenu.width + buttonSpace;
@@ -149,7 +160,22 @@ public class TopBarPart extends UIPart {
 		editMenu.x = nextX;
 		editMenu.y = buttonY;
 		nextX += editMenu.width + buttonSpace;
-
+		
+		//���˵�����COM��_wh
+		comMenu.x = nextX;
+		comMenu.y = buttonY;
+		nextX += comMenu.width + buttonSpace;
+		
+		//���˵�����è�ѻ���_wh
+		myMenu.x = nextX;
+		myMenu.y = buttonY;
+		nextX += myMenu.width + buttonSpace;
+		
+		//���˵�������̳������_wh
+		helpMenu.x = nextX;
+		helpMenu.y = buttonY;
+		nextX += helpMenu.width + buttonSpace;
+		
 		// cursor tool buttons
 		var space:int = 3;
 		copyTool.x = app.isOffline ? 493 : 427;
@@ -208,9 +234,9 @@ public class TopBarPart extends UIPart {
 	protected function addTextButtons():void {
 		addChild(fileMenu = makeMenuButton('File', app.showFileMenu, true));
 		addChild(editMenu = makeMenuButton('Edit', app.showEditMenu, true));
-		addChild(editMenu = makeMenuButton('COM', app.showCOMMenu, true));
-		addChild(editMenu = makeMenuButton('MYH', app.showMYHMenu, true));
-		addChild(editMenu = makeMenuButton('Forum/Help', app.showForumHelpMenu, true));
+		addChild(comMenu = makeMenuButton('COM', app.showCOMMenu, true));//���˵�����COM��������_wh
+		addChild(myMenu = makeMenuButton('MYH', app.showMYHMenu, true));//���˵�����è�ѻ���������_wh
+		addChild(helpMenu = makeMenuButton('Forum/Help', app.showForumHelpMenu, true));//���˵�����COM��������_wh
 	}
 
 	private function addToolButtons():void {
@@ -229,17 +255,12 @@ public class TopBarPart extends UIPart {
 				CursorTool.setTool(newTool);
 			}
 		}
+		addChild(copyTool = makeToolButton('copyTool', selectTool));
+		addChild(cutTool = makeToolButton('cutTool', selectTool));
+		addChild(growTool = makeToolButton('growTool', selectTool));
+		addChild(shrinkTool = makeToolButton('shrinkTool', selectTool));
+		addChild(helpTool = makeToolButton('helpTool', selectTool));
 
-		toolButtons.push(copyTool = makeToolButton('copyTool', selectTool));
-		toolButtons.push(cutTool = makeToolButton('cutTool', selectTool));
-		toolButtons.push(growTool = makeToolButton('growTool', selectTool));
-		toolButtons.push(shrinkTool = makeToolButton('shrinkTool', selectTool));
-		toolButtons.push(helpTool = makeToolButton('helpTool', selectTool));
-		if(!app.isMicroworld){
-			for each (var b:IconButton in toolButtons) {
-				addChild(b);
-			}
-		}
 		SimpleTooltips.add(copyTool, {text: 'Duplicate', direction: 'bottom'});
 		SimpleTooltips.add(cutTool, {text: 'Delete', direction: 'bottom'});
 		SimpleTooltips.add(growTool, {text: 'Grow', direction: 'bottom'});
@@ -251,17 +272,14 @@ public class TopBarPart extends UIPart {
 		clearToolButtonsExcept(null)
 	}
 
-	private function clearToolButtonsExcept(activeButton:IconButton):void {
-		for each (var b:IconButton in toolButtons) {
+	private function clearToolButtonsExcept(activeButton: IconButton):void {
+		for each (var b:IconButton in [copyTool, cutTool, growTool, shrinkTool, helpTool]) {
 			if (b != activeButton) b.turnOff();
 		}
 	}
 
 	private function makeToolButton(iconName:String, fcn:Function):IconButton {
-		function mouseDown(evt:MouseEvent):void {
-			toolOnMouseDown = CursorTool.tool
-		}
-
+		function mouseDown(evt:MouseEvent):void { toolOnMouseDown = CursorTool.tool }
 		var onImage:Sprite = toolButtonImage(iconName, CSS.overColor, 1);
 		var offImage:Sprite = toolButtonImage(iconName, 0, 0);
 		var b:IconButton = new IconButton(fcn, onImage, offImage);

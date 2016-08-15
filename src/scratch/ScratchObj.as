@@ -182,7 +182,7 @@ public class ScratchObj extends Sprite {
 	}
 
 	protected function updateRenderDetails(reason:uint):void {
-	SCRATCH::allow3d {
+	/*SCRATCH::allow3d */{
 		if(this is ScratchStage || this is ScratchSprite || (parent && parent is ScratchStage)) {
 			var renderOpts:Object = {};
 			var costume:ScratchCostume = currentCostume();
@@ -276,8 +276,8 @@ public class ScratchObj extends Sprite {
 	}
 
 	protected function shapeChangedByFilter():Boolean {
-		var filters:Object = filterPack.getAllSettings();
-		return (filters['fisheye'] !== 0 || filters['whirl'] !== 0 || filters['mosaic'] !== 0);
+		var filters_xuhy:Object = filterPack.getAllSettings();
+		return (filters_xuhy['fisheye'] !== 0 || filters_xuhy['whirl'] !== 0 || filters_xuhy['mosaic'] !== 0);
 	}
 
 	static public const clearColorTrans:ColorTransform = new ColorTransform();
@@ -287,7 +287,7 @@ public class ScratchObj extends Sprite {
 		img.transform.colorTransform = clearColorTrans;
 		clearCachedBitmap();
 
-		SCRATCH::allow3d {
+		/*SCRATCH::allow3d */{
 			if (parent && parent is ScratchStage) {
 				(parent as ScratchStage).updateSpriteEffects(this, null);
 			}

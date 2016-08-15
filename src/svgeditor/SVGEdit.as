@@ -279,7 +279,7 @@ import svgeditor.objs.*;
 				if (targetCostume.undoList.length == 0) recordForUndo(c.baseLayerData, c.rotationCenterX, c.rotationCenterY);
 				installSVGData(c.baseLayerData, c.rotationCenterX, c.rotationCenterY);
 			}
-//			imagesPart.refreshUndoButtons();
+			imagesPart.refreshUndoButtons();
 
 			// set the initial tool
 			if(toolMode == 'select' || (c.svgRoot && c.svgRoot.subElements.length && (!isScene || c.svgRoot.subElements.length > 1)))

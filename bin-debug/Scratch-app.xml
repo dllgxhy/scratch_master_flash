@@ -51,9 +51,8 @@
 	<!-- Copyright information. Optional -->
 	<copyright>
 	————————————
-	南京最沃电子科技有限公司
 	深圳少年创客科技有限公司
-	————联合推出————
+	————推出————
 	</copyright>
 
 	<!-- Publisher ID. Used if you're updating an application created prior to 1.5.3 -->
@@ -267,8 +266,6 @@
         <!-- <colorDepth></colorDepth> -->
     <!-- </android> -->
 	<!-- End of the schema for adding the android specific tags in AndroidManifest.xml file -->
-
-
 
 
 

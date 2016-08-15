@@ -353,7 +353,7 @@ public class ScratchStage extends ScratchObj {
 	public function scrollUp(n:Number):void { yScroll += n; updateImage() }
 
 	public function getUILayer():Sprite {
-		SCRATCH::allow3d {
+		/*SCRATCH::allow3d _wh*/ {
 			if(Scratch.app.isIn3D) return Scratch.app.render3D.getUIContainer();
 		}
 		return this;
@@ -361,7 +361,7 @@ public class ScratchStage extends ScratchObj {
 
 	override protected function updateImage():void {
 		super.updateImage();
-		SCRATCH::allow3d {
+		/*SCRATCH::allow3d _wh*/ {
 			if (Scratch.app.isIn3D)
 				Scratch.app.render3D.getUIContainer().transform.matrix = transform.matrix.clone();
 		}
@@ -437,7 +437,7 @@ public class ScratchStage extends ScratchObj {
 			} else {
 				videoImage.bitmapData.draw(video);
 			}
-			SCRATCH::allow3d { if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(videoImage); }
+			/*SCRATCH::allow3d _wh*/ { if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(videoImage); }
 		}
 		cachedBitmapIsCurrent = false;
 
@@ -480,7 +480,7 @@ public class ScratchStage extends ScratchObj {
 			s.visible = wasVisible;
 		}
 
-		if (SCRATCH::allow3d) {
+		if (/*SCRATCH::allow3d _wh*/true) {
 			if (Scratch.app.isIn3D) {
 				var bmd:BitmapData = getBitmapOfSprite(s, stampBounds);
 				if (!bmd) return;
@@ -504,7 +504,6 @@ public class ScratchStage extends ScratchObj {
 		}
 	}
 
-	SCRATCH::allow3d
 	public function getBitmapOfSprite(s:ScratchSprite, bounds:Rectangle, for_carry:Boolean = false):BitmapData {
 		var b:Rectangle = s.currentCostume().bitmap ? s.img.getChildAt(0).getBounds(s) : s.getVisibleBounds(s);
 		bounds.width = b.width; bounds.height = b.height; bounds.x = b.x; bounds.y = b.y;
@@ -544,21 +543,14 @@ public class ScratchStage extends ScratchObj {
 			video.attachCamera(camera);
 			videoImage = new Bitmap(new BitmapData(video.width, video.height, false));
 			videoImage.alpha = videoAlpha;
-			SCRATCH::allow3d {
-				updateSpriteEffects(videoImage, {'ghost': 100 * (1 - videoAlpha)});
-			}
 			addChildAt(videoImage, getChildIndex(penLayer) + 1);
 		}
 	}
 
 	public function setVideoTransparency(transparency:Number):void {
 		videoAlpha = 1 - Math.max(0, Math.min(transparency / 100, 1));
-		if (videoImage) {
-			videoImage.alpha = videoAlpha;
-			SCRATCH::allow3d {
-				updateSpriteEffects(videoImage, {'ghost': transparency});
-			}
-		}
+		
+		if (videoImage) videoImage.alpha = videoAlpha;
 	}
 
 	public function isVideoOn():Boolean { return videoImage != null }
@@ -570,7 +562,7 @@ public class ScratchStage extends ScratchObj {
 		bm.fillRect(bm.rect, 0);
 		newPenStrokes.graphics.clear();
 		penActivity = false;
-		SCRATCH::allow3d { if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(penLayer); }
+		/*SCRATCH::allow3d _wh*/ { if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(penLayer); }
 	}
 
 	public function commitPenStrokes():void {
@@ -578,7 +570,7 @@ public class ScratchStage extends ScratchObj {
 		penLayer.bitmapData.draw(newPenStrokes);
 		newPenStrokes.graphics.clear();
 		penActivity = false;
-		SCRATCH::allow3d { if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(penLayer); }
+		/*SCRATCH::allow3d _wh*/ { if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(penLayer); }
 	}
 
 	private var cachedBM:BitmapData;
@@ -629,11 +621,9 @@ public class ScratchStage extends ScratchObj {
 //	private var testBM:Bitmap = new Bitmap();
 //	private var dumpPixels:Boolean = true;
 
-	SCRATCH::allow3d
+	/*SCRATCH::allow3d _wh*/
 	public function updateSpriteEffects(spr:DisplayObject, effects:Object):void {
-		if(Scratch.app.isIn3D) {
-			Scratch.app.render3D.updateFilters(spr, effects);
-		}
+		if(Scratch.app.isIn3D) Scratch.app.render3D.updateFilters(spr, effects);
 	}
 
 	public function getBitmapWithoutSpriteFilteredByColor(s:ScratchSprite, c:int):BitmapData {
@@ -642,7 +632,7 @@ public class ScratchStage extends ScratchObj {
 		var bm1:BitmapData;
 		var mask:uint = 0x00F8F8F0;
 		if (Scratch.app.isIn3D) {
-			SCRATCH::allow3d {
+			/*SCRATCH::allow3d*/ {
 				bm1 = Scratch.app.render3D.getOtherRenderedChildren(s, 1);
 			}
 		}
@@ -688,7 +678,7 @@ public class ScratchStage extends ScratchObj {
 	}
 
 	public function updateRender(dispObj:DisplayObject, renderID:String = null, renderOpts:Object = null):void {
-		SCRATCH::allow3d {
+		/*SCRATCH::allow3d _wh*/ {
 			if (Scratch.app.isIn3D) Scratch.app.render3D.updateRender(dispObj, renderID, renderOpts);
 		}
 	}
@@ -700,7 +690,7 @@ public class ScratchStage extends ScratchObj {
 		if (videoImage) videoImage.visible = false;
 
 		// Get a screenshot of the stage
-		if (SCRATCH::allow3d) {
+		if (/*SCRATCH::allow3d _wh*/true) {
 			if(Scratch.app.isIn3D) Scratch.app.render3D.getRender(bm);
 			else bm.draw(this);
 		}

@@ -78,7 +78,7 @@ public class ExtensionManager {
 		extensionDict = {};
 		extensionDict[picoBoardExt] = ScratchExtension.PicoBoard();
 		extensionDict[wedoExt] = ScratchExtension.WeDo();
-		extensionDict[wedo2Ext] = ScratchExtension.WeDo2();
+//		extensionDict[wedo2Ext] = ScratchExtension.WeDo2();
 	}
 
 	// Should the interpreter force async communication with extensions?

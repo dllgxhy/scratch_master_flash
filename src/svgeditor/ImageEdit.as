@@ -451,12 +451,11 @@ public class ImageEdit extends Sprite {
 				var r:Rectangle = workArea.getVisibleLayer().getRect(stage);
 				workArea.zoom(new Point(Math.round((r.right + r.left) / 2), Math.round((r.bottom + r.top) / 2)));
 
-				// Center around the selection if we have one
-				if (s) {
-					r = s.getBounds(stage);
-					workArea.centerAround(
-							new Point(Math.round((r.right + r.left) / 2), Math.round((r.bottom + r.top) / 2)));
-				}
+					// Center around the selection if we have one
+					if(s) {
+						r = s.getBounds(stage);
+						workArea.centerAround(new Point(Math.round((r.right+r.left)/2), Math.round((r.bottom+r.top)/2)));
+					}
 
 				currentTool.refresh();
 				if (toolButtons[toolMode]) toolButtons[toolMode].turnOn();
@@ -908,16 +907,18 @@ public class ImageEdit extends Sprite {
 				(targetCostume.undoListIndex < (targetCostume.undoList.length - 1)) &&
 				!targetCostume.segmentationState.lastMask;
 	}
-/*
+
 	public function canUndoSegmentation():Boolean {
-		return segmentationTool && targetCostume.segmentationState.canUndo();
+//		return segmentationTool && targetCostume.segmentationState.canUndo();
+		return  targetCostume.segmentationState.canUndo();
 	}
 
 	
 	public function canRedoSegmentation():Boolean {
-		return segmentationTool && targetCostume.segmentationState.canRedo() && !canRedo();
+//		return segmentationTool && targetCostume.segmentationState.canRedo() && !canRedo();
+		return targetCostume.segmentationState.canRedo() && !canRedo();
 	}
-*/
+
 	public function undo(ignore:* = null):void {
 
 		//This is handled as a special case since clearSelection will commit a
@@ -949,15 +950,15 @@ public class ImageEdit extends Sprite {
 	protected function clearSelection():void {
 	}
 
-	protected final function recordForUndo(imgData:*, rotationCenterX:int, rotationCenterY:int):void {
-		if (!targetCostume) return;
-		if (targetCostume.undoListIndex < targetCostume.undoList.length) {
-			targetCostume.undoList = targetCostume.undoList.slice(0, targetCostume.undoListIndex + 1);
+		protected final function recordForUndo(imgData:*, rotationCenterX:int, rotationCenterY:int):void {
+			if (!targetCostume) return;
+			if (targetCostume.undoListIndex < targetCostume.undoList.length) {
+				targetCostume.undoList = targetCostume.undoList.slice(0, targetCostume.undoListIndex + 1);
+			}
+			targetCostume.undoListIndex = targetCostume.undoList.length;
+			targetCostume.undoList.push([imgData, rotationCenterX, rotationCenterY]);
+			imagesPart.refreshUndoButtons();
 		}
-		targetCostume.undoListIndex = targetCostume.undoList.length;
-		targetCostume.undoList.push([imgData, rotationCenterX, rotationCenterY]);
-//		imagesPart.refreshUndoButtons();
-	}
 
 	private function installUndoRecord(undoRec:Array):void {
 		// Load image editor from the given undo state array.
@@ -973,9 +974,9 @@ public class ImageEdit extends Sprite {
 		if (data is ByteArray) targetCostume.setSVGData(data, false);
 		if (data is BitmapData) targetCostume.setBitmapData(data, undoRec[1], undoRec[2]);
 
-		imagesPart.editor.restoreUndoState(undoRec);
-//		imagesPart.refreshUndoButtons();
-	}
+			imagesPart.editor.restoreUndoState(undoRec);
+			imagesPart.refreshUndoButtons();
+		}
 
 	protected function restoreUndoState(undoRec:Array):void { }
 

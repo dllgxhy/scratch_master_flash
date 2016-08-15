@@ -108,21 +108,13 @@ public class Slider extends Sprite implements DragClient {
 		const knobOutline:int = 0x707070;
 		const knobFill:int = 0xEBEBEB;
 		const knobRadius:int = 6; // 3;
-		var knobW:int,knobH:int,o:int=0.5;
-		if (isTriangle) {
-			knobW = isVertical ? w + 3 : 7;
-			knobH = isVertical ? 7 : h + 3;
-			o+=2
-		}
-		else {
-			knobW = isVertical ? w + 7 : 7;
-			knobH = isVertical ? 7 : h + 7;
-		}
+		var knobW:int = isVertical ? w + 7 : 7;
+		var knobH:int = isVertical ? 7 : h + 7;
 		var g:Graphics = knob.graphics;
 		g.clear();
 		g.lineStyle(1, knobOutline);
 		g.beginFill(knobFill);
-		g.drawRoundRect(o, o, knobW, knobH, knobRadius, knobRadius);
+		g.drawRoundRect(0.5, 0.5, knobW, knobH, knobRadius, knobRadius);
 		g.endFill();
 	}
 

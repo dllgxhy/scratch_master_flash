@@ -61,7 +61,7 @@ import mx.utils.URLUtil;
 
 import blocks.Block;
 
-import extensions.ExtensionDevManager;
+//import extensions.ExtensionDevManager;
 import extensions.ExtensionManager;
 
 import interpreter.Interpreter;
@@ -217,6 +217,8 @@ public class Scratch extends Sprite {
 		stage.align = StageAlign.TOP_LEFT;
 		stage.scaleMode = StageScaleMode.NO_SCALE;
 		stage.frameRate = 30;
+		stage.stageWidth = 1100;//增加软件窗口初始化设置
+		stage.stageHeight = 640;//增加软件窗口初始化设置
 
 		if (stage.hasOwnProperty('color')) {
 			// Stage doesn't have a color property on Air 2.6, and Linux throws if you try to set it anyway.
@@ -237,6 +239,8 @@ public class Scratch extends Sprite {
 
 		playerBG = new Shape(); // create, but don't add
 		addParts();
+		
+		libraryPart.initSprite(0);//add by xuhy,此处为后加，增加了调取图库的内容
 
 		server.getSelectedLang(Translator.setLanguageValue);
 
@@ -489,7 +493,7 @@ public class Scratch extends Sprite {
 	}
 
 	protected function checkFlashVersion():void {
-		SCRATCH::allow3d {
+		/*SCRATCH::allow3d */{
 			if (Capabilities.playerType != "Desktop" || Capabilities.version.indexOf('IOS') === 0) {
 				var versionString:String = Capabilities.version.substr(Capabilities.version.indexOf(' ') + 1);
 				var versionParts:Array = versionString.split(',');
@@ -506,7 +510,7 @@ public class Scratch extends Sprite {
 		render3D = null;
 	}
 
-	SCRATCH::allow3d
+	/*SCRATCH::allow3d*/
 	protected function handleRenderCallback(enabled:Boolean):void {
 		if (!enabled) {
 			go2D();
@@ -542,7 +546,7 @@ public class Scratch extends Sprite {
 		}
 	}
 
-	SCRATCH::allow3d
+	/*SCRATCH::allow3d*/
 	public function go3D():void {
 		if (!render3D || isIn3D) return;
 
@@ -553,7 +557,7 @@ public class Scratch extends Sprite {
 		isIn3D = true;
 	}
 
-	SCRATCH::allow3d
+	/*SCRATCH::allow3d*/
 	public function go2D():void {
 		if (!render3D || !isIn3D) return;
 
@@ -690,7 +694,7 @@ public class Scratch extends Sprite {
 
 		if (lp) fixLoadProgressLayout();
 		stagePane.updateCostume();
-		SCRATCH::allow3d {
+		/*SCRATCH::allow3d*/ {
 			if (isIn3D) render3D.onStageResize();
 		}
 	}
@@ -1010,7 +1014,7 @@ public class Scratch extends Sprite {
 			addChild(frameRateGraph); // put in front
 		}
 
-		SCRATCH::allow3d {
+		/*SCRATCH::allow3d*/ {
 			if (isIn3D) render3D.onStageResize();
 		}
 	}

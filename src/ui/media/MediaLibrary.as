@@ -118,6 +118,14 @@ public class MediaLibrary extends Sprite {
 		app.addChild(this);
 		viewLibrary();
 	}
+// add by xuhy 20160815	
+	public function initopen():void {//_wh
+		//app.closeTips();
+		app.mediaLibrary = this;
+		//setWidthHeight(app.stage.stageWidth, app.stage.stageHeight);
+		app.addChild(this);
+		//viewLibrary();
+	}
 
 	public function importFromDisk():void {
 		if (parent) close();
@@ -297,7 +305,7 @@ spriteFeaturesFilter.visible = false; // disable features filter for now
 					if (entry.tags is Array) entry.category = entry.tags[0];
 					var info:Array = entry.info as Array;
 					if (info) {
-						if (entry.type == 'backdrop') {
+						if ((entry.type == 'backdrop') || (assetType == 'costume')) {
 							entry.width = info[0];
 							entry.height = info[1];
 						}
@@ -453,6 +461,13 @@ spriteFeaturesFilter.visible = false; // disable features filter for now
 		}
 	}
 
+	public function initSelected():void {//初始化选择_wh
+		// Close dialog and call whenDone() with an array of selected media items.
+		var io:ProjectIO = new ProjectIO(app);
+		close();
+		io.fetchSprite("21d7c8705a0fdeea32affb616ee6c984.json", whenDone);
+	}
+	
 	// -----------------------------
 	// Thumbnail loading
 	//------------------------------
@@ -567,6 +582,9 @@ spriteFeaturesFilter.visible = false; // disable features filter for now
 			uploadCostume(costumeOrSprite as ScratchCostume, uploadComplete);
 		} else {
 			data.position = 0;
+			
+						
+					
 			if (data.bytesAvailable > 4 && data.readUTFBytes(4) == 'ObjS') {
 				var info:Object;
 				var objTable:Array;
@@ -702,7 +720,7 @@ spriteFeaturesFilter.visible = false; // disable features filter for now
 					DialogBox.notify('Error decoding sound', 'Sorry, Scratch was unable to load the sound ' + sndName + '.', Scratch.app.stage);
 				}
 			}
-			SCRATCH::allow3d {
+			/*SCRATCH::allow3d*/ {
 				sound = new Sound();
 				try {
 					data.position = 0;

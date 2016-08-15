@@ -54,6 +54,8 @@ public class Specs {
 	public static var procedureColor:int = 0x632D99; // 0x531E99;
 	public static var parameterColor:int = 0x5947B1;
 	public static var extensionsColor:int = 0x4B4A60; // 0x72228C; // 0x672D79;
+	public static var cfunblocksColor:int = 0x0e9f97;//CFunMoreÄ£¿éÑÕÉ«_wh 0x20b2aa
+
 
 	private static const undefinedColor:int = 0xD42828;
 

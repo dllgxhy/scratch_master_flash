@@ -297,14 +297,12 @@ public class ImageCanvas extends Sprite {
 		hScrollbar.x = r.x;
 		hScrollbar.y = r.bottom + margin;
 		hScrollbar.setWidthHeight(visibleMask.width, hScrollbar.h);
-		hScrollbar.visible =
-				hScrollbar.update(-visibleArea.x / maxScrollH(), r.width / (visibleArea.scaleX * canvasWidth));
+		hScrollbar.visible = hScrollbar.update(-visibleArea.x / maxScrollH(), r.width / (visibleArea.scaleX * canvasWidth));
 
 		vScrollbar.x = r.right + margin;
 		vScrollbar.y = r.top;
 		vScrollbar.setWidthHeight(vScrollbar.w, visibleMask.height);
-		vScrollbar.visible =
-				vScrollbar.update(-visibleArea.y / maxScrollV(), r.height / (visibleArea.scaleY * canvasHeight));
+		vScrollbar.visible = vScrollbar.update(-visibleArea.y / maxScrollV(), r.height / (visibleArea.scaleY * canvasHeight));
 	}
 
 	public function centerAround(p:Point):void {

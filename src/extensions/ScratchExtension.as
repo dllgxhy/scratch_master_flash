@@ -111,5 +111,4 @@ public class ScratchExtension {
 		result.tags = ['hardware'];
 		return result;
 	}
-}
-}
+}}

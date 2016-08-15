@@ -117,7 +117,7 @@ public class DisplayObjectContainerIn3D extends Sprite {SCRATCH::allow3d{
 	/**
 	 *   Make the texture
 	 */
-	public function DisplayObjectContainerIn3D() {
+	public function DisplayObjectContainerIn3D():void {
 		if (effectNames.length != FilterPack.filterNames.length) {
 			Scratch.app.logMessage(
 					'Effect list mismatch', {effectNames: effectNames, filterPack: FilterPack.filterNames});
@@ -605,7 +605,7 @@ public class DisplayObjectContainerIn3D extends Sprite {SCRATCH::allow3d{
 
 			var effectValue:Number;
 
-			if (!!(effectValue = effects[FX_PIXELATE])) {
+			if (!!(effectValue == effects[FX_PIXELATE])) {  //xuhy_20160812
 				var pixelate:Number = (Math.abs(effectValue * scale) / 10) + 1;
 				var pixelX:Number = (pixelate > 1 ? pixelate / rect.width : -1);
 				var pixelY:Number = (pixelate > 1 ? pixelate / rect.height : -1);
@@ -618,29 +618,29 @@ public class DisplayObjectContainerIn3D extends Sprite {SCRATCH::allow3d{
 				FC[4][1] = pixelX / 2;
 				FC[4][2] = pixelY / 2;
 			}
-
-			if (!!(effectValue = effects[FX_COLOR])) {
+				//effectValue = effects[FX_COLOR]  原函数
+			if (!!(effectValue == effects[FX_COLOR])) {  //xuhy_20160812
 				FC[componentIndex >> 2][(componentIndex++) & 3] = ((360.0 * effectValue) / 200.0) % 360.0;
 			}
 
-			if (!!(effectValue = effects[FX_FISHEYE])) {
+			if (!!(effectValue == effects[FX_FISHEYE])) { //xuhy_20160812
 				FC[componentIndex >> 2][(componentIndex++) & 3] = Math.max(0, (effectValue + 100) / 100);
 			}
 
-			if (!!(effectValue = effects[FX_WHIRL])) {
+			if (!!(effectValue == effects[FX_WHIRL])) { //xuhy_20160812
 				FC[componentIndex >> 2][(componentIndex++) & 3] = (Math.PI * effectValue) / 180;
 			}
 
-			if (!!(effectValue = effects[FX_MOSAIC])) {
+			if (!!(effectValue == effects[FX_MOSAIC])) {//xuhy_20160812
 				effectValue = Math.round((Math.abs(effectValue) + 10) / 10);
 				FC[componentIndex >> 2][(componentIndex++) & 3] = Math.floor(Math.max(1, Math.min(effectValue, Math.min(srcWidth, srcHeight))));
 			}
 
-			if (!!(effectValue = effects[FX_BRIGHTNESS])) {
+			if (!!(effectValue == effects[FX_BRIGHTNESS])) {//xuhy_20160812
 				FC[componentIndex >> 2][(componentIndex++) & 3] = Math.max(-100, Math.min(effectValue, 100)) / 100;
 			}
 
-			if (!!(effectValue = effects[FX_GHOST])) {
+			if (!!(effectValue == effects[FX_GHOST])) { //xuhy_20160812
 				FC[componentIndex >> 2][(componentIndex++) & 3] = 1.0 - (Math.max(0, Math.min(effectValue, 100)) / 100.0);
 			}
 		}

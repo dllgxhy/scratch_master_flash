@@ -776,7 +776,7 @@ public class BlockMenus implements DragClient {
 		if (app.isIn3D) app.stagePane.visible = true;
 		onePixel.draw(app, m);
 		if (app.isIn3D) app.stagePane.visible = false;
-		var x:int = onePixel.getPixel32(0, 0);
+		x = onePixel.getPixel32(0, 0);
 		return x ? x | 0xFF000000 : 0xFFFFFFFF; // alpha is always 0xFF
 	}
 

@@ -191,7 +191,8 @@ public class Server implements IServer {
 			onCallServerException(url, data, exception);
 			whenDone(null);
 		}
-
+//xuhy_20160812
+//错误代码 HTTPStatusEvent type="httpStatus" bubbles=false cancelable=false eventPhase=2 status=0 redirected=false responseURL=null
 		function statusHandler(e:HTTPStatusEvent):void {
 			httpStatus = e.status;
 			onCallServerHttpStatus(url, data, e);
