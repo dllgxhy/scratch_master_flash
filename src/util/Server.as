@@ -154,20 +154,21 @@ public class Server implements IServer {
 	// The whenDone() function is called when the request is done, either with the
 	// data returned by the server or with a null argument if the request failed.
 	// The request includes site and session authentication headers.
+
 	protected function callServer(url:String, data:*, mimeType:String, whenDone:Function,
 	                              queryParams:Object = null):URLLoader {
 		function addListeners():void {
 			loader.addEventListener(Event.COMPLETE, completeHandler);
 			loader.addEventListener(SecurityErrorEvent.SECURITY_ERROR, errorHandler);
 			loader.addEventListener(IOErrorEvent.IO_ERROR, errorHandler);
-			loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, statusHandler);
+//			loader.addEventListener(HTTPStatusEvent.HTTP_STATUS, statusHandler);
 		}
 
 		function removeListeners():void {
 			loader.removeEventListener(Event.COMPLETE, completeHandler);
 			loader.removeEventListener(SecurityErrorEvent.SECURITY_ERROR, errorHandler);
 			loader.removeEventListener(IOErrorEvent.IO_ERROR, errorHandler);
-			loader.removeEventListener(HTTPStatusEvent.HTTP_STATUS, statusHandler);
+//			loader.removeEventListener(HTTPStatusEvent.HTTP_STATUS, statusHandler);
 		}
 
 		function completeHandler(event:Event):void {
@@ -201,6 +202,7 @@ public class Server implements IServer {
 		var loader:URLLoader = new URLLoader();
 		loader.dataFormat = URLLoaderDataFormat.BINARY;
 		addListeners();
+		
 
 		// Add a cache breaker if we're sending data and the url has no query string.
 		var nextSeparator:String = '?';
@@ -254,12 +256,14 @@ public class Server implements IServer {
 //			whenDone(BackpackPart.localAssets[md5]);
 //			return null;
 //		}
-		var url:String = URLs.assetCdnPrefix + URLs.internalAPI + 'asset/' + md5 + '/get/';
+//		var url:String = URLs.assetCdnPrefix + URLs.internalAPI + 'asset/' + md5 + '/get/';  //origin code
+		var url:String = 'media/' + md5;   //新更改的代码，将媒体位置进行更改
 		return serverGet(url, whenDone);
 	}
 
 	public function getMediaLibrary(libraryType:String, whenDone:Function):URLLoader {
-		var url:String = getCdnStaticSiteURL() + 'medialibraries/' + libraryType + 'Library.json';
+//		var url:String = getCdnStaticSiteURL() + 'medialibraries/' + libraryType + 'Library.json';
+		var url:String = 'media/mediaLibrary.json';    //新更改的代码，将媒体位置进行更改
 		return serverGet(url, whenDone);
 	}
 

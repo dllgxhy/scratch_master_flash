@@ -393,12 +393,8 @@ public class LibraryPart extends UIPart {
 		if (fromComputer) lib.importFromDisk();
 		else lib.open();
 	}
-
-/*
-add by xuhy
-此处为新加功能
-*/	
-	public function initSprite(fromComputer:Boolean):void {//改成public供外部调用_wh
+	
+	public function initSprite(fromComputer:Boolean):void {
 		function addSprite(costumeOrSprite:*):void {
 			var spr:ScratchSprite;
 			var c:ScratchCostume = costumeOrSprite as ScratchCostume;
