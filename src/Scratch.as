@@ -24,6 +24,8 @@
 
 package {
 import com.adobe.utils.StringUtil;
+import com.quetwo.Arduino.ArduinoConnector;
+import com.quetwo.Arduino.ArduinoConnectorEvent;
 
 import flash.display.DisplayObject;
 import flash.display.Graphics;
@@ -61,7 +63,6 @@ import mx.utils.URLUtil;
 
 import blocks.Block;
 
-//import extensions.ExtensionDevManager;
 import extensions.ExtensionManager;
 
 import interpreter.Interpreter;
@@ -114,6 +115,8 @@ import util.Server;
 import util.Transition;
 
 import watchers.ListWatcher;
+
+import arduino.ArduinoUart;
 
 public class Scratch extends Sprite {
 	// Version
@@ -177,7 +180,9 @@ public class Scratch extends Sprite {
 	public const tipsBarClosedWidth:int = 17;
 
 	public var logger:Log = new Log(16);
-
+	
+	public var arduinouart:ArduinoUart;
+	
 	public function Scratch() {
 		SVGTool.setStage(stage);
 		loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, uncaughtErrorHandler);

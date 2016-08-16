@@ -24,25 +24,35 @@
 // Represents a variable display.
 
 package watchers {
+import flash.display.Graphics;
+import flash.display.Shape;
+import flash.display.Sprite;
+import flash.events.MouseEvent;
+import flash.filters.BevelFilter;
+import flash.geom.Point;
+import flash.text.TextField;
+import flash.text.TextFormat;
+
+import arduino.ArduinoLibrary;
+
 import blocks.Block;
 
 import extensions.ExtensionManager;
 
-import flash.display.*;
-import flash.events.MouseEvent;
-import flash.filters.BevelFilter;
-import flash.geom.Point;
-import flash.text.*;
+import interpreter.Variable;
 
-import interpreter.*;
-
-import scratch.*;
+import scratch.ScratchObj;
+import scratch.ScratchRuntime;
+import scratch.ScratchSprite;
 
 import translation.Translator;
 
-import uiwidgets.*;
+import uiwidgets.DialogBox;
+import uiwidgets.Menu;
+import uiwidgets.ResizeableFrame;
 
-import util.*;
+import util.DragClient;
+import util.JSON;
 
 public class Watcher extends Sprite implements DragClient {
 
@@ -81,6 +91,9 @@ public class Watcher extends Sprite implements DragClient {
 	private var sliderMax:Number = 100;
 	private var isDiscrete:Boolean = true;
 	private var mouseMoved:Boolean;
+	
+	//arduino board xuhy20160816
+	private var arduinolib:ArduinoLibrary = new ArduinoLibrary();
 
 	public function Watcher() {
 		frame = new ResizeableFrame(0x949191, 0xC1C4C7, 8);
@@ -242,6 +255,9 @@ public class Watcher extends Sprite implements DragClient {
 			case "timeAndDate": return runtime.getTimeString(param);
 			case "xScroll": return app.stagePane.xScroll;
 			case "yScroll": return app.stagePane.yScroll;
+			case "readcksound": return arduinolib.arduinoSoundValue;  //xuhy20160816 返回得到的arduino板子上的传感器的值
+			case "readckslide": return arduinolib.arduinoSlideValue;
+			case "readcklight": return arduinolib.arduinoLightValue;
 		}
 
 		if(ExtensionManager.hasExtensionPrefix(cmd)) {

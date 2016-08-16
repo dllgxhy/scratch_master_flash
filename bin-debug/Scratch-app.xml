@@ -271,4 +271,8 @@
 
 
 
+
+<extensions>
+        <extensionID>com.quetwo.Arduino.ArduinoConnector</extensionID>
+    </extensions>
 </application>

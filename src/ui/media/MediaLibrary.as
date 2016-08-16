@@ -258,7 +258,7 @@ public class MediaLibrary extends Sprite {
 		themeFilter.visible = (['sprite', 'costume', 'backdrop'].indexOf(assetType) > -1);
 		imageTypeFilter.visible = (['sprite', 'costume'].indexOf(assetType) > -1);
 		spriteFeaturesFilter.visible = ('sprite' == assetType);
-spriteFeaturesFilter.visible = false; // disable features filter for now
+		spriteFeaturesFilter.visible = false; // disable features filter for now
 	}
 
 	private function filterChanged(filter:MediaFilter):void {

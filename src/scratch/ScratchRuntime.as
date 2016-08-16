@@ -61,6 +61,7 @@ import uiwidgets.DialogBox;
 import util.*;
 
 import watchers.*;
+import arduino.ArduinoUart;
 
 public class ScratchRuntime {
 
@@ -73,6 +74,7 @@ public class ScratchRuntime {
 	public var cloneCount:int;
 	public var edgeTriggersEnabled:Boolean = false; // initially false, becomes true when project first run
 	public var currentDoObj:ScratchObj = null;
+	public var arduinoUart:ArduinoUart = new ArduinoUart(115200);
 
 	private var microphone:Microphone;
 	private var timerBase:uint;
@@ -162,6 +164,7 @@ public class ScratchRuntime {
 			}
 		}
 		app.extensionManager.step();
+		
 		if (motionDetector) motionDetector.step(); // Video motion detection
 
 		// Step the stage, sprites, and watchers
@@ -175,6 +178,9 @@ public class ScratchRuntime {
 		if (ready==ReadyLabel.COUNTDOWN || ready==ReadyLabel.READY) {
 			app.stagePane.countdown(count);
 		}
+		
+		if (arduinoUart.comWorkingFlag == false)// 用于侦测串口通讯是否正常，如果有工作的串口，则不在检测。xuhy20160816
+			arduinoUart.checkUartAvail();
 	}
 
 //-------- recording video code ---------

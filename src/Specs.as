@@ -54,8 +54,6 @@ public class Specs {
 	public static var procedureColor:int = 0x632D99; // 0x531E99;
 	public static var parameterColor:int = 0x5947B1;
 	public static var extensionsColor:int = 0x4B4A60; // 0x72228C; // 0x672D79;
-	public static var cfunblocksColor:int = 0x0e9f97;//CFunMoreģ����ɫ_wh 0x20b2aa
-
 
 	private static const undefinedColor:int = 0xD42828;
 
@@ -74,7 +72,9 @@ public class Specs {
 		[10, "More Blocks",	procedureColor],
 		[11, "Parameter",	parameterColor],
 		[12, "List",		listColor],
-		[20, "Extension",	extensionsColor],
+		[13, "Arduino Blocks",0x0f9f97],
+		[14, "Arduino Robot", 0xbb42c3],
+ 		[20, "Extension",	extensionsColor],
 	];
 
 	public static function blockColor(categoryID:int):int {
@@ -395,7 +395,13 @@ public class Specs {
 		// other obsolete blocks from alpha/beta
 		["hide all sprites",					" ", 99, "hideAll"],
 		["user id",								"r", 99, "getUserId"],
-
+		
+		
+		//stage sensing,二级积木模块添加：arduino robot_xuhy20160816
+		["————CK Board————",	"+",	14],//细分类别说明
+		["sound",	"r", 14, "readcksound"],//测控板模拟量_声音
+		["slide",	"r", 14, "readckslide"],//测控板模拟量_滑动变阻器
+		["light",	"r", 14, "readcklight"],//测控板模拟量_光敏
 	];
 
 	public static var extensionSpecs:Array = ["when %m.booleanSensor", "when %m.sensor %m.lessMore %n", "sensor %m.booleanSensor?", "%m.sensor sensor value", "turn %m.motor on for %n secs", "turn %m.motor on", "turn %m.motor off", "set %m.motor power to %n", "set %m.motor2 direction to %m.motorDirection", "when distance %m.lessMore %n", "when tilt %m.eNe %n", "distance", "tilt"];

@@ -437,7 +437,7 @@ public class ScratchStage extends ScratchObj {
 			} else {
 				videoImage.bitmapData.draw(video);
 			}
-			/*SCRATCH::allow3d _wh*/ { if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(videoImage); }
+			{ if(Scratch.app.isIn3D) Scratch.app.render3D.updateRender(videoImage); }
 		}
 		cachedBitmapIsCurrent = false;
 

@@ -372,7 +372,7 @@ public class ScratchSprite extends ScratchObj {
 			return false;
 		}
 
-		if (SCRATCH::allow3d) {
+		if (/*SCRATCH::allow3d*/true) {
 			if (Scratch.app.isIn3D) {
 				var oldGhost:Number = filterPack.getFilterSetting('ghost');
 				filterPack.setFilter('ghost', 0);

@@ -32,8 +32,8 @@ package ui {
 public class PaletteSelector extends Sprite {
 
 	private static const categories:Array = [
-		'Motion', 'Looks', 'Sound', 'Pen', 'Data', // column 1
-		'Events', 'Control', 'Sensing', 'Operators', 'More Blocks']; // column 2
+		'Motion', 'Looks', 'Sound', 'Pen', 'Data','Arduino Blocks', // column 1
+		'Events', 'Control', 'Sensing', 'Operators', 'More Blocks','Arduino Robot']; // column 2
 
 	public var selectedCategory:int = 0;
 	private var app:Scratch;
@@ -61,8 +61,8 @@ public class PaletteSelector extends Sprite {
 	}
 
 	private function initCategories():void {
-		const numberOfRows:int = 5;
-		const w:int = 208;
+		const numberOfRows:int = 6;  //_xuhy20160816 此处更改为6，将arduino block& Arduino robot增加进去
+		const w:int = 275; //_xuhy201608016 更改block的宽度，变美观
 		const startY:int = 3;
 		var itemH:int;
 		var x:int, i:int;
@@ -79,6 +79,7 @@ public class PaletteSelector extends Sprite {
 			itemH = item.height;
 			item.x = x;
 			item.y = y;
+			item.width = 130;//xuhy20160816积木模块外框长度
 			addChild(item);
 			y += itemH;
 		}

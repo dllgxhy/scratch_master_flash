@@ -181,7 +181,7 @@ public class Server implements IServer {
 
 		function errorHandler(event:ErrorEvent):void {
 			removeListeners();
-			onCallServerError(url, data, event);
+//			onCallServerError(url, data, event);  //_xuhy 20160815
 			callServerErrorInfo = {url: url, httpStatus: httpStatus, errorEvent: event};
 			whenDone(null);
 			callServerErrorInfo = null;

@@ -307,7 +307,7 @@ public class PaletteBuilder {
 			'xpos', 'ypos', 'heading', 'costumeIndex', 'scale', 'volume', 'timeAndDate',
 			'backgroundIndex', 'sceneName', 'tempo', 'answer', 'timer', 'soundLevel', 'isLoud',
 			'sensor:', 'sensorPressed:', 'senseVideoMotion', 'xScroll', 'yScroll',
-			'getDistance', 'getTilt'];
+			'getDistance', 'getTilt','readcksound','readckslide','readcklight'];  //xuhy20160816 增加读取硬件电路板上的传感器钱的check按钮
 		return checkboxReporters.indexOf(op) > -1;
 	}
 
