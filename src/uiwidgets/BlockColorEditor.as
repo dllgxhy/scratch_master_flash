@@ -81,6 +81,7 @@ public class BlockColorEditor extends Sprite {
 			if ('More Blocks' == catName) Specs.procedureColor = c;
 			if ('Parameter' == catName) Specs.parameterColor = c;
 			if ('Extension' == catName) Specs.extensionsColor = c;
+			if ('Arduino Blocks' == catName) Specs.cfunblocksColor = c;
 		}
 	}
 

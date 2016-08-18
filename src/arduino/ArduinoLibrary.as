@@ -28,16 +28,34 @@ import flash.display.Sprite;
 
 public class ArduinoLibrary extends Sprite{
 	
-	public var arduinoSoundValue:Number = 0x00;
-	public var arduinoSlideValue:Number = 0x00;
-	public var arduinoLightValue:Number = 0x00;
+	public var uartData:ArduinoUart;
 	
+	public static var arduinoLightValue:int;  //作为全局变量
+	public static var arduinoSlideValue:int;
+	public static var arduinoSoundValue:int;
 	
-	
-	
-	
-	
-	
+	/*
+	 * 返回Arduino板子上的sensor的数据值
+	*/
+	public function arduinoBoardSensorValue(SensorType:String):Number
+	{
+		var sensorValue:Number = 0x00;
 		
+		switch(SensorType)
+		{
+			case "readcklight" :
+				sensorValue = arduinoLightValue;
+				break;
+			case "readckslide" :
+				sensorValue = arduinoSlideValue;
+				break;
+			case "readcksound" :
+				sensorValue = arduinoSoundValue;
+				break;  
+			default:
+				break;
+		}
+		return sensorValue;
+	}
 	
 }}

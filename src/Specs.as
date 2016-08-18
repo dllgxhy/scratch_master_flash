@@ -54,6 +54,7 @@ public class Specs {
 	public static var procedureColor:int = 0x632D99; // 0x531E99;
 	public static var parameterColor:int = 0x5947B1;
 	public static var extensionsColor:int = 0x4B4A60; // 0x72228C; // 0x672D79;
+	public static var cfunblocksColor:int = 0xbb42c3;
 
 	private static const undefinedColor:int = 0xD42828;
 
@@ -72,8 +73,8 @@ public class Specs {
 		[10, "More Blocks",	procedureColor],
 		[11, "Parameter",	parameterColor],
 		[12, "List",		listColor],
-		[13, "Arduino Blocks",0x0f9f97],
-		[14, "Arduino Robot", 0xbb42c3],
+		[13, "Arduino Blocks",cfunblocksColor],
+		[14, "Arduino Robot", cfunblocksColor],
  		[20, "Extension",	extensionsColor],
 	];
 

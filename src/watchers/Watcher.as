@@ -255,9 +255,7 @@ public class Watcher extends Sprite implements DragClient {
 			case "timeAndDate": return runtime.getTimeString(param);
 			case "xScroll": return app.stagePane.xScroll;
 			case "yScroll": return app.stagePane.yScroll;
-			case "readcksound": return arduinolib.arduinoSoundValue;  //xuhy20160816 返回得到的arduino板子上的传感器的值
-			case "readckslide": return arduinolib.arduinoSlideValue;
-			case "readcklight": return arduinolib.arduinoLightValue;
+			case "readcklight": return arduinolib.arduinoBoardSensorValue("readcklight");  //xuhy20160816 返回得到的arduino板子上的传感器的值
 		}
 
 		if(ExtensionManager.hasExtensionPrefix(cmd)) {

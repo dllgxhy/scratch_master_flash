@@ -181,6 +181,10 @@ public class ScratchRuntime {
 		
 		if (arduinoUart.comWorkingFlag == false)// 用于侦测串口通讯是否正常，如果有工作的串口，则不在检测。xuhy20160816
 			arduinoUart.checkUartAvail();
+		else
+		{
+			//发送串口心跳包
+		}
 	}
 
 //-------- recording video code ---------
