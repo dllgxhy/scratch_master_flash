@@ -57,7 +57,8 @@ import com.quetwo.Arduino.ArduinoConnector;
 import com.quetwo.Arduino.ArduinoConnectorEvent;
 
 import flash.display.Sprite;
-
+import flash.utils.Timer;
+import flash.events.TimerEvent;
 
 
 
@@ -137,23 +138,23 @@ scratch 通过UART 向Arduino写入数据
 		tempUartData[5] = uartCommunicationPackageTail[0];
 		tempUartData[6] = uartCommunicationPackageTail[1];
 		
-		for(var i:int = 12;i<=16;i++)
+		for(var i:int = 4;i<=6;i++)
 		{		
 			arduinoUart.close();//重新关闭_wh
 			if(uartConnect("COM"+i))//判断是否能打开成功_wh
 			{
 				scratchWriteData2Arduino(tempUartData);
 				arduinoUart.addEventListener("socketData", fncArduinoData);
-				if (1)   //此处需要更改xuhy_20160816
-				{		
+//				timer_get.start();
+				
+				if (1)
+				{
 					comWorkingFlag = true;
 					return true;
-				}
+				}			
 			}	
 		}
-		//此处增加一个延时函数
-		
-//		uartDisconnet();//重新关闭_wh
+		//此处增加一个延时函数	
 		return false;
 	}	
 
@@ -233,6 +234,11 @@ scratch 通过UART 向Arduino写入数据
 	public function uartCommunicationOnTick():void
 	{
 		
+	}
+	
+	private function time1s():Boolean
+	{
+		return true;
 	}
 	
 }}

@@ -1,0 +1,47 @@
+---- Servo Matches (65 in 1 files) ----
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):#include <Servo.h>
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):///////////////////////////////Servo/////////////
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo2;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo3;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo4;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo5;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo6;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo7;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo8;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo9;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo10;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo11;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo12;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):Servo myservo13;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware)://boolean _servo_flag;                //for avoiding servo initial again and again
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware)://boolean _servo_num;                 //for several servo work at the same time
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):        //     _servo_flag = 1;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):        //          if (_servo_flag)
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):        //            _servo_flag = 0;
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):        //            myservo.attach(pin);  // attaches the servo on pin 9 to the servo object
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):        //          //  myservo.attach(pin);  // attaches the servo on pin 9 to the servo object
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):        //          myservo.write(val.byteVal[0]);              // tell servo to go to position in variable 'pos'
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo2.attach(2);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo2.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo3.attach(3);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo3.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo4.attach(4);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo4.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo5.attach(5);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo5.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo6.attach(6);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo6.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo7.attach(7);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo7.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo8.attach(8);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo8.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo9.attach(9);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo9.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo10.attach(10);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo10.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo11.attach(11);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo11.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo12.attach(12);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo12.write(val.byteVal[0]);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo13.attach(13);
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):              myservo13.write(val.byteVal[0]);
