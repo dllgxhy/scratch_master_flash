@@ -82,6 +82,7 @@ public class Primitives {
 		new MotionAndPenPrims(app, interp).addPrimsTo(primTable);
 		new SoundPrims(app, interp).addPrimsTo(primTable);
 		new VideoMotionPrims(app, interp).addPrimsTo(primTable);
+		new CfunPrims(app, interp).addPrimsTo(primTable);  //将新的功能增加如block中，后续可以与其他block共用
 		addOtherPrims(primTable);
 	}
 

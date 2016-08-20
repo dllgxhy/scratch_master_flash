@@ -181,8 +181,10 @@ public class Scratch extends Sprite {
 
 	public var logger:Log = new Log(16);
 	
-	public var arduinouart:ArduinoUart;
+	//UART Part
+	public var arduinoUart:ArduinoUart = new ArduinoUart(115200);
 	
+	//
 	public function Scratch() {
 		SVGTool.setStage(stage);
 		loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, uncaughtErrorHandler);

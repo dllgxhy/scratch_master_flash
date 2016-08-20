@@ -57,9 +57,9 @@ import com.quetwo.Arduino.ArduinoConnector;
 import com.quetwo.Arduino.ArduinoConnectorEvent;
 
 import flash.display.Sprite;
+import flash.utils.getTimer;
 import flash.utils.Timer;
 import flash.events.TimerEvent;
-
 
 
 public class ArduinoUart extends Sprite {
@@ -67,9 +67,10 @@ public class ArduinoUart extends Sprite {
 	public var arduinoUart:ArduinoConnector = new ArduinoConnector();	//新建串口类
 	public var arduinolib:ArduinoLibrary = new ArduinoLibrary();
 	private var arduinoUartBaud:Number = 115200;
+	private var scratchComID:int = 0x00;				//当前选中打开的COM口
 	
 	public var comWorkingFlag:Boolean = false;			//COM口是否开启
-	public var comWorkingID:String = '0';				//当前选中打开的COM口
+	public var scratchUartStayAlive:Boolean = false;			
 	public var comRevDataAvailable:Boolean = false;//串口数据接收完整性判断标识
 	
 	private var uartCommunicationPackageHead:Array = [0xfe, 0xfd]; //通讯协议的包头和包尾
@@ -80,6 +81,14 @@ public class ArduinoUart extends Sprite {
 	private var uartDataID_checkUartAvail:int = 0x01;  //串口通讯心跳包，数据包括各种板载传感器的数据
 	private var uartDataID_Readshort:int = 0x00;
 	
+	private var uartDetectStatustimerStart:Number = 0x00;
+	private var uartDetectStatustimerStop:Number = 0x00;
+	
+	public var uartOnTickTimer:Timer = new Timer(2000, 0);  //生成一个无限次循环的定时器，专门用于检测串口是否开启
+	private var comHeartTimeStart:Number = 0x00;
+	private var comHeartTimeStop:Number = 0x00;
+	
+	
 	/*
 	Scratch与Arduino
 	*/
@@ -88,6 +97,8 @@ public class ArduinoUart extends Sprite {
 	public function ArduinoUart(baud:Number):void
 	{
 		this.arduinoUartBaud = baud;	
+		uartOnTickTimer.addEventListener(TimerEvent.TIMER, onTick);
+		uartOnTickTimer.start();
 	}
 	
 	/*************************************************
@@ -96,67 +107,46 @@ public class ArduinoUart extends Sprite {
 	 返回值:true:连接成功
 			false:连接失败
 	**************************************************/	
-	public function uartConnect(comID:String):Boolean 
-	{
-		return arduinoUart.connect(comID,arduinoUartBaud);
-	}
-	
-	
-/*串口断开*/
-	public function uartDisconnet():void
-	{	
-		arduinoUart.dispose();
-		comWorkingFlag = false;
-	}
 	
 
 /***************************************************
 scratch 通过UART 向Arduino写入数据
+该数据为固定值，Arduino收到该值，则认为UART是通的
 ***************************************************/
-	public function scratchWriteData2Arduino(scratchWrite2ArduinoBuffer:Array):void
+	public function uartHeartDatascratch2Arduino():void
 	{
-		for (var i:int = 0x00; i < scratchWrite2ArduinoBuffer.length; i++)
+		var tempUartData:Array = new Array();
+		tempUartData[0] = uartCommunicationPackageHead[0];
+		tempUartData[1] = uartCommunicationPackageHead[1];
+		tempUartData[2] = 0x01;
+		tempUartData[3] = 0x02;
+		tempUartData[4] = uartCommunicationPackageTail[0];
+		tempUartData[5] = uartCommunicationPackageTail[1];
+		
+		for (var i:int = 0x00; i < tempUartData.length; i++)
 		{
-			arduinoUart.writeByte(scratchWrite2ArduinoBuffer[i]);
+			arduinoUart.writeByte(tempUartData[i]);
 		}		
 	}
 
 /*	
 串口检测，输出扫描到的所有有效串口号
 有效串口号可能有几个，比如在电脑上插入了串口调试助手等，所以还需要检测是否通讯成功。
-*/
-	public function checkUartAvail():Boolean
-	{
-		var comAvailArray:Array = new Array();
-		var tempUartData:Array = new Array;
-		
-		tempUartData[0] = uartCommunicationPackageHead[0];
-		tempUartData[1] = uartCommunicationPackageHead[1];
-		tempUartData[2] = 0x00;
-		tempUartData[3] = 0x01;
-		tempUartData[4] = 0x02;
-		tempUartData[5] = uartCommunicationPackageTail[0];
-		tempUartData[6] = uartCommunicationPackageTail[1];
-		
-		for(var i:int = 4;i<=6;i++)
-		{		
-			arduinoUart.close();//重新关闭_wh
-			if(uartConnect("COM"+i))//判断是否能打开成功_wh
-			{
-				scratchWriteData2Arduino(tempUartData);
-				arduinoUart.addEventListener("socketData", fncArduinoData);
-//				timer_get.start();
-				
-				if (1)
-				{
-					comWorkingFlag = true;
-					return true;
-				}			
-			}	
+*/	
+	public function checkUartAvail(scratchComID:int):Boolean
+	{	
+		if (scratchUartStayAlive == true)
+		{
+			return true;
 		}
-		//此处增加一个延时函数	
-		return false;
-	}	
+		else
+		{
+			arduinoUart.close();//重新关闭_wh
+			arduinoUart.connect("COM" + scratchComID, 115200);
+			arduinoUart.addEventListener("socketData", fncArduinoData);
+			return false;
+		}	
+	}
 
 	/*********************************************************************
 	串口数据接收事件处理
@@ -168,7 +158,7 @@ scratch 通过UART 向Arduino写入数据
 		try
 		{
 			comDataBufferOld = comDataBufferOld.concat(arduinoUart.readBytesAsArray());//将接收到的数据放在comDataArrayOld数组中_wh
-			comWorkingFlag = true;
+			uartDetectStatustimerStop = getTimer();
 		}
 		catch(Error)
 		{
@@ -219,26 +209,43 @@ scratch 通过UART 向Arduino写入数据
 			}
 		}
 	}
+	
 	/**************************************************
 	将串口接收到的数据按照协议进行解包
 	**************************************************/
 	public function paraUartData_OnTick(data:Array):void
 	{		
 		ArduinoLibrary.arduinoLightValue = data[0] * 256 + data[1];
-		trace("arduinoLightValue" + ArduinoLibrary.arduinoLightValue);
 	}
 	
 	/*
-	串口通讯心跳包，发送简单的协议，返回的是板载sensor的值。 
+	 
 	*/
-	public function uartCommunicationOnTick():void
+	protected function onTick(event:TimerEvent):void
 	{
-		
+		if (uartDetectStatustimerStop != uartDetectStatustimerStart)
+		{
+//			trace ("uart stay alive");
+			scratchComID = 0x00;
+		}
+		else
+		{	
+//			trace ("uart is failed");
+			scratchUartStayAlive = false;
+			if (checkUartAvail(scratchComID))
+			{
+				scratchComID = scratchComID - 1;
+			}
+			else 
+			{
+				scratchComID ++;
+			}
+			
+			if (scratchComID > 16)
+			{
+				scratchComID = 0x00;
+			}
+		}	
+		uartDetectStatustimerStop = uartDetectStatustimerStart = getTimer();
 	}
-	
-	private function time1s():Boolean
-	{
-		return true;
-	}
-	
 }}
