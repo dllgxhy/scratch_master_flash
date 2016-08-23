@@ -403,6 +403,7 @@ public class Specs {
 		["sound",	"r", 14, "readcksound"],//测控板模拟量_声音
 		["slide",	"r", 14, "readckslide"],//测控板模拟量_滑动变阻器
 		["light",	"r", 14, "readcklight"],//测控板模拟量_光敏
+		["ultrasonic sensor",	"r", 14, "readckUltrasonicSensor"],//测控板超声波传感器
 	];
 
 	public static var extensionSpecs:Array = ["when %m.booleanSensor", "when %m.sensor %m.lessMore %n", "sensor %m.booleanSensor?", "%m.sensor sensor value", "turn %m.motor on for %n secs", "turn %m.motor on", "turn %m.motor off", "set %m.motor power to %n", "set %m.motor2 direction to %m.motorDirection", "when distance %m.lessMore %n", "when tilt %m.eNe %n", "distance", "tilt"];

@@ -93,7 +93,6 @@ public class Watcher extends Sprite implements DragClient {
 	private var mouseMoved:Boolean;
 	
 	//arduino board xuhy20160816
-	private var arduinolib:ArduinoLibrary = new ArduinoLibrary();
 
 	public function Watcher() {
 		frame = new ResizeableFrame(0x949191, 0xC1C4C7, 8);
@@ -255,7 +254,8 @@ public class Watcher extends Sprite implements DragClient {
 			case "timeAndDate": return runtime.getTimeString(param);
 			case "xScroll": return app.stagePane.xScroll;
 			case "yScroll": return app.stagePane.yScroll;
-			case "readcklight": return arduinolib.arduinoBoardSensorValue("readcklight");  //xuhy20160816 返回得到的arduino板子上的传感器的值
+			case "readcklight": return ArduinoLibrary.arduinoLightValue;  //xuhy20160816 返回得到的arduino板子上的传感器的值
+			case "readckUltrasonicSensor": return ArduinoLibrary.arduinoUltrasonicValue;
 		}
 
 		if(ExtensionManager.hasExtensionPrefix(cmd)) {

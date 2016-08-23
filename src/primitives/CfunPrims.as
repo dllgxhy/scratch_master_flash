@@ -28,6 +28,7 @@ package primitives {
 	import interpreter.*;
 	import scratch.*;
 	import flash.utils.ByteArray;
+	import arduino.ArduinoLibrary;
 
 public class CfunPrims {
 
@@ -40,31 +41,9 @@ public class CfunPrims {
 	}
 
 	public function addPrimsTo(primTable:Dictionary):void {
-		primTable["readcksound"]			= primReadSound;
-		primTable["readckslide"]	        = primReadSlide;
-		primTable["readcklight"]		    = primReadLight;
-		
+		primTable["readcksound"]			= function(b:*):* { return ArduinoLibrary.arduinoSoundValue};
+		primTable["readckslide"]	        = function(b:*):* { return ArduinoLibrary.arduinoSlideValue};
+		primTable["readcklight"]		    = function(b:*):* { return ArduinoLibrary.arduinoLightValue};
+		primTable["readckUltrasonicSensor"]	= function(b:*):* { return ArduinoLibrary.arduinoUltrasonicValue};	
 	}
-
-	private function primReadSound(b:Block):void {
-		
-	}
-	
-	private function primReadSlide(b:Block):void {
-		
-	
-	}
-	
-	private function primReadLight(b:Block):Number {
-		var numba:ByteArray = new ByteArray();//4字节流转浮点型（注意大端顺序）_wh
-//		numba.writeByte(app.comDataArray[6]);
-//		numba.writeByte(app.comDataArray[7]);
-		numba.position = 0;
-		var num:Number = numba.readShort();
-//		app.comDataArray.length = 0;//数组清零_wh
-//		app.comDataArrayOld.length = 0;//数组清零_wh
-		return num;			
-
-	}
-
 }}

@@ -24,9 +24,6 @@
 
 package {
 import com.adobe.utils.StringUtil;
-import com.quetwo.Arduino.ArduinoConnector;
-import com.quetwo.Arduino.ArduinoConnectorEvent;
-
 import flash.display.DisplayObject;
 import flash.display.Graphics;
 import flash.display.Shape;
@@ -182,7 +179,7 @@ public class Scratch extends Sprite {
 	public var logger:Log = new Log(16);
 	
 	//UART Part
-	public var arduinoUart:ArduinoUart = new ArduinoUart(115200);
+	public var arduinoUart:ArduinoUart = new ArduinoUart();
 	
 	//
 	public function Scratch() {
@@ -1717,5 +1714,6 @@ public class Scratch extends Sprite {
 		args.splice(1, 0, returnValueCallback);
 		externalCall.apply(this, args);
 	}
+	
 }
 }

@@ -65,54 +65,37 @@ import flash.events.TimerEvent;
 public class ArduinoUart extends Sprite {
 	
 	public var arduinoUart:ArduinoConnector = new ArduinoConnector();	//新建串口类
-	public var arduinolib:ArduinoLibrary = new ArduinoLibrary();
-	private var arduinoUartBaud:Number = 115200;
-	private var scratchComID:int = 0x00;				//当前选中打开的COM口
+	public var arduinolib:ArduinoLibrary = new ArduinoLibrary();		
+
+	private var scratchComID:int = 0x00;								//当前选中打开的COM口
+	public var scratchUartStayAlive:Boolean = false;					//串口是否还可以正常通讯
 	
-	public var comWorkingFlag:Boolean = false;			//COM口是否开启
-	public var scratchUartStayAlive:Boolean = false;			
-	public var comRevDataAvailable:Boolean = false;//串口数据接收完整性判断标识
-	
-	private var uartCommunicationPackageHead:Array = [0xfe, 0xfd]; //通讯协议的包头和包尾
-	private var uartCommunicationPackageTail:Array = [0xfe, 0xfb];	
+	/*串口通讯协议*/
 	public var comDataBuffer:Array = new Array();//串口接收数据缓存
 	public var comDataBufferOld:Array = new Array();//串口接收数据缓存未处理数据
-	
-	private var uartDataID_checkUartAvail:int = 0x01;  //串口通讯心跳包，数据包括各种板载传感器的数据
-	private var uartDataID_Readshort:int = 0x00;
-	
+	private var uartCommunicationPackageHead:Array = [0xfe, 0xfd]; 		//通讯协议的包头
+	private var uartCommunicationPackageTail:Array = [0xfe, 0xfb];		//通讯协议的包尾
+	private var uartDataID_checkUartAvail:int = 0x01;  					//串口通讯心跳包，数据包括各种板载传感器的数据
+	private var uartDataID_Readshort:int = 0x00;							
+	/*串口在线计时器
+	 * 在串口监测定时器结束前，设置这两个参数，如果串口接收到数据，则重新置 uartDetectStatustimerStop 的值，
+	 * 如果uartDetectStatustimerStart 和 uartDetectStatustimerStop 两个值不等，说明串口接收到过数据，证明串口在线
+	 * uartOnTickTimer: 串口在线定时器
+	 */
 	private var uartDetectStatustimerStart:Number = 0x00;
 	private var uartDetectStatustimerStop:Number = 0x00;
-	
-	public var uartOnTickTimer:Timer = new Timer(2000, 0);  //生成一个无限次循环的定时器，专门用于检测串口是否开启
-	private var comHeartTimeStart:Number = 0x00;
-	private var comHeartTimeStop:Number = 0x00;
-	
-	
-	/*
-	Scratch与Arduino
-	*/
+	public var uartOnTickTimer:Timer = new Timer(1000, 0);  //生成一个无限次循环的定时器，专门用于检测串口是否开启
 
-
-	public function ArduinoUart(baud:Number):void
-	{
-		this.arduinoUartBaud = baud;	
+	public function ArduinoUart():void
+	{	
 		uartOnTickTimer.addEventListener(TimerEvent.TIMER, onTick);
 		uartOnTickTimer.start();
-	}
+	}	
 	
-	/*************************************************
-	 串口连接
-	 参数:可连接的有效串口
-	 返回值:true:连接成功
-			false:连接失败
-	**************************************************/	
-	
-
-/***************************************************
-scratch 通过UART 向Arduino写入数据
-该数据为固定值，Arduino收到该值，则认为UART是通的
-***************************************************/
+	/***************************************************
+	scratch 通过UART 向Arduino写入数据
+	该数据为固定值，Arduino收到该值，则认为UART是通的
+	***************************************************/
 	public function uartHeartDatascratch2Arduino():void
 	{
 		var tempUartData:Array = new Array();
@@ -129,10 +112,10 @@ scratch 通过UART 向Arduino写入数据
 		}		
 	}
 
-/*	
-串口检测，输出扫描到的所有有效串口号
-有效串口号可能有几个，比如在电脑上插入了串口调试助手等，所以还需要检测是否通讯成功。
-*/	
+	/*	
+	串口检测，输出扫描到的所有有效串口号
+	有效串口号可能有几个，比如在电脑上插入了串口调试助手等，所以还需要检测是否通讯成功。
+	*/	
 	public function checkUartAvail(scratchComID:int):Boolean
 	{	
 		if (scratchUartStayAlive == true)
@@ -168,17 +151,15 @@ scratch 通过UART 向Arduino写入数据
 		while(1)
 		{
 			comDataBuffer.length =0;
-			//将接收到的ASCII码字符型转成数值型_wh
 			for (i = 0; i < comDataBufferOld.length; i++)
 			{
 				comDataBuffer[i] = comDataBufferOld[i].charCodeAt(0);
 			}
-			if (comDataBuffer.length < 8)		//通讯协议最短要有8Byte，少于这个则为错误数据
+			if (comDataBuffer.length < 8)	
 				break;					
-			//接收通信协议：0xfe 0xfd 0xXX(数据长度) 0xXX(类型);0xXX(子类型) 0xXX(数据) 若干个; 0xfe 0xfb(值)
+			//接收通信协议：0xfe 0xfd 0xXX(数据长度) 0xXX(类型); 0xXX(数据) 若干个; 0xfe 0xfb(值)
 			if((comDataBuffer[0] == 0xfe) && (comDataBuffer[1] == 0xfd) && (comDataBuffer[comDataBuffer.length-2] == 0xfe) && (comDataBuffer[comDataBuffer.length-1] == 0xfb))//comDataArray中为ASCII码字符型，判断不等
 			{
-				//根据类别进行初步数据有效性判断_wh
 				if (comDataBuffer[2] == comDataBuffer.length)
 				{
 					switch(comDataBuffer[3])
@@ -189,8 +170,7 @@ scratch 通过UART 向Arduino写入数据
 								paraDataBuffer[i] = comDataBuffer[i+4];
 							}
 							paraUartData_OnTick(paraDataBuffer);
-							break;//数据接收完整判断_wh
-							
+							break;	
 						default:
 							break;
 					}
@@ -212,10 +192,12 @@ scratch 通过UART 向Arduino写入数据
 	
 	/**************************************************
 	将串口接收到的数据按照协议进行解包
+	数据种类与Arduino板一致
 	**************************************************/
 	public function paraUartData_OnTick(data:Array):void
 	{		
 		ArduinoLibrary.arduinoLightValue = data[0] * 256 + data[1];
+		ArduinoLibrary.arduinoUltrasonicValue =  data[5];
 	}
 	
 	/*
