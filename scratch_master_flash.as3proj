@@ -8,7 +8,7 @@
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />
-    <movie version="11" />
+    <movie version="0" />
     <movie minorVersion="0" />
     <movie platform="AIR" />
     <movie background="#FFFFFF" />
@@ -92,5 +92,7 @@
     <option testMovieCommand="" />
   </options>
   <!-- Plugin storage -->
-  <storage />
+  <storage>
+    <entry key="air-descriptor"><![CDATA[src\Scratch-app.xml]]></entry>
+  </storage>
 </project>

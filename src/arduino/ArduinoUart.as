@@ -67,8 +67,11 @@ public class ArduinoUart extends Sprite {
 	public var arduinoUart:ArduinoConnector = new ArduinoConnector();	//新建串口类
 	public var arduinolib:ArduinoLibrary = new ArduinoLibrary();		
 
-	private var scratchComID:int = 0x00;								//当前选中打开的COM口
-	public var scratchUartStayAlive:Boolean = false;					//串口是否还可以正常通讯
+	private var scratchComID:int = 0x01;								//当前选中打开的COM口,COM口从1开始计数
+	public  var scratchUartStayAlive:Boolean = false;					//串口是否还可以正常通讯
+	private var comStatusTrueArray:Array = new Array();
+	private var comStatusTrueFlag:Boolean = false;
+	private var uartCloseFlag:Boolean = false;
 	
 	/*串口通讯协议*/
 	public var comDataBuffer:Array = new Array();//串口接收数据缓存
@@ -84,7 +87,7 @@ public class ArduinoUart extends Sprite {
 	 */
 	private var uartDetectStatustimerStart:Number = 0x00;
 	private var uartDetectStatustimerStop:Number = 0x00;
-	public var uartOnTickTimer:Timer = new Timer(1000, 0);  //生成一个无限次循环的定时器，专门用于检测串口是否开启
+	public var uartOnTickTimer:Timer = new Timer(500, 0);  //生成一个无限次循环的定时器，专门用于检测串口是否开启
 
 	public function ArduinoUart():void
 	{	
@@ -116,19 +119,10 @@ public class ArduinoUart extends Sprite {
 	串口检测，输出扫描到的所有有效串口号
 	有效串口号可能有几个，比如在电脑上插入了串口调试助手等，所以还需要检测是否通讯成功。
 	*/	
-	public function checkUartAvail(scratchComID:int):Boolean
+	public function checkUartAvail(scratchComID:int):void
 	{	
-		if (scratchUartStayAlive == true)
-		{
-			return true;
-		}
-		else
-		{
-			arduinoUart.close();//重新关闭_wh
-			arduinoUart.connect("COM" + scratchComID, 115200);
-			arduinoUart.addEventListener("socketData", fncArduinoData);
-			return false;
-		}	
+		arduinoUart.connect("COM" + scratchComID, 115200);
+		arduinoUart.addEventListener("socketData", fncArduinoData);	
 	}
 
 	/*********************************************************************
@@ -201,31 +195,72 @@ public class ArduinoUart extends Sprite {
 	}
 	
 	/*
+	 *检查可用的UART接口 
+	*/
+	public function findComStatusTrue():Array
+	{
+		for (var i:int = 0x02; i <= 16;i++)//暂时设定只有16个com口，为com1 到 com16
+		{
+			if (arduinoUart.connect("COM" + i, 115200))
+			{
+				comStatusTrueArray.push(i);
+				arduinoUart.close();
+			}
+		}
+		return comStatusTrueArray;
+	}
+	
+	
+	
+	/*
 	 
 	*/
 	protected function onTick(event:TimerEvent):void
-	{
+	{	
+		
 		if (uartDetectStatustimerStop != uartDetectStatustimerStart)
 		{
-//			trace ("uart stay alive");
-			scratchComID = 0x00;
+			scratchComID = 1;
+			comStatusTrueFlag = false;
+			trace("com ok"+scratchComID);
 		}
+		
 		else
 		{	
-//			trace ("uart is failed");
-			scratchUartStayAlive = false;
-			if (checkUartAvail(scratchComID))
+			scratchUartStayAlive = false;	
+			
+			if (scratchComID != 0x00)   //监测临时插拔后  对相应的COM口进行关断处理，否则无法检测到该COM口
 			{
-				scratchComID = scratchComID - 1;
-			}
-			else 
-			{
-				scratchComID ++;
+				trace("avail id " + scratchComID);
+				arduinoUart.close();
+				scratchComID = 0x00;	
 			}
 			
-			if (scratchComID > 16)
+			if (comStatusTrueFlag == false)
 			{
-				scratchComID = 0x00;
+				comStatusTrueArray = findComStatusTrue();		//先检测是否有可用的com口
+				comStatusTrueFlag = true;
+				trace("onTick  comStatusTrueFlag false");
+				return ;
+			}
+			
+			if (uartCloseFlag) 
+			{
+				arduinoUart.close();
+				uartCloseFlag = false;
+			}		
+			
+			if ((comStatusTrueArray.length > 0x00))	//长度大于0，说明数组中有数据，有为true的com口
+			{	
+				checkUartAvail(comStatusTrueArray[comStatusTrueArray.length -1]);
+				comStatusTrueArray.pop();
+				uartCloseFlag = true;
+				trace("onTick "+comStatusTrueArray.length);
+			}
+			else
+			{
+				comStatusTrueFlag = false;
+				return ;
 			}
 		}	
 		uartDetectStatustimerStop = uartDetectStatustimerStart = getTimer();

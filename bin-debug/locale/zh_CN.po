@@ -45,6 +45,9 @@ msgstr "将 %s 加到链表 %m.list 末尾"
 msgid "answer"
 msgstr "回答"
 
+msgid "readckUltrasonicSensor"
+msgstr "读取超声波距离数据"
+
 msgid "ask %s and wait"
 msgstr "询问 %s 并等待"
 

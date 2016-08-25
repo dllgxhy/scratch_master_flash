@@ -33,7 +33,7 @@ CFunPort cp;//CFunport
 CFunDCMotor dc;
 CFunAvoid av;
 CFunTrack tr;
-CFunTemperature ts;
+CFunTemperature ts;yes
 //CFunTemperature2 ts2;
 CFunRGBLed led;
 CFunUltrasonic us;
