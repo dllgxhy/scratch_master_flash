@@ -43,9 +43,9 @@ public class TopBarPart extends UIPart {
 
 	protected var fileMenu:IconButton;
 	protected var editMenu:IconButton;
-	protected var comMenu:IconButton;
+	protected var comMenu:IconButton; //增加COM控制链接
 	protected var myMenu:IconButton;
-	protected var helpMenu:IconButton;
+	protected var helpMenu:IconButton;//增加论坛链接
 
 	private var copyTool:IconButton;
 	private var cutTool:IconButton;
@@ -95,9 +95,9 @@ public class TopBarPart extends UIPart {
 		if (Scratch.app) {
 			Scratch.app.showFileMenu(Menu.dummyButton());
 			Scratch.app.showEditMenu(Menu.dummyButton());
-			Scratch.app.showCOMMenu(Menu.dummyButton());//���˵�����COM��_wh
-//			Scratch.app.showMYMenu(Menu.dummyButton());//���˵�����è�ѻ���_wh
-//			Scratch.app.showHelpMenu(Menu.dummyButton());//���˵�������̳������_wh
+			Scratch.app.showCOMMenu(Menu.dummyButton());
+			Scratch.app.showMYMenu(Menu.dummyButton());
+			Scratch.app.showHelpMenu(Menu.dummyButton());
 		}
 		return ['File', 'Edit', 'COM','MYH','Forum/Help','Tips', 'Duplicate', 'Delete', 'Grow', 'Shrink', 'Block help', 'Offline Editor'];
 	}
@@ -106,9 +106,9 @@ public class TopBarPart extends UIPart {
 		if (fileMenu.parent) {
 			removeChild(fileMenu);
 			removeChild(editMenu);
-			removeChild(comMenu);//���˵�����COM��_wh
-			removeChild(myMenu);//���˵�����COM��_wh
-			removeChild(helpMenu);//���˵�����COM��_wh
+			removeChild(comMenu);
+			removeChild(myMenu);
+			removeChild(helpMenu);
 		}
 	}
 
@@ -161,22 +161,22 @@ public class TopBarPart extends UIPart {
 		editMenu.y = buttonY;
 		nextX += editMenu.width + buttonSpace;
 		
-		//���˵�����COM��_wh
+		
 		comMenu.x = nextX;
 		comMenu.y = buttonY;
 		nextX += comMenu.width + buttonSpace;
 		
-		//���˵�����è�ѻ���_wh
+	
 		myMenu.x = nextX;
 		myMenu.y = buttonY;
 		nextX += myMenu.width + buttonSpace;
 		
-		//���˵�������̳������_wh
+		
 		helpMenu.x = nextX;
 		helpMenu.y = buttonY;
 		nextX += helpMenu.width + buttonSpace;
 		
-		// cursor tool buttons
+		
 		var space:int = 3;
 		copyTool.x = app.isOffline ? 493 : 427;
 		cutTool.x = copyTool.right() + space;
@@ -234,9 +234,9 @@ public class TopBarPart extends UIPart {
 	protected function addTextButtons():void {
 		addChild(fileMenu = makeMenuButton('File', app.showFileMenu, true));
 		addChild(editMenu = makeMenuButton('Edit', app.showEditMenu, true));
-		addChild(comMenu = makeMenuButton('COM', app.showCOMMenu, true));//���˵�����COM��������_wh
-		addChild(myMenu = makeMenuButton('MYH', app.showMYHMenu, true));//���˵�����è�ѻ���������_wh
-		addChild(helpMenu = makeMenuButton('Forum/Help', app.showForumHelpMenu, true));//���˵�����COM��������_wh
+		addChild(comMenu = makeMenuButton('COM', app.showCOMMenu, true));
+		addChild(myMenu = makeMenuButton('MYH', app.showMYMenu, true));
+		addChild(helpMenu = makeMenuButton('Forum/Help', app.showHelpMenu, true));
 	}
 
 	private function addToolButtons():void {

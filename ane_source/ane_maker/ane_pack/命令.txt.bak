@@ -1,0 +1,1 @@
+bin/adt -package -storetype pkcs12 -keystore xuhy.p12 -storepass Xuhaiyang8 -target ane ArduinoConnector.ane extension.xml -swc swc名称.swc -platform 平台名称 library.swf 本机扩展库

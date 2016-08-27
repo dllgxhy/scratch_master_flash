@@ -24,6 +24,7 @@
 
 package {
 import com.adobe.utils.StringUtil;
+
 import flash.display.DisplayObject;
 import flash.display.Graphics;
 import flash.display.Shape;
@@ -49,12 +50,16 @@ import flash.net.URLLoader;
 import flash.net.URLLoaderDataFormat;
 import flash.net.URLRequest;
 import flash.system.Capabilities;
+import flash.system.MessageChannel;
 import flash.system.System;
+import flash.system.Worker;
+import flash.system.WorkerDomain;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
 import flash.utils.ByteArray;
 import flash.utils.getTimer;
+import flash.utils.setInterval;
 
 import mx.utils.URLUtil;
 
@@ -112,8 +117,9 @@ import util.Server;
 import util.Transition;
 
 import watchers.ListWatcher;
-
+import flash.utils.*;
 import arduino.ArduinoUart;
+
 
 public class Scratch extends Sprite {
 	// Version
@@ -165,6 +171,9 @@ public class Scratch extends Sprite {
 	public var mediaLibrary:MediaLibrary;
 	public var lp:LoadProgress;
 	public var cameraDialog:CameraDialog;
+	
+	public var ComWorkID_Text:TextField = new TextField();
+	public var ComWorkID_TextType:TextFormat = new TextFormat();
 
 	// UI Parts
 	public var libraryPart:LibraryPart;
@@ -175,22 +184,26 @@ public class Scratch extends Sprite {
 	public var imagesPart:ImagesPart;
 	public var soundsPart:SoundsPart;
 	public const tipsBarClosedWidth:int = 17;
+	
 
 	public var logger:Log = new Log(16);
 	
 	//UART Part
 	public var arduinoUart:ArduinoUart = new ArduinoUart();
+	public var showCOMFlag:Boolean = false;
 	
-	//
+	
 	public function Scratch() {
 		SVGTool.setStage(stage);
 		loaderInfo.uncaughtErrorEvents.addEventListener(UncaughtErrorEvent.UNCAUGHT_ERROR, uncaughtErrorHandler);
 		app = this;
-
+		
 		// This one must finish before most other queries can start, so do it separately
 		determineJSAccess();
+		comWorkIDTextTypeSet();
+		comWorkIDShowInTopBar(5);
 	}
-
+	
 	protected function determineJSAccess():void {
 		if (externalInterfaceAvailable()) {
 			try {
@@ -207,6 +220,23 @@ public class Scratch extends Sprite {
 		jsEnabled = result;
 		initialize();
 	}
+	
+	public function comWorkIDShowInTopBar(comID:int):void
+	{
+		ComWorkID_Text.text = "COM" + comID;
+	}
+	
+	public function comWorkIDTextTypeSet():void
+	{
+		ComWorkID_TextType.font = "黑体";
+		ComWorkID_Text.textColor = 0xffffff;
+		ComWorkID_Text.width = 200;
+		ComWorkID_Text.height = 50;
+		ComWorkID_Text.x = 370;
+		ComWorkID_Text.y = 5;
+		addChild(ComWorkID_Text);
+	}
+	
 
 	protected function initialize():void {
 		isOffline = !URLUtil.isHttpURL(loaderInfo.url);
@@ -1164,34 +1194,116 @@ public class Scratch extends Sprite {
 		m.addLine();
 		m.addItem('Edit block colors', editBlockColors);
 	}
-	//edit by xuhy 
 	
+	/*
+	以下内容由xuhy编辑
+	 
+	*/
 	public function showCOMMenu(b:*):void {
-		var m:Menu = new Menu(null, 'More', CSS.topBarColor(), 28);
-		m.addItem('Undelete', runtime.undelete, runtime.canUndelete());
+		var m:Menu = new Menu(null, 'COM', CSS.topBarColor(), 28);
+		
+		trace ("showCOMMenu COM"+arduinoUart.scratchComID);
+		
+		if (arduinoUart.comStatus != 0x00)
+		{
+			m.addItem("Auto Connect", arduinoUart.setAutoConnect);
+			trace("topbar show Auto Connect");
+		}
+		else
+		{
+			m.addItem("COM" + arduinoUart.scratchComID, arduinoUart.setUartDisconnect, true, true);
+			trace("topbar show COMID");
+		}
+		
 		m.addLine();
-		m.addItem('Small stage layout', toggleSmallStage, true, stageIsContracted);
-		m.addItem('Turbo mode', toggleTurboMode, true, interp.turboMode);
-		addComMenuItems(b, m);
-		var p:Point = b.localToGlobal(new Point(0, 0));
+/*		
+		if(cmdBackNum == 0)//固件下载过程中不允许操作COM口_wh
+		{
+			var comArrays:Array = new Array(); //COM口未开启_wh
+			if(comTrue == false)
+			{
+				comArrays = checkUART();//获取扫描到的COM口编号(可用未开启的)_wh
+				for(var i:int = 0; i < comArrays.length; i++)//显示扫描到的COM号_wh
+				{
+					//comID = comArrays[i];//当前显示ID号赋给comID作为全局变量_wh
+					switch(comArrays[i])
+					{
+						case 'COM1':m.addItem(comArrays[i], comOpen1);break;//选中则开启_wh
+						case 'COM2':m.addItem(comArrays[i], comOpen2);break;//选中则开启_wh
+						case 'COM3':m.addItem(comArrays[i], comOpen3);break;//选中则开启_wh
+						case 'COM4':m.addItem(comArrays[i], comOpen4);break;//选中则开启_wh
+						case 'COM5':m.addItem(comArrays[i], comOpen5);break;//选中则开启_wh
+						case 'COM6':m.addItem(comArrays[i], comOpen6);break;//选中则开启_wh
+						case 'COM7':m.addItem(comArrays[i], comOpen7);break;//选中则开启_wh
+						case 'COM8':m.addItem(comArrays[i], comOpen8);break;//选中则开启_wh
+						case 'COM9':m.addItem(comArrays[i], comOpen9);break;//选中则开启_wh
+						case 'COM10':m.addItem(comArrays[i], comOpen10);break;//选中则开启_wh
+						case 'COM11':m.addItem(comArrays[i], comOpen11);break;//选中则开启_wh
+						case 'COM12':m.addItem(comArrays[i], comOpen12);break;//选中则开启_wh
+						case 'COM13':m.addItem(comArrays[i], comOpen13);break;//选中则开启_wh
+						case 'COM14':m.addItem(comArrays[i], comOpen14);break;//选中则开启_wh
+						case 'COM15':m.addItem(comArrays[i], comOpen15);break;//选中则开启_wh
+						case 'COM16':m.addItem(comArrays[i], comOpen16);break;//选中则开启_wh
+						default:break;
+					}
+				}
+			}
+			//COM口已开启_wh
+			else
+			{
+				arduino.close();
+				comTrue = false;
+				comDataArrayOld.splice();//数组清零_wh
+//				var t1:Number = getTimer();
+//				while(getTimer() - t1 < 100)
+//					;
+				if(arduino.connect(comIDTrue,115200))//判断是否能打开成功_wh
+				{
+					comTrue = true;
+					m.addItem(comIDTrue, comClose, true, true);//选中则关闭；只显示选中的COM口且前面勾对号(最后一个true)_wh
+				}
+				else
+				{
+					arduino.close();//重新关闭_wh
+					CFunConCir(0);
+				}
+			}
+			m.addLine();
+			
+			//蓝牙通信模式_wh
+			if(blueFlag == false)
+				m.addItem("Bluetooth", BlueOpen);
+			else
+				m.addItem("Bluetooth", BlueClose, true, true);
+			
+			m.addLine();
+			
+			m.addItem("Firmware", dofirm);//固件更新_wh
+			m.addLine();
+			m.addItem("Drive", dodrive);//固件更新_wh
+			m.addLine();
+		}*/
+		
 		m.showOnStage(stage, b.x, topBarPart.bottom() - 1);
+		/*
+		if(UDFlag == false)
+		{
+			UDFlag = true;
+			//上传固件等待文本框_wh
+			UpDialog.addTitle('Upload');
+			UpDialog.addButton('Close',cancel);
+			UpDialog.addText(Translator.map("uploading") + " ... ");
+		}
+		
+		showCOMFlag = false;*/
 	}
 	
-	protected function addComMenuItems(b:*, m:Menu):void {
-		m.addLine();
-		m.addItem('Edit block colors', editBlockColors);
-	}
-	
-	
-	public function showMYHMenu(b:*):void{
+	public function showMYMenu(b:*):void{
 		var m:Menu = new Menu(null,'More',CSS.topBarColor(), 28);
 	}
 	
-	public function showForumHelpMenu(b:*):void {
-//		var
+	public function showHelpMenu(b:*):void {
 	}
-	
-	
 	
 
 	protected function editBlockColors():void {
@@ -1714,6 +1826,4 @@ public class Scratch extends Sprite {
 		args.splice(1, 0, returnValueCallback);
 		externalCall.apply(this, args);
 	}
-	
-}
-}
+}}

@@ -23,8 +23,11 @@
     <ClCompile Include="..\SerialANE.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\..\..\pthreads-w32-2-9-1-release\Pre-built.2\lib\x86\pthreadVC2.lib" />
     <Library Include="..\FlashRuntimeExtensions.lib" />
+    <Library Include="..\pthreadVC2.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\pthreadVC2.dll" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{74677F3D-7CB4-4D46-B78B-FEF99EFB5410}</ProjectGuid>

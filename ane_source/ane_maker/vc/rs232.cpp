@@ -31,7 +31,7 @@
 Updated 2011-11-25 by Nicholas Kwiatkowski to allow compatibility with MacOSX 10.4+
 Updated 2012-03-15 by Nicholas Kwiatkowski, with contributions from blanchard.glen.  Allows COM Ports > 16
 Updated 2013-01-04 by Ellis Elkins on behalf of DirectAthletics to add the ability
- to enable DTR Control when port opened from outside this class.
+to enable DTR Control when port opened from outside this class.
 
 */
 
@@ -44,157 +44,191 @@ char comport[11];
 
 char baudr[64];
 
+//开启相应串口_wh
 int OpenComport(int comport_number, int baudrate, int useDtrControl)
 {
-  if((comport_number>999)||(comport_number<0))
-  {
-    printf("illegal comport number\n");
-    return(1);
-  }
+	if ((comport_number>999) || (comport_number<0))
+	{
+		printf("illegal comport number\n");
+		return(1);
+	}
 
-  sprintf(comport, "\\\\.\\COM%i", comport_number);
+	sprintf(comport, "\\\\.\\COM%i", comport_number);
 
-  switch(baudrate)
-  {
-    case     110 : strcpy(baudr, "baud=110 data=8 parity=N stop=1");
-                   break;
-    case     300 : strcpy(baudr, "baud=300 data=8 parity=N stop=1");
-                   break;
-    case     600 : strcpy(baudr, "baud=600 data=8 parity=N stop=1");
-                   break;
-    case    1200 : strcpy(baudr, "baud=1200 data=8 parity=N stop=1");
-                   break;
-    case    2400 : strcpy(baudr, "baud=2400 data=8 parity=N stop=1");
-                   break;
-    case    4800 : strcpy(baudr, "baud=4800 data=8 parity=N stop=1");
-                   break;
-    case    9600 : strcpy(baudr, "baud=9600 data=8 parity=N stop=1");
-                   break;
-    case   19200 : strcpy(baudr, "baud=19200 data=8 parity=N stop=1");
-                   break;
-    case   38400 : strcpy(baudr, "baud=38400 data=8 parity=N stop=1");
-                   break;
-    case   57600 : strcpy(baudr, "baud=57600 data=8 parity=N stop=1");
-                   break;
-    case  115200 : strcpy(baudr, "baud=115200 data=8 parity=N stop=1");
-                   break;
-    case  128000 : strcpy(baudr, "baud=128000 data=8 parity=N stop=1");
-                   break;
-    case  256000 : strcpy(baudr, "baud=256000 data=8 parity=N stop=1");
-                   break;
-    default      : printf("invalid baudrate\n");
-                   return(1);
-                   break;
-  }
+	switch (baudrate)
+	{
+	case     110: strcpy(baudr, "baud=110 data=8 parity=N stop=1");
+		break;
+	case     300: strcpy(baudr, "baud=300 data=8 parity=N stop=1");
+		break;
+	case     600: strcpy(baudr, "baud=600 data=8 parity=N stop=1");
+		break;
+	case    1200: strcpy(baudr, "baud=1200 data=8 parity=N stop=1");
+		break;
+	case    2400: strcpy(baudr, "baud=2400 data=8 parity=N stop=1");
+		break;
+	case    4800: strcpy(baudr, "baud=4800 data=8 parity=N stop=1");
+		break;
+	case    9600: strcpy(baudr, "baud=9600 data=8 parity=N stop=1");
+		break;
+	case   19200: strcpy(baudr, "baud=19200 data=8 parity=N stop=1");
+		break;
+	case   38400: strcpy(baudr, "baud=38400 data=8 parity=N stop=1");
+		break;
+	case   57600: strcpy(baudr, "baud=57600 data=8 parity=N stop=1");
+		break;
+	case  115200: strcpy(baudr, "baud=115200 data=8 parity=N stop=1");
+		break;
+	case  128000: strcpy(baudr, "baud=128000 data=8 parity=N stop=1");
+		break;
+	case  256000: strcpy(baudr, "baud=256000 data=8 parity=N stop=1");
+		break;
+	default: printf("invalid baudrate\n");
+		return(1);
+		break;
+	}
 
-  Cport[comport_number] = CreateFileA(comport,
-                      GENERIC_READ|GENERIC_WRITE,
-                      0,                          /* no share  */
-                      NULL,                       /* no security */
-                      OPEN_EXISTING,
-                      0,                          /* no threads */
-                      NULL);                      /* no templates */
+	Cport[comport_number] = CreateFileA(comport,
+		GENERIC_READ | GENERIC_WRITE,
+		0,                          /* no share  */
+		NULL,                       /* no security */
+		OPEN_EXISTING,
+		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,/* 重叠（异步）方式_wh */
+		NULL);                      /* no templates */
 
-  if(Cport[comport_number]==INVALID_HANDLE_VALUE)
-  {
-    printf("unable to open comport\n");
-    return(1);
-  }
+	if (Cport[comport_number] == INVALID_HANDLE_VALUE)
+	{
+		printf("unable to open comport\n");
+		return(1);
+	}
 
-  DCB port_settings;
-  memset(&port_settings, 0, sizeof(port_settings));  /* clear the new struct  */
-  port_settings.DCBlength = sizeof(port_settings);
+	DCB port_settings;
+	memset(&port_settings, 0, sizeof(port_settings));  /* clear the new struct  */
+	port_settings.DCBlength = sizeof(port_settings);
 
-  //use DTR control if specified. Disabled by default.
-  port_settings.fDtrControl = useDtrControl ? DTR_CONTROL_ENABLE : DTR_CONTROL_DISABLE;
+	//use DTR control if specified. Disabled by default.
+	port_settings.fDtrControl = useDtrControl ? DTR_CONTROL_ENABLE : DTR_CONTROL_DISABLE;
 
-  if(!BuildCommDCBA(baudr, &port_settings))
-  {
-    printf("unable to set comport dcb settings\n");
-    CloseHandle(Cport[comport_number]);
-    return(1);
-  }
+	if (!BuildCommDCBA(baudr, &port_settings))
+	{
+		printf("unable to set comport dcb settings\n");
+		CloseHandle(Cport[comport_number]);
+		Cport[comport_number] = INVALID_HANDLE_VALUE;
+		return(1);
+	}
 
-  if(!SetCommState(Cport[comport_number], &port_settings))
-  {
-    printf("unable to set comport cfg settings\n");
-    CloseHandle(Cport[comport_number]);
-    return(1);
-  }
+	if (!SetCommState(Cport[comport_number], &port_settings))
+	{
+		printf("unable to set comport cfg settings\n");
+		CloseHandle(Cport[comport_number]);
+		Cport[comport_number] = INVALID_HANDLE_VALUE;
+		return(1);
+	}
 
-  COMMTIMEOUTS Cptimeouts;
+	COMMTIMEOUTS Cptimeouts;
 
-  Cptimeouts.ReadIntervalTimeout         = MAXDWORD;
-  Cptimeouts.ReadTotalTimeoutMultiplier  = 0;
-  Cptimeouts.ReadTotalTimeoutConstant    = 0;
-  Cptimeouts.WriteTotalTimeoutMultiplier = 0;
-  Cptimeouts.WriteTotalTimeoutConstant   = 0;
+	Cptimeouts.ReadIntervalTimeout = MAXDWORD;
+	Cptimeouts.ReadTotalTimeoutMultiplier = 0;
+	Cptimeouts.ReadTotalTimeoutConstant = 0;
+	Cptimeouts.WriteTotalTimeoutMultiplier = 0;
+	Cptimeouts.WriteTotalTimeoutConstant = 0;
 
-  if(!SetCommTimeouts(Cport[comport_number], &Cptimeouts))
-  {
-    printf("unable to set comport time-out settings\n");
-    CloseHandle(Cport[comport_number]);
-    return(1);
-  }
+	if (!SetCommTimeouts(Cport[comport_number], &Cptimeouts))
+	{
+		printf("unable to set comport time-out settings\n");
+		CloseHandle(Cport[comport_number]);
+		Cport[comport_number] = INVALID_HANDLE_VALUE;
+		return(1);
+	}
 
-  return(0);
+	return(0);
 }
 
 
-int PollComport(int comport_number, unsigned char *buf, int size)
+int PollComport(int comport_number, unsigned char *buf, int size)//异步方式_wh
 {
-  int n;
+//	int n;
 
-  if(size>4096)  size = 4096;
+	if (size>4096)  size = 4096;
 
-/* added the void pointer cast, otherwise gcc will complain about */
-/* "warning: dereferencing type-punned pointer will break strict aliasing rules" */
+	DWORD dwRead;
+	OVERLAPPED ov;
+	memset(&ov, 0, sizeof(ov));
+	ov.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
+	if (!ReadFile(Cport[comport_number], buf, size, &dwRead, &ov))
+	{
+		if (GetLastError() != ERROR_IO_PENDING)
+		{
+			return 0;
+		}
+		WaitForSingleObject(ov.hEvent, 200);
+		GetOverlappedResult(Cport[comport_number], &ov, &dwRead, true);
+	}
 
-  ReadFile(Cport[comport_number], buf, size, (LPDWORD)((void *)&n), NULL);
-
-  return(n);
+	return(dwRead);
 }
 
 
-int SendByte(int comport_number, unsigned char byte)
+int SendByte(int comport_number, unsigned char byte)//异步方式_wh
 {
-  int n;
+	DWORD dwWritten;
+	OVERLAPPED ov;
+	memset(&ov, 0, sizeof(ov));
+	ov.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 
-  WriteFile(Cport[comport_number], &byte, 1, (LPDWORD)((void *)&n), NULL);
+	if (!WriteFile(Cport[comport_number], &byte, 1, &dwWritten, &ov))
+	{
+		if (GetLastError() != ERROR_IO_PENDING)
+		{
+			return (-1);
+		}
+		WaitForSingleObject(ov.hEvent, 200);//等待发送成功或者最长200ms_wh
+		GetOverlappedResult(Cport[comport_number], &ov, &dwWritten, TRUE);
+	}
 
-  if(n<0)  return(1);
-
-  return(0);
+	return(0);;
 }
 
 
-int SendBuf(int comport_number, unsigned char *buf, int size)
+int SendBuf(int comport_number, unsigned char *buf, int size)//异步方式_wh
 {
-  int n;
+	DWORD dwWritten;
+	OVERLAPPED ov;
+	memset(&ov, 0, sizeof(ov));
+	ov.hEvent = CreateEvent(NULL, TRUE, TRUE, NULL);
 
-  if(WriteFile(Cport[comport_number], buf, size, (LPDWORD)((void *)&n), NULL))
-  {
-    return(n);
-  }
+	if (!WriteFile(Cport[comport_number], buf, size, &dwWritten, &ov))
+	{
+		if (GetLastError() != ERROR_IO_PENDING)
+		{
+			return (-1);
+		}
+		WaitForSingleObject(ov.hEvent, 200);//等待发送成功或者最长200ms_wh
+		GetOverlappedResult(Cport[comport_number], &ov, &dwWritten, TRUE);
+	}
 
-  return(-1);
+	return(0);;
 }
 
 
 void CloseComport(int comport_number)
 {
-  CloseHandle(Cport[comport_number]);
+	if (Cport[comport_number] != INVALID_HANDLE_VALUE)//不需要重复关闭_wh
+	{
+		CloseHandle(Cport[comport_number]);
+		Cport[comport_number] = INVALID_HANDLE_VALUE;
+	}
 }
 
 
 int IsCTSEnabled(int comport_number)
 {
-  int status;
+	int status;
 
-  GetCommModemStatus(Cport[comport_number], (LPDWORD)((void *)&status));
+	GetCommModemStatus(Cport[comport_number], (LPDWORD)((void *)&status));
 
-  if(status&MS_CTS_ON) return(1);
-  else return(0);
+	if (status&MS_CTS_ON) return(1);
+	else return(0);
 }
 
 #endif
@@ -203,147 +237,147 @@ int IsCTSEnabled(int comport_number)
 
 
 int Cport[22],
-    error;
+error;
 
 struct termios new_port_settings,
-       old_port_settings[22];
+	old_port_settings[22];
 
-char comports[22][13]={"/dev/ttyS0","/dev/ttyS1","/dev/ttyS2","/dev/ttyS3","/dev/ttyS4","/dev/ttyS5",
-                       "/dev/ttyS6","/dev/ttyS7","/dev/ttyS8","/dev/ttyS9","/dev/ttyS10","/dev/ttyS11",
-                       "/dev/ttyS12","/dev/ttyS13","/dev/ttyS14","/dev/ttyS15","/dev/ttyUSB0",
-                       "/dev/ttyUSB1","/dev/ttyUSB2","/dev/ttyUSB3","/dev/ttyUSB4","/dev/ttyUSB5"};
+char comports[22][13] = { "/dev/ttyS0", "/dev/ttyS1", "/dev/ttyS2", "/dev/ttyS3", "/dev/ttyS4", "/dev/ttyS5",
+"/dev/ttyS6", "/dev/ttyS7", "/dev/ttyS8", "/dev/ttyS9", "/dev/ttyS10", "/dev/ttyS11",
+"/dev/ttyS12", "/dev/ttyS13", "/dev/ttyS14", "/dev/ttyS15", "/dev/ttyUSB0",
+"/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3", "/dev/ttyUSB4", "/dev/ttyUSB5" };
 
 
 int OpenComport(int comport_number, int baudrate, int useDtrControl)
 {
-  int baudr;
+	int baudr;
 
-  if((comport_number>21)||(comport_number<0))
-  {
-    printf("illegal comport number\n");
-    return(1);
-  }
+	if ((comport_number>21) || (comport_number<0))
+	{
+		printf("illegal comport number\n");
+		return(1);
+	}
 
-  switch(baudrate)
-  {
-    case      50 : baudr = B50;
-                   break;
-    case      75 : baudr = B75;
-                   break;
-    case     110 : baudr = B110;
-                   break;
-    case     134 : baudr = B134;
-                   break;
-    case     150 : baudr = B150;
-                   break;
-    case     200 : baudr = B200;
-                   break;
-    case     300 : baudr = B300;
-                   break;
-    case     600 : baudr = B600;
-                   break;
-    case    1200 : baudr = B1200;
-                   break;
-    case    1800 : baudr = B1800;
-                   break;
-    case    2400 : baudr = B2400;
-                   break;
-    case    4800 : baudr = B4800;
-                   break;
-    case    9600 : baudr = B9600;
-                   break;
-    case   19200 : baudr = B19200;
-                   break;
-    case   38400 : baudr = B38400;
-                   break;
-    case   57600 : baudr = B57600;
-                   break;
-    case  115200 : baudr = B115200;
-                   break;
-    case  230400 : baudr = B230400;
-                   break;
-    default      : printf("invalid baudrate\n");
-                   return(1);
-                   break;
-  }
+	switch (baudrate)
+	{
+	case      50: baudr = B50;
+		break;
+	case      75: baudr = B75;
+		break;
+	case     110: baudr = B110;
+		break;
+	case     134: baudr = B134;
+		break;
+	case     150: baudr = B150;
+		break;
+	case     200: baudr = B200;
+		break;
+	case     300: baudr = B300;
+		break;
+	case     600: baudr = B600;
+		break;
+	case    1200: baudr = B1200;
+		break;
+	case    1800: baudr = B1800;
+		break;
+	case    2400: baudr = B2400;
+		break;
+	case    4800: baudr = B4800;
+		break;
+	case    9600: baudr = B9600;
+		break;
+	case   19200: baudr = B19200;
+		break;
+	case   38400: baudr = B38400;
+		break;
+	case   57600: baudr = B57600;
+		break;
+	case  115200: baudr = B115200;
+		break;
+	case  230400: baudr = B230400;
+		break;
+	default: printf("invalid baudrate\n");
+		return(1);
+		break;
+	}
 
-  Cport[comport_number] = open(comports[comport_number], O_RDWR | O_NOCTTY | O_NDELAY);
-  if(Cport[comport_number]==-1)
-  {
-    perror("unable to open comport ");
-    return(1);
-  }
-  
-  //use DTR control if specified. Disabled by default.
-  int bits ;
-  ioctl( Cport[comport_number], TIOCMGET, &bits ) ;
-  if ( useDtrControl ) bits |= TIOCM_DTR ; else bits &= ~( TIOCM_DTR ) ;
-  ioctl( Cport[comport_number], TIOCMSET, &bits ) ;
+	Cport[comport_number] = open(comports[comport_number], O_RDWR | O_NOCTTY | O_NDELAY);
+	if (Cport[comport_number] == -1)
+	{
+		perror("unable to open comport ");
+		return(1);
+	}
 
-  error = tcgetattr(Cport[comport_number], old_port_settings + comport_number);
-  if(error==-1)
-  {
-    close(Cport[comport_number]);
-    perror("unable to read portsettings ");
-    return(1);
-  }
-  memset(&new_port_settings, 0, sizeof(new_port_settings));  /* clear the new struct */
+	//use DTR control if specified. Disabled by default.
+	int bits;
+	ioctl(Cport[comport_number], TIOCMGET, &bits);
+	if (useDtrControl) bits |= TIOCM_DTR; else bits &= ~(TIOCM_DTR);
+	ioctl(Cport[comport_number], TIOCMSET, &bits);
 
-  new_port_settings.c_cflag = baudr | CS8 | CLOCAL | CREAD;
-  new_port_settings.c_iflag = IGNPAR;
-  new_port_settings.c_oflag = 0;
-  new_port_settings.c_lflag = 0;
-  new_port_settings.c_cc[VMIN] = 0;      /* block untill n bytes are received */
-  new_port_settings.c_cc[VTIME] = 0;     /* block untill a timer expires (n * 100 mSec.) */
-  error = tcsetattr(Cport[comport_number], TCSANOW, &new_port_settings);
-  if(error==-1)
-  {
-    close(Cport[comport_number]);
-    perror("unable to adjust portsettings ");
-    return(1);
-  }
+	error = tcgetattr(Cport[comport_number], old_port_settings + comport_number);
+	if (error == -1)
+	{
+		close(Cport[comport_number]);
+		perror("unable to read portsettings ");
+		return(1);
+	}
+	memset(&new_port_settings, 0, sizeof(new_port_settings));  /* clear the new struct */
 
-  return(0);
+	new_port_settings.c_cflag = baudr | CS8 | CLOCAL | CREAD;
+	new_port_settings.c_iflag = IGNPAR;
+	new_port_settings.c_oflag = 0;
+	new_port_settings.c_lflag = 0;
+	new_port_settings.c_cc[VMIN] = 0;      /* block untill n bytes are received */
+	new_port_settings.c_cc[VTIME] = 0;     /* block untill a timer expires (n * 100 mSec.) */
+	error = tcsetattr(Cport[comport_number], TCSANOW, &new_port_settings);
+	if (error == -1)
+	{
+		close(Cport[comport_number]);
+		perror("unable to adjust portsettings ");
+		return(1);
+	}
+
+	return(0);
 }
 
 
 int PollComport(int comport_number, unsigned char *buf, int size)
 {
-  int n;
+	int n;
 
 #ifndef __STRICT_ANSI__                       /* __STRICT_ANSI__ is defined when the -ansi option is used for gcc */
-  if(size>SSIZE_MAX)  size = (int)SSIZE_MAX;  /* SSIZE_MAX is defined in limits.h */
+	if (size>SSIZE_MAX)  size = (int)SSIZE_MAX;  /* SSIZE_MAX is defined in limits.h */
 #else
-  if(size>4096)  size = 4096;
+	if (size>4096)  size = 4096;
 #endif
 
-  n = read(Cport[comport_number], buf, size);
+	n = read(Cport[comport_number], buf, size);
 
-  return(n);
+	return(n);
 }
 
 
 int SendByte(int comport_number, unsigned char byte)
 {
-  int n;
+	int n;
 
-  n = write(Cport[comport_number], &byte, 1);
-  if(n<0)  return(1);
+	n = write(Cport[comport_number], &byte, 1);
+	if (n<0)  return(1);
 
-  return(0);
+	return(0);
 }
 
 
 int SendBuf(int comport_number, unsigned char *buf, int size)
 {
-  return(write(Cport[comport_number], buf, size));
+	return(write(Cport[comport_number], buf, size));
 }
 
 
 void CloseComport(int comport_number)
 {
-  close(Cport[comport_number]);
-  tcsetattr(Cport[comport_number], TCSANOW, old_port_settings + comport_number);
+	close(Cport[comport_number]);
+	tcsetattr(Cport[comport_number], TCSANOW, old_port_settings + comport_number);
 }
 
 /*
@@ -363,12 +397,12 @@ TIOCM_DSR DSR (data set ready)
 
 int IsCTSEnabled(int comport_number)
 {
-  int status;
+	int status;
 
-  status = ioctl(Cport[comport_number], TIOCMGET, &status);
+	status = ioctl(Cport[comport_number], TIOCMGET, &status);
 
-  if(status&TIOCM_CTS) return(1);
-  else return(0);
+	if (status&TIOCM_CTS) return(1);
+	else return(0);
 }
 
 #endif
@@ -376,7 +410,7 @@ int IsCTSEnabled(int comport_number)
 
 void cprintf(int comport_number, const char *text)  /* sends a string to serial port */
 {
-  while(*text != 0)   SendByte(comport_number, *(text++));
+	while (*text != 0)   SendByte(comport_number, *(text++));
 }
 
 

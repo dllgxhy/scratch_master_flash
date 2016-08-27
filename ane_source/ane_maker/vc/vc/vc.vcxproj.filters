@@ -46,8 +46,13 @@
     <Library Include="..\FlashRuntimeExtensions.lib">
       <Filter>Resource Files</Filter>
     </Library>
-    <Library Include="..\..\..\..\pthreads-w32-2-9-1-release\Pre-built.2\lib\x86\pthreadVC2.lib">
+    <Library Include="..\pthreadVC2.lib">
       <Filter>Resource Files</Filter>
     </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\pthreadVC2.dll">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
