@@ -189,8 +189,9 @@ public class Scratch extends Sprite {
 	public var logger:Log = new Log(16);
 	
 	//UART Part
-	public var arduinoUart:ArduinoUart = new ArduinoUart();
+	public var arduinoUart:ArduinoUart = new ArduinoUart(this);
 	public var showCOMFlag:Boolean = false;
+	public var uartDialog:DialogBox = new DialogBox();
 	
 	
 	public function Scratch() {
@@ -200,8 +201,9 @@ public class Scratch extends Sprite {
 		
 		// This one must finish before most other queries can start, so do it separately
 		determineJSAccess();
-		comWorkIDTextTypeSet();
-		comWorkIDShowInTopBar(5);
+//		comWorkIDTextTypeSet();
+//		comWorkIDShowInTopBar(5);
+		showComStatusDialog();
 	}
 	
 	protected function determineJSAccess():void {
@@ -1199,6 +1201,20 @@ public class Scratch extends Sprite {
 	以下内容由xuhy编辑
 	 
 	*/
+	
+	public function showComStatusDialog():void
+	{
+		uartDialog.addTitle("uart status");
+		uartDialog.addText("123");
+		uartDialog.addButton("Cancel", uartDialogCancel);
+	}
+	
+	public function uartDialogCancel():void
+	{
+		uartDialog.cancel();
+	}
+	
+	
 	public function showCOMMenu(b:*):void {
 		var m:Menu = new Menu(null, 'COM', CSS.topBarColor(), 28);
 		

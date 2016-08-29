@@ -66,6 +66,7 @@ public class ArduinoUart extends Sprite {
 	
 	public var arduinoUart:ArduinoConnector = new ArduinoConnector();	//新建串口类
 	public var arduinolib:ArduinoLibrary = new ArduinoLibrary();
+	public var app:Scratch ;
 
 
 	public var scratchComID:int = 0x01;								//当前选中打开的COM口,COM口从1开始计数
@@ -99,15 +100,10 @@ public class ArduinoUart extends Sprite {
 	private var IntervalID:uint = 0x00;
 	
 	
-	
-	
-	
-	
-	
 	 
-	public function ArduinoUart():void
+	public function ArduinoUart(app:Scratch)
 	{	
-		
+		this.app = app;
 //		uartOnTickTimer.addEventListener(TimerEvent.TIMER, onTick);
 //		uartOnTickTimer.start();
 		
@@ -275,11 +271,13 @@ public class ArduinoUart extends Sprite {
 				checkUartAvail(scratchComID);
 				comStatusTrueArray.pop();
 				uartCloseFlag = true;
-				trace("onTick "+comStatusTrueArray.length);
+				trace("onTick " + comStatusTrueArray.length);
+				
 			}
 			else
 			{
 				comStatusTrueFlag = false;
+				
 				return ;
 			}
 		}	
@@ -334,7 +332,8 @@ public class ArduinoUart extends Sprite {
 				clearInterval(IntervalID); //关闭时钟
 				time = false;
 				trace("uart disconnect unexpected");
-				//此处后续可以添加dialog 提示链接USB接口
+				app.uartDialog.showOnStage(app.stage); //此处后续可以添加dialog 提示链接USB接口
+				
 			}
 		}
 		uartDetectStatustimerStop = uartDetectStatustimerStart = getTimer();

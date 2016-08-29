@@ -4,7 +4,7 @@
   <output>
     <movie outputType="Application" />
     <movie input="" />
-    <movie path="bin-debug\Scratch.swf" />
+    <movie path="" />
     <movie fps="30" />
     <movie width="800" />
     <movie height="600" />
