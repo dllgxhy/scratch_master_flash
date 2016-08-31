@@ -114,9 +114,10 @@ public class DrawPropertyUI extends Sprite {
 
 	public static function strings():Array {
 		return [
-			'Smooth', 'Set Costume Center', 'Font:', 'Bitmap Mode', 'Vector Mode', 'Convert to bitmap',
-			'Convert to vector', 'Line width', 'Eraser width'
-		];
+			'Smooth', 'Set Costume Center', 'Font:', 
+			'Bitmap Mode', 'Vector Mode', 
+			'Convert to bitmap','Convert to vector', 
+			'Line width', 'Eraser width'];
 	}
 
 	public var w:int, h:int;

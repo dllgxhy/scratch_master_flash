@@ -172,6 +172,11 @@ public class Block extends Sprite {
 		} else if (type == "p") {
 			base = new BlockShape(BlockShape.ProcHatShape, color);
 			isHat = true;
+		} else  if (type == "+"){
+			base = new BlockShape(BlockShape.StrShape);
+			addChildAt(base, 0);
+			setSpec(this.spec, defaultArgs, 0x408080);
+			return;
 		} else {
 			base = new BlockShape(BlockShape.RectShape, color);
 		}
@@ -181,7 +186,8 @@ public class Block extends Sprite {
 		addEventListener(FocusEvent.KEY_FOCUS_CHANGE, focusChange);
 	}
 
-	public function setSpec(newSpec:String, defaultArgs:Array = null):void {
+	//加入字符串颜色参数_wh
+	public function setSpec(newSpec:String, defaultArgs:Array = null, strcolor:int = 0xffffff):void {
 		for each (var o:DisplayObject in labelsAndArgs) {
 			if (o.parent != null) o.parent.removeChild(o);
 		}
@@ -204,7 +210,7 @@ public class Block extends Sprite {
 		} else {
 			const loopBlocks:Array = ['doForever', 'doForeverIf', 'doRepeat', 'doUntil'];
 			base.hasLoopArrow = (loopBlocks.indexOf(op) >= 0);
-			addLabelsAndArgs(spec, base.color);
+			addLabelsAndArgs(spec, base.color, strcolor);
 		}
 		rightToLeft = Translator.rightToLeft;
 		if (rightToLeft) {
@@ -323,13 +329,14 @@ public class Block extends Sprite {
 		addChildAt(base, 0);
 		fixArgLayout();
 	}
-
-	private function addLabelsAndArgs(spec:String, c:int):void {
+	
+	//加入字符串颜色参数_wh
+	private function addLabelsAndArgs(spec:String, c:int, sc:int = 0xffffff):void {
 		var specParts:Array = ReadStream.tokenize(spec), i:int;
 		labelsAndArgs = [];
 		argTypes = [];
 		for (i = 0; i < specParts.length; i++) {
-			var o:DisplayObject = argOrLabelFor(specParts[i], c);
+			var o:DisplayObject = argOrLabelFor(specParts[i], c, sc);
 			labelsAndArgs.push(o);
 			var argType:String = 'icon';
 			if (o is BlockArg) argType = specParts[i];
@@ -675,7 +682,7 @@ public class Block extends Sprite {
 				b.requestLoader.close();
 		}
 		topBlock().fixStackLayout();
-		SCRATCH::allow3d { Scratch.app.runtime.checkForGraphicEffects(); }
+		/*SCRATCH::allow3d*/ { Scratch.app.runtime.checkForGraphicEffects(); }
 	}
 
 	public function insertBlock(b:Block):void {
@@ -783,7 +790,8 @@ public class Block extends Sprite {
 		return result;
 	}
 
-	private function argOrLabelFor(s:String, c:int):DisplayObject {
+	//加入字符串参数
+	private function argOrLabelFor(s:String, c:int, sc:int = 0xffffff):DisplayObject {
 		// Possible token formats:
 		//	%<single letter>
 		//	%m.<menuName>
@@ -800,12 +808,13 @@ public class Block extends Sprite {
 			if (argSpec == "s") return new BlockArg("s", c, true);
 		} else if (s.length >= 2 && s.charAt(0) == "@") { // icon spec
 			var icon:* = Specs.IconNamed(s.slice(1));
-			return (icon) ? icon : makeLabel(s);
+			return (icon) ? icon : makeLabel(s,sc);
 		}
-		return makeLabel(ReadStream.unescape(s));
+		return makeLabel(ReadStream.unescape(s),sc);
 	}
 
-	private function makeLabel(label:String):TextField {
+	//加入字符串参数_wh
+	private function makeLabel(label:String, sc:int = 0xffffff):TextField {
 		var text:TextField = new TextField();
 		text.autoSize = TextFieldAutoSize.LEFT;
 		text.selectable = false;
@@ -816,6 +825,7 @@ public class Block extends Sprite {
 			text.antiAliasType = AntiAliasType.ADVANCED;
 			text.embedFonts = true;
 		}
+		text.textColor = sc;//_wh
 		text.mouseEnabled = false;
 		return text;
 	}

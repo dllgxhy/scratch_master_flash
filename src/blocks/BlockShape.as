@@ -37,6 +37,7 @@ public class BlockShape extends Shape {
 	public static const CmdOutlineShape:int = 6;
 	public static const HatShape:int = 7;
 	public static const ProcHatShape:int = 8;
+	public static const StrShape:int = 21;//此处增加用于显示注释语句的形状
 	// C-shaped blocks
 	public static const LoopShape:int = 9;
 	public static const FinalLoopShape:int = 10;
@@ -192,11 +193,14 @@ public class BlockShape extends Shape {
 		case IfElseShape:		drawFunction = drawIfElseShape; break;
 		case HatShape:			drawFunction = drawHatShape; break;
 		case ProcHatShape:		drawFunction = drawProcHatShape; break;
+		case StrShape:		    drawFunction = drawStrShape;; break;   //此处增加了一种用于显示 注释的形状
 		}
 	}
 
 	private function drawRectShape(g:Graphics):void { g.drawRect(0, 0, w, topH) }
-
+	
+	private function drawStrShape(g:Graphics):void { ; }  //不做任何操作只显示注释文字
+	
 	private function drawBooleanShape(g:Graphics):void {
 		var centerY:int = topH / 2;
 		g.moveTo(centerY, topH);

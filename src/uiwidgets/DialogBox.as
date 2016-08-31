@@ -77,6 +77,37 @@ public class DialogBox extends Sprite {
 		if (context) d.updateContext(context);
 		d.showOnStage(stage ? stage : Scratch.app.stage);
 	}
+	
+	
+	//不支持离线下载警告框
+	public static function warnconfirm(question:String, block:String, obj:DisplayObject, stage:Stage = null):void {
+		var d:DialogBox = new DialogBox();
+		d.addTitle(question);
+		d.addText(block);
+		d.addAcceptButtons('OK');
+		d.showOnStage(stage ? stage : Scratch.app.stage);
+		Scratch.app.ArduinoWarnFlag = true;
+	}
+	
+	//模块帮助
+	public static function blockhelp(question:String, block:String, obj:DisplayObject, stage:Stage = null):void {
+		var d:DialogBox = new DialogBox();
+		d.addTitle(question);
+		d.addText(block);
+		d.addAcceptButtons('OK');
+		d.showOnStage(stage ? stage : Scratch.app.stage,false);
+	}
+	
+	//关闭按钮后提示是否保存当前工程对话框
+	public static function saveconfirm(question:String, stage:Stage = null, okFunction:Function = null, noFunction:Function = null, cancelFunction:Function = null, context:Dictionary = null):void {
+		var d:DialogBox = new DialogBox(okFunction, cancelFunction);
+		d.addTitle(question);
+		d.addButton('Save', okFunction);
+		d.addButton('Don\'t save', noFunction);
+		d.addButton('Cancel', cancelFunction);
+		if (context) d.updateContext(context);
+		d.showOnStage(stage ? stage : Scratch.app.stage);
+	}
 
 	public static function notify(title:String, msg:String, stage:Stage = null, leftJustify:Boolean = false, okFunction:Function = null, cancelFunction:Function = null, context:Dictionary = null):void {
 		var d:DialogBox = new DialogBox(okFunction, cancelFunction);
@@ -185,6 +216,11 @@ public class DialogBox extends Sprite {
 		addButton(cancelLabel, cancel);
 	}
 
+	public function addAcceptButtons(acceptLabel:String = null):void {
+		// Add a cancel button and an optional accept button with the given label.
+		if (acceptLabel != null) addButton(acceptLabel, accept);
+	}
+	
 	public function addButton(label:String, action:Function):void {
 		function doAction():void {
 			remove();

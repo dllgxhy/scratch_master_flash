@@ -100,7 +100,17 @@ public class PaletteBuilder {
 				addItem(block, showCheckbox);
 				cmdCount++;
 			} else {
-				if ((spec.length == 1) && (cmdCount > 0)) nextY += 10 * spec[0].length; // add some space
+				if ((spec.length == 1) && (cmdCount > 0))
+					nextY += 10 * spec[0].length; // add some space
+				//增加模块细分类别说明_wh
+				else
+				{
+					if ((spec[1] == "+") && (spec[2] == category))
+					{
+						var block:Block = new Block(spec[0],"+");
+						addItem(block,0);
+					}
+				}
 				cmdCount = 0;
 			}
 		}

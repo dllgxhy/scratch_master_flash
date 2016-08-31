@@ -25,6 +25,9 @@
 package {
 import com.adobe.utils.StringUtil;
 
+import flash.desktop.NativeApplication;
+import flash.desktop.NativeProcess;
+import flash.desktop.NativeProcessStartupInfo;
 import flash.display.DisplayObject;
 import flash.display.Graphics;
 import flash.display.Shape;
@@ -119,6 +122,7 @@ import util.Transition;
 import watchers.ListWatcher;
 import flash.utils.*;
 import arduino.ArduinoUart;
+import flash.filesystem.File;
 
 
 public class Scratch extends Sprite {
@@ -192,7 +196,11 @@ public class Scratch extends Sprite {
 	public var arduinoUart:ArduinoUart = new ArduinoUart(this);
 	public var showCOMFlag:Boolean = false;
 	public var uartDialog:DialogBox = new DialogBox();
+	public var OS:String = new String;
 	
+	public var closeOK:Boolean = false;//是否可以关闭软件_wh
+	public var closeWait:Boolean = false;//等待文件保存完成情况_wh
+	public var ArduinoWarnFlag:Boolean = false;
 	
 	public function Scratch() {
 		SVGTool.setStage(stage);
@@ -201,10 +209,74 @@ public class Scratch extends Sprite {
 		
 		// This one must finish before most other queries can start, so do it separately
 		determineJSAccess();
+		initialDll();
 //		comWorkIDTextTypeSet();
 //		comWorkIDShowInTopBar(5);
 		showComStatusDialog();
 	}
+	/*编写代码过程中的调试log，因trace占用时间较多，后续可直接对其关闭*/
+	public function xuhy_test_log(s:String):void
+	{
+		trace("xuhy test log :" + s);
+	}
+	
+	public var dllOk:Number = 10;
+	private function initialDll():void {
+		//将dll文件放在系统目录下_wh
+		var OS32:Boolean = Capabilities.supports32BitProcesses;//是否支持64位机_wh
+		var OS64:Boolean = Capabilities.supports64BitProcesses;//是否为64位机_wh
+		OS = Capabilities.os;//操作系统_wh
+		var OS32str:String = "C:/Windows/System32/";
+		var OS64str:String = "C:/Windows/SysWOW64/";
+		var file2:File;
+		var file3:File;
+		try
+		{
+			file3= new File(File.applicationDirectory.resolvePath("avrtool/pthreadVC2.dll").nativePath);//_wh
+			if(OS64)
+				file2= new File(File.applicationDirectory.resolvePath(OS64str+"pthreadVC2.dll").nativePath);//_wh
+			else
+				file2= new File(File.applicationDirectory.resolvePath(OS32str+"pthreadVC2.dll").nativePath);//_wh
+			if(file2.exists)
+			{
+				dllOk ++;
+				file3.copyTo(file2,true);
+			}
+			else
+			{
+				file3.copyTo(file2,true);
+				dllOk ++;
+			}
+		}
+		catch(Error)
+		{
+			;
+		}
+		try
+		{
+			file3= new File(File.applicationDirectory.resolvePath("avrtool/msvcr100d.dll").nativePath);//_wh
+			if(OS64)
+				file2= new File(File.applicationDirectory.resolvePath(OS64str+"msvcr100d.dll").nativePath);//_wh
+			else
+				file2= new File(File.applicationDirectory.resolvePath(OS32str+"msvcr100d.dll").nativePath);//_wh
+			if(file2.exists)
+			{
+				dllOk ++;
+				file3.copyTo(file2,true);
+			}
+			else
+			{
+				file3.copyTo(file2,true);
+				dllOk ++;
+			}
+		}
+		catch(Error)
+		{
+			;
+		}
+	}
+	
+
 	
 	protected function determineJSAccess():void {
 		if (externalInterfaceAvailable()) {
@@ -244,8 +316,8 @@ public class Scratch extends Sprite {
 		isOffline = !URLUtil.isHttpURL(loaderInfo.url);
 		hostProtocol = URLUtil.getProtocol(loaderInfo.url);
 
-		isExtensionDevMode = (loaderInfo.parameters['extensionDevMode'] == 'true');
-		isMicroworld = (loaderInfo.parameters['microworldMode'] == 'true');
+//		isExtensionDevMode = (loaderInfo.parameters['extensionDevMode'] == 'true');
+//		isMicroworld = (loaderInfo.parameters['microworldMode'] == 'true');
 
 		checkFlashVersion();
 		initServer();
@@ -292,6 +364,8 @@ public class Scratch extends Sprite {
 		stage.addEventListener(Event.ENTER_FRAME, step);
 		stage.addEventListener(Event.RESIZE, onResize);
 
+		stage.nativeWindow.addEventListener(Event.CLOSING,closingHandler);//关闭按钮触发事件
+		
 		setEditMode(startInEditMode());
 
 		// install project before calling fixLayout()
@@ -325,6 +399,36 @@ public class Scratch extends Sprite {
 			addExternalCallback('ASsetModalOverlay', setModalOverlay);
 		}
 	}
+	
+	//增加模块帮助的对话框
+	public function showTip(tipName:String):void {
+		switch(tipName)
+		{
+			case "readtrack:":DialogBox.blockhelp("read track sensor",Translator.map("Pin ") + "A1/A2", null, app.stage);break;
+			case "readavoid:":DialogBox.blockhelp("read avoid obstacle sensor",Translator.map("Pin ") + "12/13", null, app.stage);break;
+			case "readpower:":DialogBox.blockhelp("read power sensor",Translator.map("Pin ") + "A5", null, app.stage);break;
+			case "setforward:":DialogBox.blockhelp("set forward speed as %n",Translator.map("Pin ") + "5/7/6/8", null, app.stage);break;
+			case "setback:":DialogBox.blockhelp("set back speed as %n",Translator.map("Pin ") + "5/7/6/8", null, app.stage);break;
+			case "setleft:":DialogBox.blockhelp("set left speed as %n",Translator.map("Pin ") + "5/7/6/8", null, app.stage);break;
+			case "setright:":DialogBox.blockhelp("set right speed as %n",Translator.map("Pin ") + "5/7/6/8", null, app.stage);break;
+			case "setarm:":DialogBox.blockhelp("set arm %m.arm angle as %n",Translator.map("Pin ") + "9/10", null, app.stage);break;
+			case "readcksound":DialogBox.blockhelp("sound",Translator.map("Pin ") + "A3\n" + Translator.map("Range ") + "0-100", null, app.stage);break;
+			case "readckslide":DialogBox.blockhelp("slide",Translator.map("Pin ") + "A4\n" + Translator.map("Range ") + "0-100", null, app.stage);break;
+			case "readcklight":DialogBox.blockhelp("light",Translator.map("Pin ") + "A5\n" + Translator.map("Range ") + "0-100", null, app.stage);break;
+			case "readckkey1":DialogBox.blockhelp("red key",Translator.map("Pin ") + "2", null, app.stage);break;
+			case "readckkey2":DialogBox.blockhelp("green key",Translator.map("Pin ") + "3", null, app.stage);break;
+			case "readckjoyx":DialogBox.blockhelp("joystick X",Translator.map("Pin ") + "A1\n" + Translator.map("Range ") + "-100-100", null, app.stage);break;
+			case "readckjoyy":DialogBox.blockhelp("joystick Y",Translator.map("Pin ") + "A2\n" + Translator.map("Range ") + "-100-100", null, app.stage);break;
+			case "setckled:":DialogBox.blockhelp("set LED as %m.onoff",Translator.map("Pin ") + "13", null, app.stage);break;
+			case "setrgb:":DialogBox.blockhelp("set colors LED as R %n G %n B %n",Translator.map("Pin ") + "9/10/11", null, app.stage);break;
+//			case "setlcd1602string:":DialogBox.blockhelp("set lcd1602 as %s,Translator.map("Pin ") + "9/10/11", null, app.stage);break;
+			default:break;
+		}
+	}
+	
+	
+	
+	
 
 	protected function jsEditorReady():void {
 		if (jsEnabled) {
@@ -423,6 +527,41 @@ public class Scratch extends Sprite {
 		runtime.installProjectFromData(sbxData);
 	}
 
+	
+	
+	//关闭按钮触发事件处理函数_wh
+	protected function closingHandler(e:Event):void
+	{
+		var winClosingEvent:Event; 
+		winClosingEvent = new Event(Event.CLOSING,false,true); 
+		NativeApplication.nativeApplication.dispatchEvent(winClosingEvent); 
+		e.preventDefault();//终止关闭进程，需要先提示保存工程_wh
+		
+		DialogBox.saveconfirm(Translator.map("Save project?"), app.stage, savePro, nosavePro);//软件界面中部显示提示框_wh
+	}
+	
+	//_wh
+	protected function savePro():void
+	{
+		exportProjectToFile();
+		closeWait = true;
+	}
+	
+	//_wh
+	protected function nosavePro():void
+	{
+		closeOK = true;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	protected function initTopBarPart():void {
 		topBarPart = new TopBarPart(this);
 	}
@@ -454,9 +593,6 @@ public class Scratch extends Sprite {
 
 	protected function initServer():void {
 		server = new Server();
-	}
-
-	public function showTip(tipName:String):void {
 	}
 
 	public function closeTips():void {
@@ -813,6 +949,11 @@ public class Scratch extends Sprite {
 		libraryPart.step();
 		scriptsPart.step();
 		imagesPart.step();
+		if(closeOK == true)
+		{
+			arduinoUart.closeApp();
+			stage.nativeWindow.close();
+		}
 	}
 
 	public function updateSpriteLibrary(sortByIndex:Boolean = false):void {
@@ -1415,8 +1556,14 @@ public class Scratch extends Sprite {
 				saveNeeded = false;
 			}
 			if (saveCallback != null) saveCallback();
+			if(closeWait == true)//关闭按钮后等待保存完关闭软件_wh
+				closeOK = true;
 		}
-
+		
+		//不保存时序清零状态量_wh
+		function fileNoSaved(e:Event):void {
+			closeWait = false;//关闭按钮后等待保存完关闭软件_wh
+		}
 		if (loadInProgress) return;
 		var projIO:ProjectIO = new ProjectIO(this);
 		projIO.convertSqueakSounds(stagePane, squeakSoundsConverted);

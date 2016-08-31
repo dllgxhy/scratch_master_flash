@@ -107,7 +107,12 @@ public class ArduinoUart extends Sprite {
 //		uartOnTickTimer.addEventListener(TimerEvent.TIMER, onTick);
 //		uartOnTickTimer.start();
 		
-	}		
+	}
+	
+	public function closeApp():void
+	{
+        arduinoUart.dispose();                              
+	}
 	
 
 	
@@ -216,7 +221,7 @@ public class ArduinoUart extends Sprite {
 	*/
 	public function findComStatusTrue():Array
 	{
-		for (var i:int = 0x01; i <= 16;i++)//暂时设定只有16个com口，为com1 到 com16
+		for (var i:int = 0x01; i <= 32;i++)//暂时设定只有16个com口，为com1 到 com16
 		{
 			if (arduinoUart.connect("COM" + i, 115200))
 			{
@@ -290,7 +295,7 @@ public class ArduinoUart extends Sprite {
 	 **/
 	public function setAutoConnect():uint
 	{
-		var intervalDuration:Number = 500;
+		var intervalDuration:Number = 1000;
 		IntervalID = setInterval(onTick_searchAndCheckUart, intervalDuration);
 		uartDetectStatustimerStop = uartDetectStatustimerStart = 0x00;
 		return IntervalID;
@@ -301,13 +306,12 @@ public class ArduinoUart extends Sprite {
 	
 	public function onTick_searchAndCheckUart():void
 	{	
-		trace("uart connect test time " + uartDetectStatustimerStart +" ? " + uartDetectStatustimerStop);
+		app.xuhy_test_log("uart connect test time " + uartDetectStatustimerStart +" ? " + uartDetectStatustimerStop);
 		if (uartDetectStatustimerStop != uartDetectStatustimerStart)
 		{
 			arduinoUart.flush();
 			comStatus = 0x00;
-			time = false;
-			trace("uart connect success,scratchComID = " + scratchComID);	
+			time = false;	
 		}
 		else
 		{
@@ -316,12 +320,12 @@ public class ArduinoUart extends Sprite {
 				comStatusTrueArray.splice();
 				comStatusTrueArray = findComStatusTrue(); //先检测是否有可用的com口
 				time = true ;
-				trace("com is ready");
+				app.xuhy_test_log("com is ready");
 			}else if(comStatusTrueArray.length != 0x00){
 				scratchComID = comStatusTrueArray[comStatusTrueArray.length -1];
 				checkUartAvail(scratchComID);
 				comStatusTrueArray.pop();
-				trace("test " + scratchComID + " is availed for arduino");
+				app.xuhy_test_log("test " + scratchComID + " is availed for arduino");
 			}
 			else
 			{
@@ -331,7 +335,7 @@ public class ArduinoUart extends Sprite {
 				scratchComID = 0x01;
 				clearInterval(IntervalID); //关闭时钟
 				time = false;
-				trace("uart disconnect unexpected");
+				app.xuhy_test_log("uart disconnect unexpected");
 				app.uartDialog.showOnStage(app.stage); //此处后续可以添加dialog 提示链接USB接口
 				
 			}
@@ -350,6 +354,7 @@ public class ArduinoUart extends Sprite {
 		comStatus = 0x02;   
 		clearInterval(IntervalID);
 		time = false;
-		trace ("Uart Disconnect");
+		app.xuhy_test_log("Uart Disconnect");
 	}
+	
 }}
