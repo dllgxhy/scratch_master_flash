@@ -43,6 +43,7 @@ import flash.events.MouseEvent;
 import flash.events.SecurityErrorEvent;
 import flash.events.UncaughtErrorEvent;
 import flash.external.ExternalInterface;
+import flash.filesystem.File;
 import flash.geom.Point;
 import flash.geom.Rectangle;
 import flash.net.FileFilter;
@@ -55,8 +56,6 @@ import flash.net.URLRequest;
 import flash.system.Capabilities;
 import flash.system.MessageChannel;
 import flash.system.System;
-import flash.system.Worker;
-import flash.system.WorkerDomain;
 import flash.text.TextField;
 import flash.text.TextFieldAutoSize;
 import flash.text.TextFormat;
@@ -65,6 +64,9 @@ import flash.utils.getTimer;
 import flash.utils.setInterval;
 
 import mx.utils.URLUtil;
+
+import arduino.ArduinoLibrary;
+import arduino.ArduinoUart;
 
 import blocks.Block;
 
@@ -120,9 +122,6 @@ import util.Server;
 import util.Transition;
 
 import watchers.ListWatcher;
-import flash.utils.*;
-import arduino.ArduinoUart;
-import flash.filesystem.File;
 
 
 public class Scratch extends Sprite {
@@ -194,13 +193,19 @@ public class Scratch extends Sprite {
 	
 	//UART Part
 	public var arduinoUart:ArduinoUart = new ArduinoUart(this);
+	public var arduinoLib:ArduinoLibrary = new ArduinoLibrary(this);
 	public var showCOMFlag:Boolean = false;
 	public var uartDialog:DialogBox = new DialogBox();
 	public var OS:String = new String;
 	
+	
 	public var closeOK:Boolean = false;//是否可以关闭软件_wh
 	public var closeWait:Boolean = false;//等待文件保存完成情况_wh
 	public var ArduinoWarnFlag:Boolean = false;
+	public var blueFlag:Boolean = false;
+	
+	//
+	
 	
 	public function Scratch() {
 		SVGTool.setStage(stage);
@@ -553,13 +558,7 @@ public class Scratch extends Sprite {
 		closeOK = true;
 	}
 	
-	
-	
-	
-	
-	
-	
-	
+
 	
 	
 	protected function initTopBarPart():void {
@@ -951,7 +950,7 @@ public class Scratch extends Sprite {
 		imagesPart.step();
 		if(closeOK == true)
 		{
-			arduinoUart.closeApp();
+			arduinoUart.setUartDisconnect();
 			stage.nativeWindow.close();
 		}
 	}
@@ -1358,88 +1357,30 @@ public class Scratch extends Sprite {
 	
 	public function showCOMMenu(b:*):void {
 		var m:Menu = new Menu(null, 'COM', CSS.topBarColor(), 28);
-		
-		trace ("showCOMMenu COM"+arduinoUart.scratchComID);
-		
+	
 		if (arduinoUart.comStatus != 0x00)
 		{
 			m.addItem("Auto Connect", arduinoUart.setAutoConnect);
-			trace("topbar show Auto Connect");
+			app.xuhy_test_log("topbar show Auto Connect");
 		}
 		else
 		{
 			m.addItem("COM" + arduinoUart.scratchComID, arduinoUart.setUartDisconnect, true, true);
-			trace("topbar show COMID");
+			app.xuhy_test_log("topbar show COMID");
 		}
 		
+		//蓝牙通信模式_wh
+		if(blueFlag == false)
+			m.addItem("Bluetooth", BlueOpen);
+		else
+			m.addItem("Bluetooth", BlueClose, true, true);
+		
 		m.addLine();
-/*		
-		if(cmdBackNum == 0)//固件下载过程中不允许操作COM口_wh
-		{
-			var comArrays:Array = new Array(); //COM口未开启_wh
-			if(comTrue == false)
-			{
-				comArrays = checkUART();//获取扫描到的COM口编号(可用未开启的)_wh
-				for(var i:int = 0; i < comArrays.length; i++)//显示扫描到的COM号_wh
-				{
-					//comID = comArrays[i];//当前显示ID号赋给comID作为全局变量_wh
-					switch(comArrays[i])
-					{
-						case 'COM1':m.addItem(comArrays[i], comOpen1);break;//选中则开启_wh
-						case 'COM2':m.addItem(comArrays[i], comOpen2);break;//选中则开启_wh
-						case 'COM3':m.addItem(comArrays[i], comOpen3);break;//选中则开启_wh
-						case 'COM4':m.addItem(comArrays[i], comOpen4);break;//选中则开启_wh
-						case 'COM5':m.addItem(comArrays[i], comOpen5);break;//选中则开启_wh
-						case 'COM6':m.addItem(comArrays[i], comOpen6);break;//选中则开启_wh
-						case 'COM7':m.addItem(comArrays[i], comOpen7);break;//选中则开启_wh
-						case 'COM8':m.addItem(comArrays[i], comOpen8);break;//选中则开启_wh
-						case 'COM9':m.addItem(comArrays[i], comOpen9);break;//选中则开启_wh
-						case 'COM10':m.addItem(comArrays[i], comOpen10);break;//选中则开启_wh
-						case 'COM11':m.addItem(comArrays[i], comOpen11);break;//选中则开启_wh
-						case 'COM12':m.addItem(comArrays[i], comOpen12);break;//选中则开启_wh
-						case 'COM13':m.addItem(comArrays[i], comOpen13);break;//选中则开启_wh
-						case 'COM14':m.addItem(comArrays[i], comOpen14);break;//选中则开启_wh
-						case 'COM15':m.addItem(comArrays[i], comOpen15);break;//选中则开启_wh
-						case 'COM16':m.addItem(comArrays[i], comOpen16);break;//选中则开启_wh
-						default:break;
-					}
-				}
-			}
-			//COM口已开启_wh
-			else
-			{
-				arduino.close();
-				comTrue = false;
-				comDataArrayOld.splice();//数组清零_wh
-//				var t1:Number = getTimer();
-//				while(getTimer() - t1 < 100)
-//					;
-				if(arduino.connect(comIDTrue,115200))//判断是否能打开成功_wh
-				{
-					comTrue = true;
-					m.addItem(comIDTrue, comClose, true, true);//选中则关闭；只显示选中的COM口且前面勾对号(最后一个true)_wh
-				}
-				else
-				{
-					arduino.close();//重新关闭_wh
-					CFunConCir(0);
-				}
-			}
-			m.addLine();
-			
-			//蓝牙通信模式_wh
-			if(blueFlag == false)
-				m.addItem("Bluetooth", BlueOpen);
-			else
-				m.addItem("Bluetooth", BlueClose, true, true);
-			
-			m.addLine();
-			
-			m.addItem("Firmware", dofirm);//固件更新_wh
-			m.addLine();
-			m.addItem("Drive", dodrive);//固件更新_wh
-			m.addLine();
-		}*/
+		
+		m.addItem("Firmware", arduinoLib.dofirm);//固件更新_wh
+		m.addLine();
+		m.addItem("Drive", dodrive);//固件更新_wh
+		m.addLine();
 		
 		m.showOnStage(stage, b.x, topBarPart.bottom() - 1);
 		/*
@@ -1453,6 +1394,20 @@ public class Scratch extends Sprite {
 		}
 		
 		showCOMFlag = false;*/
+	}
+	
+	protected function BlueOpen():void {
+		blueFlag = true;
+	}
+	
+	protected function BlueClose():void {
+		blueFlag = false;
+	}
+	
+
+	
+	protected function dodrive():void {
+		app.xuhy_test_log("dodrive");
 	}
 	
 	public function showMYMenu(b:*):void{

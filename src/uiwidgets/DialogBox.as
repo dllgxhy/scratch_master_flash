@@ -161,7 +161,20 @@ public class DialogBox extends Sprite {
 			textLines.push(line);
 		}
 	}
-
+	
+	//新增对dialog中text的设置功能
+	public function setText(text:String):void{
+		cleanText();
+		addText(text);
+		fixLayout();
+	}
+	private function cleanText():void{
+		for(var i:* in textLines){
+			removeChild(textLines[i]);
+		}
+		textLines = [];
+	}
+	
 	public function addWidget(o:DisplayObject):void {
 		widget = o;
 		addChild(o);
