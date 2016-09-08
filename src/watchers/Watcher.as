@@ -233,29 +233,31 @@ public class Watcher extends Sprite implements DragClient {
 		}
 		if (target is ScratchSprite) {
 			switch(cmd) {
-				case "costumeIndex": return ScratchSprite(target).costumeNumber();
-				case "xpos": return ScratchSprite(target).scratchX;
-				case "ypos": return ScratchSprite(target).scratchY;
-				case "heading": return ScratchSprite(target).direction;
-				case "scale": return Math.round(ScratchSprite(target).getSize());
+				case "costumeIndex":     return ScratchSprite(target).costumeNumber();
+				case "xpos":             return ScratchSprite(target).scratchX;
+				case "ypos":             return ScratchSprite(target).scratchY;
+				case "heading":          return ScratchSprite(target).direction;
+				case "scale":            return Math.round(ScratchSprite(target).getSize());
 			}
 		}
 		switch(cmd) {
-			case "backgroundIndex": return app.stagePane.costumeNumber();
-			case "sceneName": return app.stagePane.currentCostume().costumeName;
-			case "tempo": return app.stagePane.tempoBPM;
-			case "volume": return target.volume;
-			case "answer": return runtime.lastAnswer;
-			case "timer": return Math.round(10 * runtime.timer()) / 10; // round to 10's of seconds
-			case "soundLevel": return runtime.soundLevel();
-			case "isLoud": return runtime.isLoud();
-			case "sensor:": return runtime.getSensor(param);
-			case "sensorPressed:": return runtime.getBooleanSensor(param);
-			case "timeAndDate": return runtime.getTimeString(param);
-			case "xScroll": return app.stagePane.xScroll;
-			case "yScroll": return app.stagePane.yScroll;
-			case "readcklight": return ArduinoLibrary.arduinoLightValue;  //xuhy20160816 返回得到的arduino板子上的传感器的值
-			case "readckUltrasonicSensor": return ArduinoLibrary.arduinoUltrasonicValue;
+			case "backgroundIndex":      return app.stagePane.costumeNumber();
+			case "sceneName":            return app.stagePane.currentCostume().costumeName;
+			case "tempo":                return app.stagePane.tempoBPM;
+			case "volume":               return target.volume;
+			case "answer":               return runtime.lastAnswer;
+			case "timer":                return Math.round(10 * runtime.timer()) / 10; // round to 10's of seconds
+			case "soundLevel":           return runtime.soundLevel();
+			case "isLoud":               return runtime.isLoud();
+			case "sensor:":              return runtime.getSensor(param);
+			case "sensorPressed:":       return runtime.getBooleanSensor(param);
+			case "timeAndDate":          return runtime.getTimeString(param);
+			case "xScroll":              return app.stagePane.xScroll;
+			case "yScroll":              return app.stagePane.yScroll;
+			case "readcklight":            return app.arduinoLib.arduinoLightValue;  //xuhy20160816 返回得到的arduino板子上的传感器的值
+			case "readckUltrasonicSensor": return app.arduinoLib.arduinoUltrasonicValue;
+			case "readcksound":            return app.arduinoLib.arduinoSoundValue;
+			case "readckslide":            return app.arduinoLib.arduinoSlideValue;
 		}
 
 		if(ExtensionManager.hasExtensionPrefix(cmd)) {

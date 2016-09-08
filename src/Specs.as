@@ -402,81 +402,49 @@ public class Specs {
 		["Arduino Program",	"h", 13, "whenArduino"],//Arduino程序生成_wh
 		
 		["————basic IO————",	"+",	13],//细分类别说明_wh
-		//基本IO操作模块_wh
-		["read Dx pin %m.dpin",					"b", 13, "readdigital:",		4],//数字口输入_wh
-		["read Ax pin A%m.apin",					"r", 13, "readanalog:",		0],//模拟口输入_wh
-		["set Dx pin %m.dpin as %m.highlow",		" ", 13, "setdigital:",		2,	'high'],//数字口输出_wh
-		["set pwm pin %m.pwmpin as %n",				" ", 13, "setpwm:",			3,	120],//pwm口输出_wh
+		//基本IO操作模块 所涉及到模拟IO口 和 数字IO口，这类口在Arduino端不需要库函数即可读取
+		["read Dx pin %m.dpin",					    "b", 13, "readdigital:",	4],//数字口输入
+		["read Ax pin A%m.apin",					"r", 13, "readanalog:",		0],//模拟口输入
+		["set Dx pin %m.dpin as %m.highlow",		" ", 13, "setdigital:",		2,	'high'],//数字口输出
+		["set pwm pin %m.pwmpin as %n",				" ", 13, "setpwm:",			3,	120],//pwm口输出
 		["-"],
 		
-		["————read sensor————",	"+",	13],//细分类别说明_wh
-		//读数字传感器模块_wh
-		["read %m.dsensor sensor %m.dpin",		"b", 13, "readdigitals:",		'key',	4],//按键传感器_wh
-		//		["read ball sensor %n",				"b", 13, "readdigital:",		4],//滚珠传感器_wh
-		//		["read reed sensor %n",				"b", 13, "readdigital:",		4],//干簧管传感器_wh
-		//		["read holzor sensor %n",			"b", 13, "readdigital:",		4],//霍尔传感器_wh
-		//		["read flame sensor %n",				"b", 13, "readdigital:",		4],//火焰传感器_wh
-		//		["read body sensor %n",				"b", 13, "readdigital:",		4],//人体红外传感器_wh
-		
-		//读模拟传感器模块_wh
-		["read %m.asensor sensor A%m.apin",	"r", 13, "readanalogs:",		'slider',	0],//旋转电位器_wh
-		//		["read slid potentiometer A%n",		"r", 13, "readanalog:",		0],//滑动电位器_wh
-		//		["read light sensor A%n",			"r", 13, "readanalog:",		0],//光敏传感器_wh
-		//		["read heat sensor A%n",				"r", 13, "readanalog:",		0],//热敏传感器_wh
-		//		["read sound sensor A%n",			"r", 13, "readanalog:",		0],//声音传感器_wh
-		//		["read water level sensor A%n",		"r", 13, "readanalog:",		0],//水位传感器_wh
-		
-		//读取其他模块_wh
-		["read joystick %m.xy axis A%m.apin",			"r", 13, "readanalogsj:",		'X',	0],//摇杆X轴_wh
-		//		["read joystick Y axis A%n",			"r", 13, "readanalog:",		1],//摇杆Y轴_wh
-		//["read joystick key %m.dpin",				"b", 13, "readdigitalj:",		4],//摇杆按键_wh
-		["read capacitance %m.dpin",				"r", 13, "readcap:",		4],//读取电容值_wh
-		["read frared receiver %m.dpin",			"r", 13,	"readfraredR:",	11],//红外遥控接收_wh
-		["read LM35 temperature sensor A%m.apin",	"r", 13, "readAfloat:",		0],//LM35温度值_wh
-		["read ultrasonic sensor P2,3",			"r", 13, "readPfloat:"],//超声波传感器_wh
+		["————read sensor————",	"+",	13],//读取其他模块，该类每块为需要外部库函数才能使用的模块
+		["read capacitance %m.dpin",				"r", 13, "readcap:",		    4], //读取电容值_wh
+		["read frared receiver %m.dpin",			"r", 13, "readfraredR:",	    11],//红外遥控接收_wh
+		["read LM35 temperature sensor A%m.apin",	"r", 13, "readAfloat:",		    0], //LM35温度值_wh
 		
 		["-"],//间隔_wh
-		["————set module————",	"+",	13],//细分类别说明_wh
-		//写数字模块_wh
-		["set %m.dcontrol %m.dpin as %m.onoff",		" ", 13, "setdigitals:",	'LED',	2,	'on'],//LED_wh
-		//		["set active buzzer %n as %m.highlow",	" ", 13, "setdigital:",	2,	1],//有缘蜂鸣器_wh
-		//		["set relay %n as %m.highlow",			" ", 13, "setdigital:",	2,	1],//继电器_wh
-		//		["set laser head %n as %m.highlow",		" ", 13, "setdigital:",	2,	1],//激光头_wh
+		["————set module————",	"+",	13],//写数字模块_wh
 		
-		//写PWM模块_wh
-		["set DC motor %m.pwmpin speed as %n",			" ", 13, "setMpwm:",		3,	120],//直流电机转速_wh
-		
-		//其他写模块_wh
-		["set servo %m.dpin angle as %n",	" ", 13, "setsg:",		3,	90],//舵机角度_wh
-		["set motor %m.dppin direct %m.dir speed as %n",	" ", 13, "setdm:",		"M1",	"forward",	120],//方向电机角度_wh
-		["set digital tube P%m.numpin num as %n",		" ", 13, "setnum:",	9,	123.4],//数码管_wh
-		["set pin %m.dpin tone: %m.tone meter: %m.meter",	" ", 13, "setmusic:",	3,	'C2',	'1/2'],//无源蜂鸣器_wh
-		["set colors LED as R %n G %n B %n",	" ", 13, "setrgb:",	60,60,60],//三色LED_wh
-		["set LCD1602 as %s",	" ", 13, "setLCD1602string:",	"hello arduino"],//LCD1602_xuhy
-		
+		["set servo %m.dpin angle as %n",	               " ", 13, "setsg:",		        3,	90],//舵机角度_wh
+		["set motor %m.dppin direct %m.dir speed as %n",   " ", 13, "setdm:",		 "M1",	"forward",	120],//方向电机角度_wh
+		["set digital tube P%m.numpin num as %n",		   " ", 13, "setnum:",	            9,	123.4],//数码管_wh
+		["set pin %m.dpin tone: %m.tone meter: %m.meter",  " ", 13, "setmusic:",	        3,	'C2',	'1/2'],//无源蜂鸣器_wh
+		["set LCD1602 as %s",	                           " ", 13, "setLCD1602string:",	"hello arduino"],//LCD1602_xuhy
 		
 		
 		
 		//****************Arduino Robot******************
-		["————CK Board————",	"+",	14],//细分类别说明
-		["sound",	"r", 14, "readcksound"],//测控板模拟量_声音
-		["slide",	"r", 14, "readckslide"],//测控板模拟量_滑动变阻器
-		["light",	"r", 14, "readcklight"],//测控板模拟量_光敏
-		["ultrasonic sensor",	"r", 14, "readckUltrasonicSensor"],//测控板超声波传感器
+		["————CK Board————",	"+",	 14],
+		["sound",	            "r",     14,     "readcksound"],//测控板模拟量_声音
+		["slide",	            "r",     14,     "readckslide"],//测控板模拟量_滑动变阻器
+		["light",	            "r",     14,     "readcklight"],//测控板模拟量_光敏
+		["ultrasonic sensor",	"r",     14,     "readckUltrasonicSensor"],//测控板超声波传感器
 		["-"],
-		["————Robot Car————",	"+",	14],//细分类别说明_wh
-		["read track sensor",				"r", 	14, "readtrack:"],//循迹传感器
-		["read avoid obstacle sensor",	"r", 	14, "readavoid:"],//避障传感器
-		["read power sensor",				"r", 	14, "readpower:"],//电量传感器
+		
+		["————Robot Car————",	"+",	14],
+		["read track sensor",				"r", 	14,    "readtrack:"],//循迹传感器
+		["read avoid obstacle sensor",	    "r", 	14,    "readavoid:"],//避障传感器
+		["read power sensor",				"r", 	14,    "readpower:"],//电量传感器
+		
 		["-"],//间隔
-		["set gray threshold as %n",		" ", 14, "setgray:",	600],//灰度阀值
-		["set forward speed as %n",		" ", 14, "setforward:",	120],//向前
-		["set back speed as %n",			" ", 14, "setback:",		120],//后退
-		["set left speed as %n",			" ", 14, "setleft:",		120],//左转
-		["set right speed as %n",		" ", 14, "setright:",		120],//右转
-		["set arm %m.arm angle as %n",	" ", 14, "setarm:",	'updown',	20],//舵机角度
+		["set gray threshold as %n",		" ",      14,     "setgray:",	    600],//灰度阀值
+		["set forward speed as %n",		    " ",      14,     "setforward:",	120],//向前
+		["set back speed as %n",			" ",      14,     "setback:",		120],//后退
+		["set left speed as %n",			" ",      14,     "setleft:",		120],//左转
+		["set right speed as %n",		    " ",      14,     "setright:",		120],//右转
 	];
 
 	public static var extensionSpecs:Array = ["when %m.booleanSensor", "when %m.sensor %m.lessMore %n", "sensor %m.booleanSensor?", "%m.sensor sensor value", "turn %m.motor on for %n secs", "turn %m.motor on", "turn %m.motor off", "set %m.motor power to %n", "set %m.motor2 direction to %m.motorDirection", "when distance %m.lessMore %n", "when tilt %m.eNe %n", "distance", "tilt"];
-
 }}

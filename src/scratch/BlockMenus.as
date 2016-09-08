@@ -101,6 +101,10 @@ public class BlockMenus implements DragClient {
 		if (menuName == 'var') menuHandler.varMenu(evt);
 		if (menuName == 'videoMotionType') menuHandler.videoMotionTypeMenu(evt);
 		if (menuName == 'videoState') menuHandler.videoStateMenu(evt);
+		if (menuName == 'dpin') menuHandler.DPin(evt);//�������ֹܽ�
+		if (menuName == 'apin') menuHandler.APin(evt);//����ģ��ܽ�
+		if (menuName == 'highlow') menuHandler.BitIOHL(evt);//����IO����ߵ͵�ƽѡ��˵�
+		if (menuName == 'pwmpin') menuHandler.PWMPin(evt);//����PWM�ܽ�
 	}
 
 	public static function strings():Array {
@@ -277,6 +281,57 @@ public class BlockMenus implements DragClient {
 		showMenu(m);
 	}
 
+	//�������ֹܽ�ѡ��˵�
+	private function DPin(evt:MouseEvent):void {
+		var m:Menu = new Menu(setBlockArg, 'dpin');
+		m.addItem('2', 2);
+		m.addItem('3', 3);
+		m.addItem('4', 4);
+		m.addItem('5', 5);
+		m.addItem('6', 6);
+		m.addItem('7', 7);
+		m.addItem('8', 8);
+		m.addItem('9', 9);
+		m.addItem('10', 10);
+		m.addItem('11', 11);
+		m.addItem('12', 12);
+		m.addItem('13', 13);
+		showMenu(m);
+	}
+	
+	//����ģ����ܽ�ѡ��˵�
+	private function APin(evt:MouseEvent):void {
+		var m:Menu = new Menu(setBlockArg, 'apin');
+		m.addItem('0', 0);
+		m.addItem('1', 1);
+		m.addItem('2', 2);
+		m.addItem('3', 3);
+		m.addItem('4', 4);
+		m.addItem('5', 5);
+		showMenu(m);
+	}
+	
+	//����ģ��д�ܽ�ѡ��˵�
+	private function PWMPin(evt:MouseEvent):void {
+		var m:Menu = new Menu(setBlockArg, 'pwmpin');
+		m.addItem('3', 3);
+		m.addItem('5', 5);
+		m.addItem('6', 6);
+		m.addItem('9', 9);
+		m.addItem('10', 10);
+		m.addItem('11', 11);
+		showMenu(m);
+	}
+	
+	//����IO����ߵ͵�ƽѡ��˵�
+	private function BitIOHL(evt:MouseEvent):void {
+		var m:Menu = new Menu(setBlockArg, 'highlow');
+		m.addItem('low', 'low');
+		m.addItem('high', 'high');
+		showMenu(m);
+	}
+	
+	
 	private function drumMenu(evt:MouseEvent):void {
 		var m:Menu = new Menu(setBlockArg, 'drum');
 		for (var i:int = 1; i <= SoundBank.drumNames.length; i++) {
@@ -520,10 +575,15 @@ public class BlockMenus implements DragClient {
 		showMenu(m);
 	}
 
-	private function addGenericBlockItems(m:Menu):void {
+	private function addGenericBlockItems(m:Menu):void {  //�Ҽ���block����ʾ������
 		if (!block) return;
 		m.addLine();
 		if (!isInPalette(block)) {
+			if (block.op == "whenArduino")    //whenArduino ģ�����������
+			{	
+				m.addItem('upload to arduino', ScratchUploadHex2Arduino);
+				m.addItem('arduino source',ArduinoSource);	
+			}
 			if (!block.isProcDef()) {
 				m.addItem('duplicate', duplicateStack);
 			}
@@ -533,6 +593,19 @@ public class BlockMenus implements DragClient {
 		}
 		m.addItem('help', block.showHelp);
 		m.addLine();
+	}
+	
+			//�ϴ���arduino��_wh
+	public function ScratchUploadHex2Arduino():void {
+		app.arduinoLib.ArduinoRPFlag = true;
+		app.arduinoLib.ArduinoRPNum = 1;
+		app.interp.toggleThread(block, app.viewedObj());
+	}
+	
+	public function ArduinoSource():void {
+		app.arduinoLib.ArduinoRPFlag = true;
+		app.arduinoLib.ArduinoRPNum = 2;
+		app.interp.toggleThread(block, app.viewedObj());
 	}
 
 	private function duplicateStack():void {

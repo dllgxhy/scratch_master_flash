@@ -78,8 +78,43 @@ public class ArduinoUart extends Sprite {
 	public var comDataBufferOld:Array = new Array();//串口接收数据缓存未处理数据
 	private var uartCommunicationPackageHead:Array = [0xfe, 0xfd]; 		//通讯协议的包头
 	private var uartCommunicationPackageTail:Array = [0xfe, 0xfb];		//通讯协议的包尾
-	private var uartDataID_checkUartAvail:int = 0x01;  					//串口通讯心跳包，数据包括各种板载传感器的数据
-	private var uartDataID_Readshort:int = 0x00;							
+	
+	public const uartDataID_checkUartAvail:int = 0x01;  					//串口通讯心跳包，数据包括各种板载传感器的数据
+	public const uartDataID_Readshort:int      = 0x00;
+	
+	
+	public const ID_SetDigital:int = 0x81;//写数字口输出_wh
+	public const ID_SetPWM:int = 0x82;//写pwm口输出_wh
+	public const ID_SetSG:int = 0x83;//写舵机输出角度_wh
+	public const ID_SetMUS:int = 0x84;//写无源蜂鸣器音乐输出_wh
+	public const ID_SetNUM:int = 0x85;//写数码管输出值_wh
+	public const ID_SetDM:int = 0x86;//写舵机输出角度_wh
+	public const ID_SetRGB:int = 0x87;//三色LED_wh
+	public const ID_SetLCD1602String:int = 0x88 //LCD1602写字符串
+	
+	public const ID_SetFORWARD:int = 0xA0;//机器人前进_wh
+	public const ID_SetBACK:int = 0xA1;//机器人后退_wh
+	public const ID_SetLEFT:int = 0xA2;//机器人左转弯_wh
+	public const ID_SetRIGHT:int = 0xA3;//机器人右转弯_wh
+	//public static const ID_SetBUZZER:int = 0xA4;//机器人蜂鸣器_wh
+	public const ID_SetGRAY:int = 0xA5;//机器人灰度阀值_wh
+	//public static const ID_SetARM:int = 0xA5;//机器人机械臂_wh
+	
+	public const ID_ReadDigital:int = 0x01;//读数字口输入_wh
+	public const ID_ReadAnalog:int = 0x02;//读模拟口输入_wh
+	public const ID_ReadAFloat:int = 0x03;//读模拟口输入float值_wh
+	public const ID_ReadPFloat:int = 0x04;//超声波传感器输入float值_wh
+	public const ID_ReadCap:int = 0x08;//读取电容byte值_wh
+	
+	public const ID_ReadTRACK:int = 0x52;//读机器人循迹输入_wh
+	public const ID_ReadAVOID:int = 0x50;//读机器人避障输入_wh
+	public const ID_ReadULTR:int = 0x51;//读机器人超声波输入_wh
+	public const ID_ReadPOWER:int = 0x53;//读机器人电量输入_wh
+	public const ID_READFRAREDR:int = 0x54;//读机器人红外遥控输入_wh
+	
+	public const ID_CarDC:int = 0x0100;//机器人前进方式_wh
+	public const ID_DIR:int = 0x0101;//方向电机变量_wh
+	
 	/*串口在线计时器
 	 * 在串口监测定时器结束前，设置这两个参数，如果串口接收到数据，则重新置 uartDetectStatustimerStop 的值，
 	 * 如果uartDetectStatustimerStart 和 uartDetectStatustimerStop 两个值不等，说明串口接收到过数据，证明串口在线
@@ -196,8 +231,8 @@ public class ArduinoUart extends Sprite {
 	**************************************************/
 	public function paraUartData_OnTick(data:Array):void
 	{		
-		ArduinoLibrary.arduinoLightValue = data[0] * 256 + data[1];
-		ArduinoLibrary.arduinoUltrasonicValue =  data[5];
+		app.arduinoLib.arduinoLightValue = data[0] * 256 + data[1];
+		app.arduinoLib.arduinoUltrasonicValue =  data[5];
 	}
 	
 	/*
@@ -205,7 +240,7 @@ public class ArduinoUart extends Sprite {
 	*/
 	public function findComStatusTrue():Array
 	{
-		for (var i:int = 0x01; i <= 32;i++)//暂时设定只有16个com口，为com1 到 com16
+		for (var i:int = 0x01; i <= 32;i++)//暂时设定只有32个com口，为com1 到 com32
 		{
 			if (arduinoUart.connect("COM" + i, 115200))
 			{
@@ -292,5 +327,14 @@ public class ArduinoUart extends Sprite {
 		setUartDisconnect();
 		arduinoUart.flush();
 		arduinoUart.connect("COM" + scratchComID);
+	}
+	
+	/*
+	 * 通过Scratch 向Arduino写入数据，数据的协议为
+	 * 包头  数据长度  数据类型 数据 包尾
+	 * */
+	public function uartSendDataFromScratchToArduino(dataArray:Array):void
+	{
+		
 	}
 }}
