@@ -1379,7 +1379,7 @@ public class Scratch extends Sprite {
 		
 		m.addItem("Firmware", arduinoLib.dofirm);//固件更新_wh
 		m.addLine();
-		m.addItem("Drive", dodrive);//固件更新_wh
+		m.addItem("Drive", arduinoLib.dodrive);//固件更新_wh
 		m.addLine();
 		
 		m.showOnStage(stage, b.x, topBarPart.bottom() - 1);
