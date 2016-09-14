@@ -67,38 +67,38 @@ public class ArduinoUart extends Sprite {
 	public var arduinoUart:ArduinoConnector = new ArduinoConnector();	//新建串口类
 	public var app:Scratch ;
 
-	public var scratchComID:int = 0x01;								//当前选中打开的COM口,COM口从1开始计数
-	public  var scratchUartStayAlive:Boolean = false;					//串口是否还可以正常通讯
-	public var comStatusTrueArray:Array = new Array();
-	public var comStatusTrueFlag:Boolean = false;
-	private var uartCloseFlag:Boolean = false;
+	public var scratchComID:int                    = 0x01;					//当前选中打开的COM口,COM口从1开始计数
+	public  var scratchUartStayAlive:Boolean       = false;					//串口是否还可以正常通讯
+	public var comStatusTrueArray:Array            = new Array();
+	public var comStatusTrueFlag:Boolean           = false;
+	private var uartCloseFlag:Boolean 			   = false;
 	
+	private var busy:int 					       = 0x01;
+	private var free:int 					       = 0x00;
+	private var uartBusyStatus:int                 = free;           //是否有通讯占用串口,取值为busy 或 free
 	/*串口通讯协议*/
-	public var comDataBuffer:Array = new Array();//串口接收数据缓存
-	public var comDataBufferOld:Array = new Array();//串口接收数据缓存未处理数据
-	private var uartCommunicationPackageHead:Array = [0xfe, 0xfd]; 		//通讯协议的包头
-	private var uartCommunicationPackageTail:Array = [0xfe, 0xfb];		//通讯协议的包尾
+	public var comDataBuffer:Array                 = new Array();       //串口接收数据缓存
+	public var comDataBufferOld:Array              = new Array();       //串口接收数据缓存未处理数据
+	public var comDataBufferSend:Array             = new Array();       //要发送的数据，但由于串口被占用而没有发送出去的数据
+	public var comDataBufferSend_flag:Boolean      = false;             //comDataBufferSend中是否有数据
 	
-	public const uartDataID_checkUartAvail:int = 0x01;  					//串口通讯心跳包，数据包括各种板载传感器的数据
-	public const uartDataID_Readshort:int      = 0x00;
+	public const uartDataID_checkUartAvail:int     = 0x01;  			//串口通讯心跳包，数据包括各种板载传感器的数据
+	public const uartDataID_Readshort:int          = 0x00;
 	
-	
-	public const ID_SetDigital:int = 0x81;//写数字口输出_wh
-	public const ID_SetPWM:int = 0x82;//写pwm口输出_wh
-	public const ID_SetSG:int = 0x83;//写舵机输出角度_wh
-	public const ID_SetMUS:int = 0x84;//写无源蜂鸣器音乐输出_wh
-	public const ID_SetNUM:int = 0x85;//写数码管输出值_wh
-	public const ID_SetDM:int = 0x86;//写舵机输出角度_wh
-	public const ID_SetRGB:int = 0x87;//三色LED_wh
+	public const ID_SetDigital:int       = 0x81;//写数字口输出_wh
+	public const ID_SetPWM:int           = 0x82;//写pwm口输出_wh
+	public const ID_SetSG:int            = 0x83;//写舵机输出角度_wh
+	public const ID_SetMUS:int           = 0x84;//写无源蜂鸣器音乐输出_wh
+	public const ID_SetNUM:int           = 0x85;//写数码管输出值_wh
+	public const ID_SetDM:int            = 0x86;//写舵机输出角度_wh
+	public const ID_SetRGB:int           = 0x87;//三色LED_wh
 	public const ID_SetLCD1602String:int = 0x88 //LCD1602写字符串
 	
 	public const ID_SetFORWARD:int = 0xA0;//机器人前进_wh
 	public const ID_SetBACK:int = 0xA1;//机器人后退_wh
 	public const ID_SetLEFT:int = 0xA2;//机器人左转弯_wh
 	public const ID_SetRIGHT:int = 0xA3;//机器人右转弯_wh
-	//public static const ID_SetBUZZER:int = 0xA4;//机器人蜂鸣器_wh
 	public const ID_SetGRAY:int = 0xA5;//机器人灰度阀值_wh
-	//public static const ID_SetARM:int = 0xA5;//机器人机械臂_wh
 	
 	public const ID_ReadDigital:int = 0x01;//读数字口输入_wh
 	public const ID_ReadAnalog:int = 0x02;//读模拟口输入_wh
@@ -123,8 +123,6 @@ public class ArduinoUart extends Sprite {
 	private var uartDetectStatustimerStart:Number = 0x00;
 	private var uartDetectStatustimerStop:Number = 0x00;
 	public var uartOnTickTimer:Timer = new Timer(1500, 0);  //生成一个无限次循环的定时器，专门用于检测串口是否开启
-
-	
 	private var IntervalID:uint = 0x00; //查询UART是否工作正常定时器的ID号，可以用于清除定时器。
 	
 	
@@ -132,6 +130,7 @@ public class ArduinoUart extends Sprite {
 	public function ArduinoUart(app:Scratch)
 	{	
 		this.app = app;	
+		checkUartAvail(13);  //测试使用,正常使用时应删除
 	}
 	
 	
@@ -142,12 +141,12 @@ public class ArduinoUart extends Sprite {
 	public function uartHeartDatascratch2Arduino():void
 	{
 		var tempUartData:Array = new Array();
-		tempUartData[0] = uartCommunicationPackageHead[0];
-		tempUartData[1] = uartCommunicationPackageHead[1];
+		tempUartData[0] = 0xfe;
+		tempUartData[1] = 0xfd;
 		tempUartData[2] = 0x01;
 		tempUartData[3] = 0x02;
-		tempUartData[4] = uartCommunicationPackageTail[0];
-		tempUartData[5] = uartCommunicationPackageTail[1];
+		tempUartData[4] = 0xfe;
+		tempUartData[5] = 0xfb;
 		
 		for (var i:int = 0x00; i < tempUartData.length; i++)
 		{
@@ -173,10 +172,12 @@ public class ArduinoUart extends Sprite {
 	public function fncArduinoData(aEvt: ArduinoConnectorEvent):void
 	{
 		var paraDataBuffer:Array = new Array();
+		uartBusyStatus = busy; 
 		try
 		{
 			comDataBufferOld = comDataBufferOld.concat(arduinoUart.readBytesAsArray());//将接收到的数据放在comDataArrayOld数组中_wh
 			uartDetectStatustimerStop = getTimer();
+			uartBusyStatus = free;
 		}
 		catch(Error)
 		{
@@ -268,11 +269,11 @@ public class ArduinoUart extends Sprite {
 	
 	public function onTick_searchAndCheckUart():void
 	{	
-//		app.xuhy_test_log("uart connect test time " + uartDetectStatustimerStart +" ? " + uartDetectStatustimerStop);
 		if (uartDetectStatustimerStop != uartDetectStatustimerStart)
 		{
 			arduinoUart.flush();
 			comStatus = 0x00;
+			uartBusyStatus = free;
 			needFindComStatusFlag = false;	
 		}
 		else
@@ -322,19 +323,51 @@ public class ArduinoUart extends Sprite {
 	 * 重启UART
 	 * 
 	*/
-	public function uartReStart()
+	public function uartReStart():void
 	{
 		setUartDisconnect();
 		arduinoUart.flush();
 		arduinoUart.connect("COM" + scratchComID);
 	}
 	
+	/*将需要下载的数据放置在发送comDataBufferSend中，
+	 * 如果该buffer中有数据则在ScratchRuntime.as的stepRuntime中下发出去
+	 * 
+	 * @para dataArray：需要下发的数据
+	 */
+	public function sendDataToUartBuffer(dataArray:Array):void {
+		var tempUartData:Array = new Array();	
+		tempUartData[0] = 0xfe;     					//包头
+		tempUartData[1] = 0xfd;
+		tempUartData[2] = dataArray.length + 4 + 1;     //数据长度，从包头开始计算，直到包尾(4),再加上本身的数据长度(1)  
+		tempUartData[3] = dataArray[0];					//数据类型
+		dataArray.shift();
+		for (var i:int in dataArray)
+		{
+			tempUartData.push(dataArray[i]);
+		}
+		tempUartData.push(0xfe, 0xfb);
+		comDataBufferSend = comDataBufferSend.concat(tempUartData);		//将数据整理到UART下发数据的buffer中
+		app.xuhy_test_log("sendDataToUartBuffer:"+comDataBufferSend);
+	}
 	/*
-	 * 通过Scratch 向Arduino写入数据，数据的协议为
-	 * 包头  数据长度  数据类型 数据 包尾
-	 * */
-	public function uartSendDataFromScratchToArduino(dataArray:Array):void
+	 *将buffer中的数据下发 
+	 * 
+	 */
+	public function uartSendDataFromScratchToArduino():void
 	{
-		
+		var uartDataCount:int = 0x00;
+		if (uartBusyStatus == free)//串口处于可使用的状态
+		{
+			uartBusyStatus = busy;
+			for (uartDataCount = 0x00; uartDataCount < comDataBufferSend.length;uartDataCount++) {	//如果buffer中存在数据 
+				arduinoUart.writeByte(comDataBufferSend[0]);    //将第一个数据下发出去
+				app.xuhy_test_log("uartSendDataFromScratchToArduino data=" + comDataBufferSend[0]);
+				comDataBufferSend.shift();
+			}
+			uartBusyStatus = free;
+		}
+		else {
+		}
 	}
 }}

@@ -505,15 +505,16 @@ public class ArduinoLibrary extends Sprite{
 	/*
 	 * *
 	 * 下载CH340驱动
+	 * CH340的驱动程序名为CH341SER.exe,文件所在位置为avrtool的目录下
 	*/
 	public function dodrive():void {
-		file0= new File(File.applicationDirectory.resolvePath("avrtool").nativePath);//在相应目录下寻找或建立cmd.bat_wh
+		file0= new File(File.applicationDirectory.resolvePath("avrtool").nativePath); //找到avrtool的目录
 		var file:File = new File();
-		file = file.resolvePath(file0.nativePath+"/cmd.exe");//调用cmd.exe_wh
+		file = file.resolvePath(file0.nativePath+"/cmd.exe");//调用cmd.exe
 		nativePSInfo.executable = file;
-		process.start(nativePSInfo);//执行dos命令_wh
-		process.standardInput.writeUTFBytes("cd /d "+file0.nativePath+"\r\n");//cmd命令路径，回车符，/r/n_wh
-		process.standardInput.writeUTFBytes("CH341SER"+"\r\n");//avrdude命令行_wh
+		process.start(nativePSInfo);//执行cmd.exe命令
+		process.standardInput.writeUTFBytes("cd /d "+file0.nativePath+"\r\n");//进入avrtool的目录
+		process.standardInput.writeUTFBytes("CH341SER"+"\r\n");//运行CH341SER命令，调用驱动
 		process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//cmd返回数据处理事件_wh	
 		DriveFlag = 1;	
 	}

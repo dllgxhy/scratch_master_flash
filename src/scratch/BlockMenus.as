@@ -101,10 +101,12 @@ public class BlockMenus implements DragClient {
 		if (menuName == 'var') menuHandler.varMenu(evt);
 		if (menuName == 'videoMotionType') menuHandler.videoMotionTypeMenu(evt);
 		if (menuName == 'videoState') menuHandler.videoStateMenu(evt);
-		if (menuName == 'dpin') menuHandler.DPin(evt);//�������ֹܽ�
-		if (menuName == 'apin') menuHandler.APin(evt);//����ģ��ܽ�
-		if (menuName == 'highlow') menuHandler.BitIOHL(evt);//����IO����ߵ͵�ƽѡ��˵�
-		if (menuName == 'pwmpin') menuHandler.PWMPin(evt);//����PWM�ܽ�
+		if (menuName == 'dpin') menuHandler.DPin(evt);//增加数字管脚
+		if (menuName == 'apin') menuHandler.APin(evt);//增加模拟管脚
+		if (menuName == 'highlow') menuHandler.BitIOHL(evt);//增加IO输出高低电平选项菜单
+		if (menuName == 'pwmpin') menuHandler.PWMPin(evt);//增加PWM管脚
+		if (menuName == 'tone') menuHandler.Tone(evt);//增加音乐音调类别选项菜单_wh
+		if (menuName == 'meter') menuHandler.Meter(evt);//增加音乐节拍类别选项菜单_wh
 	}
 
 	public static function strings():Array {
@@ -311,7 +313,7 @@ public class BlockMenus implements DragClient {
 		showMenu(m);
 	}
 	
-	//����ģ��д�ܽ�ѡ��˵�
+	// 
 	private function PWMPin(evt:MouseEvent):void {
 		var m:Menu = new Menu(setBlockArg, 'pwmpin');
 		m.addItem('3', 3);
@@ -322,6 +324,65 @@ public class BlockMenus implements DragClient {
 		m.addItem('11', 11);
 		showMenu(m);
 	}
+	
+	//增加音乐音调选项菜单
+	private function Tone(evt:MouseEvent):void {
+		var m:Menu = new Menu(setBlockArg, 'tone');
+		m.addItem('C2', 'C2');
+		m.addItem('D2', 'D2');
+		m.addItem('E2', 'E2');
+		m.addItem('F2', 'F2');
+		m.addItem('G2', 'G2');
+		m.addItem('A2', 'A2');
+		m.addItem('B2', 'B2');
+		m.addItem('C3', 'C3');
+		m.addItem('D3', 'D3');
+		m.addItem('E3', 'E3');
+		m.addItem('F3', 'F3');
+		m.addItem('G3', 'G3');
+		m.addItem('A3', 'A3');
+		m.addItem('B3', 'B3');
+		m.addItem('C4', 'C4');
+		m.addItem('D4', 'D4');
+		m.addItem('E4', 'E4');
+		m.addItem('F4', 'F4');
+		m.addItem('G4', 'G4');
+		m.addItem('A4', 'A4');
+		m.addItem('B4', 'B4');
+		m.addItem('C5', 'C5');
+		m.addItem('D5', 'D5');
+		m.addItem('E5', 'E5');
+		m.addItem('F5', 'F5');
+		m.addItem('G5', 'G5');
+		m.addItem('A5', 'A5');
+		m.addItem('B5', 'B5');
+		m.addItem('C6', 'C6');
+		m.addItem('D6', 'D6');
+		m.addItem('E6', 'E6');
+		m.addItem('F6', 'F6');
+		m.addItem('G6', 'G6');
+		m.addItem('A6', 'A6');
+		m.addItem('B6', 'B6');
+		m.addItem('C7', 'C7');
+		m.addItem('E7', 'D7');
+		m.addItem('F7', 'F7');
+		m.addItem('G7', 'G7');
+		m.addItem('A7', 'A7');
+		showMenu(m);
+	}
+	
+	//增加音乐节拍选项菜单
+	private function Meter(evt:MouseEvent):void {
+		var m:Menu = new Menu(setBlockArg, 'meter');
+		m.addItem('1/2', '1/2');
+		m.addItem('1/4', '1/4');
+		m.addItem('1/8', '1/8');
+		m.addItem('whole', 'whole');
+		m.addItem('double', 'double');
+		m.addItem('stop', 'stop');
+		showMenu(m);
+	}
+	
 	
 	//����IO����ߵ͵�ƽѡ��˵�
 	private function BitIOHL(evt:MouseEvent):void {

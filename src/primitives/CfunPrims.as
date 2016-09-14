@@ -302,9 +302,124 @@ public class CfunPrims {
 	{
 		
 	}
-	private function primSetMUS(b:Block):void
-	{
-		
+	
+	/*
+	 * 设置无源蜂鸣器音调和时长
+	 * */
+	private function primSetMUS(b:Block):void{
+		var pin:Number = interp.numarg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh
+		var tone:Number;//音调，模块参数第一个，参数类型为数字，需要16位 short 型表示
+		var meter:Number;//节拍，需要16位 short型表示
+		switch(interp.arg(b,1))
+		{
+			case "C2":tone = 65;break;
+			case "D2":tone = 73;break;
+			case "E2":tone = 82;break;
+			case "F2":tone = 87;break;
+			case "G2":tone = 98;break;
+			case "A2":tone = 110;break;
+			case "B2":tone = 123;break;
+			case "C3":tone = 134;break;
+			case "D3":tone = 147;break;
+			case "E3":tone = 165;break;
+			case "F3":tone = 175;break;
+			case "G3":tone = 196;break;
+			case "A3":tone = 220;break;
+			case "B3":tone = 247;break;
+			case "C4":tone = 262;break;
+			case "D4":tone = 294;break;
+			case "E4":tone = 330;break;
+			case "F4":tone = 349;break;
+			case "G4":tone = 392;break;
+			case "A4":tone = 440;break;
+			case "B4":tone = 494;break;
+			case "C5":tone = 523;break;
+			case "D5":tone = 587;break;
+			case "E5":tone = 659;break;
+			case "F5":tone = 698;break;
+			case "G5":tone = 784;break;
+			case "A5":tone = 880;break;
+			case "B5":tone = 998;break;
+			case "C6":tone = 1047;break;
+			case "D6":tone = 1175;break;
+			case "E6":tone = 1319;break;
+			case "F6":tone = 1397;break;
+			case "G6":tone = 1568;break;
+			case "A6":tone = 1760;break;
+			case "B6":tone = 1976;break;
+			case "C7":tone = 2093;break;
+			case "D7":tone = 2349;break;
+			case "E7":tone = 2637;break;
+			case "F7":tone = 2794;break;
+			case "G7":tone = 3136;break;
+			case "A7":tone = 3520;break;
+			default:break;
+		}
+		switch(interp.arg(b,2))
+		{
+			case "1/2":meter = 500;break;
+			case "1/4":meter = 250;break;
+			case "1/8":meter = 125;break;
+			case "whole":meter = 1000;break;
+			case "double":meter = 2000;break;
+			case "stop":meter = 0;break;
+			default:break;
+		}/*
+		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			app.ArduinoBuz = true;
+			app.ArduinoMathNum = 0;
+			
+			if(app.ArduinoBlock[ID_SetMUS][pin] == 0)
+			{
+				app.ArduinoHeadFs.writeUTFBytes("CFunBuzzer buzzer_cfun" + pin + "(" + pin + ");" + '\n');
+				app.ArduinoBlock[ID_SetMUS][pin] = 1;
+			}
+			
+			if(app.ArduinoPin[pin] == 0)
+			{
+				app.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",OUTPUT);" + '\n');
+				app.ArduinoPin[pin] = 2;
+			}
+			
+			if(app.ArduinoLoopFlag == true)
+			{
+				app.ArduinoLoopFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
+				app.ArduinoLoopFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
+			}
+			else
+			{
+				app.ArduinoDoFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
+				app.ArduinoDoFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
+			}
+		}
+		else//正常上位机运行模式_wh
+		{*/
+			var numf:Array = new Array();
+			var numfs:ByteArray = new ByteArray();
+			numfs.writeShort(tone);
+			numfs.position = 0;
+			numf[0] = app.arduinoUart.ID_SetMUS;
+			numf[1] = numfs.readByte();
+			numf[2] = numfs.readByte();
+			
+			var numfms:ByteArray = new ByteArray();
+			numfms.writeShort(meter);
+			numfms.position = 0;
+			numf[3] = numfms.readByte();
+			numf[4] = numfms.readByte();
+			/*
+			app.arduino.writeByte(0xff);
+			app.arduino.writeByte(0x55);
+			app.arduino.writeByte(app.arduinoUart.ID_SetMUS);
+			app.arduino.writeByte(pin);
+			app.arduino.writeByte(numf[0]);
+			app.arduino.writeByte(numf[1]);
+			app.arduino.writeByte(numfm[0]);
+			app.arduino.writeByte(numfm[1]);*/
+			app.arduinoUart.sendDataToUartBuffer(numf);
+//			app.CFunDelayms(5);//延时15ms_wh
+		//}
 	}
 	private function primSetLCD1602String(b:Block):void
 	{
@@ -346,7 +461,4 @@ public class CfunPrims {
 	{
 		
 	}
-			
-	
-	
 }}

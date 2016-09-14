@@ -177,6 +177,8 @@ public class ScratchRuntime {
 		if (ready==ReadyLabel.COUNTDOWN || ready==ReadyLabel.READY) {
 			app.stagePane.countdown(count);
 		}
+		//此处增加下发串口数据的指令
+		app.arduinoUart.uartSendDataFromScratchToArduino();
 		
 	}
 
