@@ -50,7 +50,58 @@ public class Primitives {
 		primTable["*"]				= function(b:*):* { return interp.numarg(b, 0) * interp.numarg(b, 1) };
 		primTable["/"]				= function(b:*):* { return interp.numarg(b, 0) / interp.numarg(b, 1) };
 		primTable["randomFrom:to:"]	= primRandom;
-		primTable["<"]				= function(b:*):* { return compare(interp.arg(b, 0), interp.arg(b, 1)) < 0 };
+		primTable["<"]				= function(b:*):*{
+			if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+			{
+				app.arduinoLib.ArduinoMathNum++;
+				interp.arg(b, 0);
+				app.arduinoLib.ArduinoMathNum--;
+				if(app.arduinoLib.ArduinoReadFlag == true)
+				{
+					app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + app.arduinoLib.ArduinoReadStr[0] + ") < (";
+					app.arduinoLib.ArduinoReadFlag = false;
+				}
+				else
+					if(app.arduinoLib.ArduinoMathFlag == true)
+					{
+						app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum+1] + ") < (";
+						app.arduinoLib.ArduinoMathFlag = false;
+					}
+					else
+						if(app.arduinoLib.ArduinoValueFlag == true)
+						{
+							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + app.arduinoLib.ArduinoValueStr + ") < (";
+							app.arduinoLib.ArduinoValueFlag = false;
+						}
+						else
+							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + interp.numarg(b, 0) + ") < (";
+				app.arduinoLib.ArduinoMathNum++;
+				interp.arg(b, 1);
+				app.arduinoLib.ArduinoMathNum--;
+				if(app.arduinoLib.ArduinoReadFlag == true)
+				{
+					app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoReadStr[0] + "))";
+					app.arduinoLib.ArduinoReadFlag = false;
+				}
+				else
+					if(app.arduinoLib.ArduinoMathFlag == true)
+					{
+						app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum+1] + "))";
+						app.arduinoLib.ArduinoMathFlag = false;
+					}
+					else
+						if(app.arduinoLib.ArduinoValueFlag == true)
+						{
+							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoValueStr + "))";
+							app.arduinoLib.ArduinoValueFlag = false;
+						}
+						else
+							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += interp.numarg(b, 1) + "))";
+				app.arduinoLib.ArduinoMathFlag = true;
+			}
+			else
+				return compare(interp.arg(b, 0), interp.arg(b, 1)) < 0
+		};
 		primTable["="]				= function(b:*):* { return compare(interp.arg(b, 0), interp.arg(b, 1)) == 0 };
 		primTable[">"]				= function(b:*):* { return compare(interp.arg(b, 0), interp.arg(b, 1)) > 0 };
 		primTable["&"]				= function(b:*):* { return interp.arg(b, 0) && interp.arg(b, 1) };

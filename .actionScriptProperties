@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<actionScriptProperties analytics="false" mainApplicationPath="Scratch.as" projectUUID="45e54e95-97f1-4484-81ea-624e2c336ae0" version="11">
+<actionScriptProperties analytics="false" mainApplicationPath="Scratch.as" projectUUID="4e868367-6a00-4d5c-8c6f-1b01fe356996" version="11">
   <compiler additionalCompilerArguments="-locale en_US -swf-version=17 -define SCRATCH::allow3d true -define SCRATCH::revision 1" advancedTelemetry="false" autoRSLOrdering="true" copyDependentFiles="true" fteInMXComponents="false" generateAccessible="false" htmlExpressInstall="true" htmlGenerate="false" htmlHistoryManagement="false" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="true" useDebugRSLSwfs="true" useFlashSDK="true" verifyDigests="true" warn="true">
     <compilerSourcePath/>
     <libraryPath defaultLinkType="0">
@@ -32,6 +32,7 @@
       </libraryPathEntry>
       <libraryPathEntry kind="3" linkType="1" path="libs/blooddy_crypto.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="libs/as3corelib.swc" useDefaultLinkType="false"/>
+      <libraryPathEntry kind="3" linkType="2" path="libs/playerglobal.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="3" linkType="1" path="libs/grabcut.swc" useDefaultLinkType="false"/>
       <libraryPathEntry kind="5" linkType="2" path="libs/ArduinoConnector.ane"/>
     </libraryPath>
@@ -48,7 +49,7 @@
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
     <buildTarget buildTargetName="default" platformId="default">
-      <airSettings airCertificatePath="J:/xuhy/git_proj/scratch_master_flash/xuhy.p12" airTimestamp="true" anePathSet="true" version="1">
+      <airSettings airCertificatePath="E:/WH/AS-Block/CFunWorld/WM.p12" airTimestamp="false" anePathSet="true" version="1">
         <airExcludes/>
         <anePaths>
           <anePathEntry path="libs/ArduinoConnector.ane"/>
@@ -62,5 +63,4 @@
     </buildTarget>
   </buildTargets>
 </actionScriptProperties>
-
 

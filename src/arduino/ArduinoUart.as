@@ -61,17 +61,19 @@ import flash.utils.getTimer;
 import flash.utils.Timer;
 import flash.utils.*;
 import flash.events.TimerEvent;
+import flash.display.Shape;
 
 public class ArduinoUart extends Sprite {
 	
-	public var arduinoUart:ArduinoConnector = new ArduinoConnector();	//新建串口类
+	public var arduinoUart:ArduinoConnector         = new ArduinoConnector();	    //新建串口类
 	public var app:Scratch ;
 
-	public var scratchComID:int                    = 0x01;					//当前选中打开的COM口,COM口从1开始计数
-	public  var scratchUartStayAlive:Boolean       = false;					//串口是否还可以正常通讯
-	public var comStatusTrueArray:Array            = new Array();
-	public var comStatusTrueFlag:Boolean           = false;
-	private var uartCloseFlag:Boolean 			   = false;
+	public  var scratchComID:int                    = 0x01;					//当前选中打开的COM口,COM口从1开始计数
+	public  var scratchUartStayAlive:Boolean        = false;				//串口是否还可以正常通讯
+	public  var comStatusTrueArray:Array            = new Array();
+	public  var comStatusTrueFlag:Boolean           = false;
+	private var uartCloseFlag:Boolean 			    = false;
+	
 	
 	private var busy:int 					       = 0x01;
 	private var free:int 					       = 0x00;
@@ -94,23 +96,23 @@ public class ArduinoUart extends Sprite {
 	public const ID_SetRGB:int           = 0x87;//三色LED_wh
 	public const ID_SetLCD1602String:int = 0x88 //LCD1602写字符串
 	
-	public const ID_SetFORWARD:int = 0xA0;//机器人前进_wh
-	public const ID_SetBACK:int = 0xA1;//机器人后退_wh
-	public const ID_SetLEFT:int = 0xA2;//机器人左转弯_wh
-	public const ID_SetRIGHT:int = 0xA3;//机器人右转弯_wh
-	public const ID_SetGRAY:int = 0xA5;//机器人灰度阀值_wh
+	public const ID_SetFORWARD:int       = 0xA0;//机器人前进_wh
+	public const ID_SetBACK:int          = 0xA1;//机器人后退_wh
+	public const ID_SetLEFT:int          = 0xA2;//机器人左转弯_wh
+	public const ID_SetRIGHT:int         = 0xA3;//机器人右转弯_wh
+	public const ID_SetGRAY:int          = 0xA5;//机器人灰度阀值_wh
 	
-	public const ID_ReadDigital:int = 0x01;//读数字口输入_wh
-	public const ID_ReadAnalog:int = 0x02;//读模拟口输入_wh
-	public const ID_ReadAFloat:int = 0x03;//读模拟口输入float值_wh
-	public const ID_ReadPFloat:int = 0x04;//超声波传感器输入float值_wh
-	public const ID_ReadCap:int = 0x08;//读取电容byte值_wh
+	public const ID_ReadDigital:int      = 0x01;//读数字口输入_wh
+	public const ID_ReadAnalog:int       = 0x02;//读模拟口输入_wh
+	public const ID_ReadAFloat:int       = 0x03;//读模拟口输入float值_wh
+	public const ID_ReadPFloat:int       = 0x04;//超声波传感器输入float值_wh
+	public const ID_ReadCap:int          = 0x08;//读取电容byte值_wh
 	
-	public const ID_ReadTRACK:int = 0x52;//读机器人循迹输入_wh
-	public const ID_ReadAVOID:int = 0x50;//读机器人避障输入_wh
-	public const ID_ReadULTR:int = 0x51;//读机器人超声波输入_wh
-	public const ID_ReadPOWER:int = 0x53;//读机器人电量输入_wh
-	public const ID_READFRAREDR:int = 0x54;//读机器人红外遥控输入_wh
+	public const ID_ReadTRACK:int        = 0x52;//读机器人循迹输入_wh
+	public const ID_ReadAVOID:int        = 0x50;//读机器人避障输入_wh
+	public const ID_ReadULTR:int         = 0x51;//读机器人超声波输入_wh
+	public const ID_ReadPOWER:int        = 0x53;//读机器人电量输入_wh
+	public const ID_READFRAREDR:int      = 0x54;//读机器人红外遥控输入_wh
 	
 	public const ID_CarDC:int = 0x0100;//机器人前进方式_wh
 	public const ID_DIR:int = 0x0101;//方向电机变量_wh
@@ -120,20 +122,277 @@ public class ArduinoUart extends Sprite {
 	 * 如果uartDetectStatustimerStart 和 uartDetectStatustimerStop 两个值不等，说明串口接收到过数据，证明串口在线
 	 * uartOnTickTimer: 串口在线定时器
 	 */
-	private var uartDetectStatustimerStart:Number = 0x00;
-	private var uartDetectStatustimerStop:Number = 0x00;
-	public var uartOnTickTimer:Timer = new Timer(1500, 0);  //生成一个无限次循环的定时器，专门用于检测串口是否开启
-	private var IntervalID:uint = 0x00; //查询UART是否工作正常定时器的ID号，可以用于清除定时器。
+	private var uartDetectStatustimerStart:Number                     = 0x00;
+	private var uartDetectStatustimerStop:Number                      = 0x00;
+	public var checkHeartPackageTimer:Timer                           = new Timer(5000, 1);  //生成一个只需要执行一次的定时器，用于检测串口没有心跳包后上传固件
 	
+	private var checkDefaultScratchComIDCanGetHeartPackageTimer:Timer = new Timer(5000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
+	
+	public var IntervalID:uint       								  = 0x00; 				//查询UART是否工作正常定时器的ID号，可以用于清除定时器。
+	public var searchComChangeID:uint 								  = 0x00;
 	
 	 
 	public function ArduinoUart(app:Scratch)
 	{	
 		this.app = app;	
-		checkUartAvail(13);  //测试使用,正常使用时应删除
+		checkUartAvail(13);  //测试使用,正常使用时应删除	
+	}
+	
+	/*
+	检测是否可以直接连接串口号为scratchComID(默认的)的串口，自动检测是否有相关的串口可以得到心跳包
+	*/
+	public function checkDefaultScratchComIDCanGetHeartPackage():void{
+		checkUartAvail(scratchComID);
+		setAutoConnect();
+		checkDefaultScratchComIDCanGetHeartPackageTimer.addEventListener(TimerEvent.TIMER_COMPLETE,checkDefaultScratchComIDCanGetHeartPackageTimerOver);
+		checkDefaultScratchComIDCanGetHeartPackageTimer.start();
+	}
+	
+	private function checkDefaultScratchComIDCanGetHeartPackageTimerOver(event:TimerEvent):void{
+		setUartDisconnect();										//时间到了 没有侦测到可用串口，则关闭已打开的串口
+		clearInterval(IntervalID);									//关闭检测心跳包的Timer;
+		checkArduinoCableIsPlugIn();								//通过重新插拔Arduino检测可用串口
+		app.xuhy_test_log("checkDefaultScratchComIDCanGetHeartPackageTimer time is done");
+	}
+
+
+	/*	
+	串口检测，输出扫描到的所有有效串口号
+	有效串口号可能有几个，比如在电脑上插入了串口调试助手等，所以还需要检测是否通讯成功。
+	*/	
+	public function checkUartAvail(scratchComID:int):void
+	{	
+		arduinoUart.connect("COM" + scratchComID, 115200);
+		arduinoUart.addEventListener("socketData", fncArduinoData);	
+		app.xuhy_test_log("checkUartAvail");
+	}
+
+	
+	
+	/**************************************************
+	将串口接收到的数据按照协议进行解包
+	数据种类与Arduino板一致
+	**************************************************/
+	public function paraUartData_OnTick(data:Array):void
+	{		
+		app.arduinoLib.arduinoLightValue = data[0] * 256 + data[1];
+		app.arduinoLib.arduinoUltrasonicValue =  data[5];
+	}
+	
+
+	/*
+	 *检查可用的UART接口 
+	*/
+	public function findComStatusTrue():Array
+	{
+		for (var i:int = 1; i <= 32;i++)//暂时设定只有32个com口，为com1 到 com32
+		{
+			if (arduinoUart.connect("COM" + i, 115200))
+			{
+				comStatusTrueArray.push(i);
+			}
+			arduinoUart.close();
+		}
+		return comStatusTrueArray;
 	}
 	
 	
+	/*
+	 * 串口状态轮询时钟，每1.5S轮询一次
+	 **/
+	public function setAutoConnect():uint
+	{
+		var intervalDuration:Number = 1500;    
+		IntervalID = setInterval(onTick_searchAndCheckUart, intervalDuration);
+		uartDetectStatustimerStop = uartDetectStatustimerStart = 0x00;
+		app.xuhy_test_log("setAutoConnect");
+		return IntervalID;
+	}
+	
+	public function detectDofirm():void{
+		checkHeartPackageTimer.addEventListener(TimerEvent.TIMER_COMPLETE, oncheckHeartPackageTimerComplete);
+		checkHeartPackageTimer.start();
+	}
+	
+
+	public var comStatus:int = 0x03;  					//com口的工作状态 0x00:连接正常 0x01:意外断开 0x02断开com口
+	
+	/*如果scratchComID 的串口连接不上，则通过插拔USB接口检测哪个COM口可用，得到scratchComID。*/
+	public var AutoConnectButtonStatus:Boolean = true;//Auto Connect 这个案件的状态显示
+	public function checkArduinoCableIsPlugIn():void{
+//		if(AutoConnectButtonStatus)					//
+//		{										
+			if(comStatus == 0x00)					// 接收到串口心跳包
+			{
+				checkHeartPackageTimer.stop();
+				ShowUartStatusFlag(true);
+				return ;
+			}
+			else{									//  没有接收到串口的心跳包
+				app.uartDialog.setText("please Check the cable isn't plugin");
+				app.uartDialog.showOnStage(app.stage);
+				app.uartDialogOKType = 0x01;
+				AutoConnectButtonStatus = false;
+			}
+//		}
+//		else{
+
+//		}
+	}
+	
+	/*
+	//检查心跳包 用来判定串口在正常工作
+	*/
+	private var notConnectArduinoCount:int = 0x00;
+	public function onTick_searchAndCheckUart():void
+	{	
+		if (uartDetectStatustimerStop != uartDetectStatustimerStart)
+		{
+			comStatus = 0x00;
+			uartBusyStatus = free;
+			checkDefaultScratchComIDCanGetHeartPackageTimer.stop();
+			checkHeartPackageTimer.stop();
+			ShowUartStatusFlag(true);
+			app.xuhy_test_log("onTick_searchAndCheckUart com is --OK--");
+		}
+		else
+		{
+			comStatus = 0x01;
+			notConnectArduinoCount ++ ;
+			if(notConnectArduinoCount >= 5)
+			{
+				clearInterval(IntervalID);
+				setUartDisconnect();
+				app.xuhy_test_log("uart disconnect unexpected");
+				ShowUartStatusFlag(false);
+			}
+		}
+		uartDetectStatustimerStop = uartDetectStatustimerStart = getTimer();
+	}
+	
+	/*
+	*状态栏中按钮和灯的显示状态
+	*/
+	public function ShowUartStatusFlag(flag:Boolean):void{
+		if(flag){											//串口已正常连接
+			app.uartConnectCirSet(1);
+			app.uartAutoConnectButton.setLabel("COM"+scratchComID);
+		}
+		else{
+			app.uartConnectCirSet(0);						//串口还没有连上
+			app.uartAutoConnectButton.setLabel("Auto Connect");
+		}
+	}
+	
+	private function oncheckHeartPackageTimerComplete(event:TimerEvent):void{
+		clearInterval(IntervalID); 				//关闭串口状态轮寻时钟
+		app.arduinoLib.dofirm();				//上传固件
+	}
+	
+	//点击确定按钮后执行以下指令
+	public function onTick_searchComChange():void{
+		var i:int = 0x00;
+		if(comStatusTrueArray.length != app.availComInComputer.length)			//串口有变化
+		{
+			app.xuhy_test_log("onTick_searchComChage find avail com  ---- Auto Connect");
+			if(( comStatusTrueArray.length - app.availComInComputer.length ) > 0)
+			{
+				for(i;i<= app.availComInComputer.length;i++)
+				{
+					if(comStatusTrueArray[i] != app.availComInComputer[i])
+					{
+						scratchComID = comStatusTrueArray[i];
+					}
+				}
+			}
+			else
+			{
+				for(i;i<= app.availComInComputer.length;i++)
+				{
+					if(comStatusTrueArray[i] != app.availComInComputer[i])
+					{
+						scratchComID = app.availComInComputer[i];
+					}
+				}
+			}
+			
+			app.availComInComputer.splice(0);
+			checkUartAvail(scratchComID);					//连接串口
+			setAutoConnect();								//固件上传完成后再次检测串口通讯		
+		}
+		
+		else{
+			app.uartDialog.setText("please check the cable");
+			app.uartDialogOKType = 3;
+			app.uartDialog.showOnStage(app.stage);
+			app.xuhy_test_log("onTick_searchComChage not find avail com");
+			return ;
+		}
+	}
+	/*
+	 * 断开UART连接
+	 * */
+	public function setUartDisconnect():void
+	{		
+		arduinoUart.close();
+		comStatus = 0x02;   
+		clearInterval(IntervalID);
+		app.xuhy_test_log("Uart Disconnect");
+		ShowUartStatusFlag(false);
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*将需要下载的数据放置在发送comDataBufferSend中，
+	 * 如果该buffer中有数据则在ScratchRuntime.as的stepRuntime中下发出去
+	 * 
+	 * @para dataArray：需要下发的数据
+	 */
+	public function sendDataToUartBuffer(dataArray:Array):void {
+		var tempUartData:Array = new Array();	
+		tempUartData[0] = 0xfe;     					//包头
+		tempUartData[1] = 0xfd;
+		tempUartData[2] = dataArray.length + 4 + 1;     //数据长度，从包头开始计算，直到包尾(4),再加上本身的数据长度(1)  
+		tempUartData[3] = dataArray[0];					//数据类型
+		dataArray.shift();
+		for (var i:int in dataArray)
+		{
+			tempUartData.push(dataArray[i]);
+		}
+		tempUartData.push(0xfe, 0xfb);
+		comDataBufferSend = comDataBufferSend.concat(tempUartData);		//将数据整理到UART下发数据的buffer中
+		app.xuhy_test_log("sendDataToUartBuffer:"+comDataBufferSend);
+	}
+	/*
+	 *将buffer中的数据下发 
+	 * 
+	 */
+	public function uartSendDataFromScratchToArduino():void
+	{
+		var uartDataCount:int = 0x00;
+		if (uartBusyStatus == free)//串口处于可使用的状态
+		{
+			uartBusyStatus = busy;
+			for (uartDataCount = 0x00; uartDataCount < comDataBufferSend.length;uartDataCount++) {	//如果buffer中存在数据 
+				arduinoUart.writeByte(comDataBufferSend[0]);    									//将第一个数据下发出去
+				arduinoUart.flush();																//发送完毕后清空数据
+				app.xuhy_test_log("uartSendDataFromScratchToArduino data=" + comDataBufferSend[0]);
+				comDataBufferSend.shift();
+			}
+			uartBusyStatus = free;
+		}
+		else {
+		}
+	}
+	
+
 	/***************************************************
 	scratch 通过UART 向Arduino写入数据
 	该数据为固定值，Arduino收到该值，则认为UART是通的
@@ -153,21 +412,11 @@ public class ArduinoUart extends Sprite {
 			arduinoUart.writeByte(tempUartData[i]);
 		}		
 	}
-
-	/*	
-	串口检测，输出扫描到的所有有效串口号
-	有效串口号可能有几个，比如在电脑上插入了串口调试助手等，所以还需要检测是否通讯成功。
-	*/	
-	public function checkUartAvail(scratchComID:int):void
-	{	
-		arduinoUart.connect("COM" + scratchComID, 115200);
-		arduinoUart.addEventListener("socketData", fncArduinoData);	
-		arduinoUart.flush();
-	}
-
+	
+	
+	
 	/*********************************************************************
 	串口数据接收事件处理
-
 	*********************************************************************/
 	public function fncArduinoData(aEvt: ArduinoConnectorEvent):void
 	{
@@ -225,149 +474,45 @@ public class ArduinoUart extends Sprite {
 			}
 		}
 	}
-	
-	/**************************************************
-	将串口接收到的数据按照协议进行解包
-	数据种类与Arduino板一致
-	**************************************************/
-	public function paraUartData_OnTick(data:Array):void
-	{		
-		app.arduinoLib.arduinoLightValue = data[0] * 256 + data[1];
-		app.arduinoLib.arduinoUltrasonicValue =  data[5];
-	}
-	
-	/*
-	 *检查可用的UART接口 
-	*/
-	public function findComStatusTrue():Array
-	{
-		for (var i:int = 0x01; i <= 32;i++)//暂时设定只有32个com口，为com1 到 com32
-		{
-			if (arduinoUart.connect("COM" + i, 115200))
-			{
-				comStatusTrueArray.push(i);
-				arduinoUart.close();
-			}
-		}
-		return comStatusTrueArray;
-	}
-	
-	
-	/*
-	 * 
-	 **/
-	public function setAutoConnect():uint
-	{
-		var intervalDuration:Number = 1000;
-		IntervalID = setInterval(onTick_searchAndCheckUart, intervalDuration);
-		uartDetectStatustimerStop = uartDetectStatustimerStart = 0x00;
-		return IntervalID;
-	}
-	
-	private var needFindComStatusFlag:Boolean = false;  //是否需要检查有哪些COM 口可用的标识
-	public var comStatus:int = 0x03;  //com口的工作状态 0x00:连接正常 0x01:意外断开 0x02断开com口
-	
-	public function onTick_searchAndCheckUart():void
-	{	
-		if (uartDetectStatustimerStop != uartDetectStatustimerStart)
-		{
-			arduinoUart.flush();
-			comStatus = 0x00;
-			uartBusyStatus = free;
-			needFindComStatusFlag = false;	
-		}
-		else
-		{
-			if (needFindComStatusFlag == false)
-			{
-				comStatusTrueArray.splice();    		  //清除数组数据
-				comStatusTrueArray = findComStatusTrue(); //先检测是否有可用的com口
-				needFindComStatusFlag = true ;
-				app.xuhy_test_log("com is ready");
-			}else if(comStatusTrueArray.length != 0x00){
-				scratchComID = comStatusTrueArray[comStatusTrueArray.length -1];
-				checkUartAvail(scratchComID);
-				comStatusTrueArray.pop();
-				app.xuhy_test_log("test " + scratchComID + " is availed for arduino");
-			}
-			else
-			{
-				arduinoUart.close();	//uart意外断开
-				arduinoUart.flush();
-				comStatus = 0x01;
-//				scratchComID = 0x01;
-				clearInterval(IntervalID); //关闭时钟
-				needFindComStatusFlag = false;
-				app.xuhy_test_log("uart disconnect unexpected");
-				app.uartDialog.showOnStage(app.stage); //此处后续可以添加dialog 提示链接USB接口	
-			}
-		}
-		uartDetectStatustimerStop = uartDetectStatustimerStart = getTimer();
-	}
-	
-	/*
-	 * 断开UART连接
-	 * */
-	public function setUartDisconnect():void
-	{		
-		arduinoUart.close();
-		arduinoUart.flush();
-//		scratchComID = 0x01;
-		comStatus = 0x02;   
-		clearInterval(IntervalID);
-		needFindComStatusFlag = false;
-		app.xuhy_test_log("Uart Disconnect");
-	}
-	
-	/*
-	 * 重启UART
-	 * 
-	*/
-	public function uartReStart():void
-	{
-		setUartDisconnect();
-		arduinoUart.flush();
-		arduinoUart.connect("COM" + scratchComID);
-	}
-	
-	/*将需要下载的数据放置在发送comDataBufferSend中，
-	 * 如果该buffer中有数据则在ScratchRuntime.as的stepRuntime中下发出去
-	 * 
-	 * @para dataArray：需要下发的数据
-	 */
-	public function sendDataToUartBuffer(dataArray:Array):void {
-		var tempUartData:Array = new Array();	
-		tempUartData[0] = 0xfe;     					//包头
-		tempUartData[1] = 0xfd;
-		tempUartData[2] = dataArray.length + 4 + 1;     //数据长度，从包头开始计算，直到包尾(4),再加上本身的数据长度(1)  
-		tempUartData[3] = dataArray[0];					//数据类型
-		dataArray.shift();
-		for (var i:int in dataArray)
-		{
-			tempUartData.push(dataArray[i]);
-		}
-		tempUartData.push(0xfe, 0xfb);
-		comDataBufferSend = comDataBufferSend.concat(tempUartData);		//将数据整理到UART下发数据的buffer中
-		app.xuhy_test_log("sendDataToUartBuffer:"+comDataBufferSend);
-	}
-	/*
-	 *将buffer中的数据下发 
-	 * 
-	 */
-	public function uartSendDataFromScratchToArduino():void
-	{
-		var uartDataCount:int = 0x00;
-		if (uartBusyStatus == free)//串口处于可使用的状态
-		{
-			uartBusyStatus = busy;
-			for (uartDataCount = 0x00; uartDataCount < comDataBufferSend.length;uartDataCount++) {	//如果buffer中存在数据 
-				arduinoUart.writeByte(comDataBufferSend[0]);    //将第一个数据下发出去
-				app.xuhy_test_log("uartSendDataFromScratchToArduino data=" + comDataBufferSend[0]);
-				comDataBufferSend.shift();
-			}
-			uartBusyStatus = free;
-		}
-		else {
-		}
-	}
 }}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

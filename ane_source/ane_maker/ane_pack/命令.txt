@@ -1,1 +1,1 @@
-bin/adt -package -storetype pkcs12 -keystore xuhy.p12 -storepass Xuhaiyang8 -target ane ArduinoConnector.ane extension.xml -swc arduinoconnector_xuhy.swc -platform Windows-x86 library.swf vc.dll
+bin\adt -package -storetype pkcs12 -keystore xuhy.p12 -storepass Xuhaiyang8 -target ane ArduinoConnector.ane extension.xml -swc arduinoconnector_xuhy.swc -platform Windows-x86 library.swf vc.dll

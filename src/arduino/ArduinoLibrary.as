@@ -174,27 +174,6 @@ public class ArduinoLibrary extends Sprite{
 	public function dofirm():void {
 		//烧入固件前先判断串口，未打开则之间退出，打开则先关闭（否则串口被占用）_wh
 		app.xuhy_test_log("do firm");
-		var firmTeststr:String = "firmware_test";
-		
-		if(app.arduinoUart.comStatus == 0x00) //有可用串口
-		{
-			app.arduinoUart.setUartDisconnect();  //关闭串口
-		}	
-		else
-		{
-			app.xuhy_test_log("find avail com");
-			app.arduinoUart.findComStatusTrue();  //找到可以使用的IO口
-			if (app.arduinoUart.comStatusTrueArray.len != 0x00)   
-			{
-				app.arduinoUart.scratchComID = app.arduinoUart.comStatusTrueArray[0];
-				app.xuhy_test_log("avail com is COM"+app.arduinoUart.comStatusTrueArray[0]);
-			}
-			else  //长度为0，没有可以使用的串口
-			{ 
-				DialogBox.warnconfirm(Translator.map("error about firmware"),Translator.map("please open the COM"), null, app.stage);//软件界面中部显示提示框_wh
-				return;
-			}
-		}
 		writeUploaderOrderToCmd(app.arduinoUart.scratchComID);
 	}
 	
