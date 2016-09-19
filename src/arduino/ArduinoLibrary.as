@@ -223,14 +223,12 @@ public class ArduinoLibrary extends Sprite{
 		{
 			if(upLoadFirmTimerCount == 71)//70s
 			{
-				{
-					process.exit(nativePSInfo);//退出cmd.exe_wh
-					process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
-					process2.start(nativePSInfo);//执行dos命令_wh
-					process2.standardInput.writeUTFBytes("taskkill /f /im avrdude.exe /t"+"\r\n");//强行关闭avrdude进程_wh
-					UpDialog.setText(Translator.map("upload failed"));
-					upDialogSuccessFlag = false;
-				}
+				process.exit(nativePSInfo);//退出cmd.exe_wh
+				process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
+				process2.start(nativePSInfo);//执行dos命令_wh
+				process2.standardInput.writeUTFBytes("taskkill /f /im avrdude.exe /t"+"\r\n");//强行关闭avrdude进程_wh
+				UpDialog.setText(Translator.map("upload failed"));
+				upDialogSuccessFlag = false;
 			}
 			if(upLoadFirmTimerCount == 73)//72s
 			{
@@ -283,6 +281,8 @@ public class ArduinoLibrary extends Sprite{
 					upLoadFirmTimer.reset();
 					upLoadFirmTimerCount = 0;
 					ArduinoRPFlag = false;
+					app.arduinoUart.checkUartAvail(app.arduinoUart.scratchComID);
+					app.arduinoUart.setAutoConnect();
 				}
 			}
 			else
@@ -306,6 +306,8 @@ public class ArduinoLibrary extends Sprite{
 								process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
 								upLoadFirmTimer.reset();
 								upLoadFirmTimerCount = 0;
+								app.arduinoUart.checkUartAvail(app.arduinoUart.scratchComID);
+								app.arduinoUart.setAutoConnect();
 							}
 						}
 					}

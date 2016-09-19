@@ -207,27 +207,7 @@ public class Scratch extends Sprite {
 	public var blueFlag:Boolean             = false;
 	
 	
-	/*
-	//当uartAutoConnectButton 按键按下后，进行如下操作
-	1) 检测是否可以直接连接串口号为scratchComID(默认的)的串口，自动检测是否有相关的串口可以得到心跳包// checkDefaultScratchComIDCanGetHeartPackage()
-	2) 如果scratchComID 的串口连接不上，则通过插拔USB接口检测哪个COM口可用，得到scratchComID。  //checkArduinoCableIsPlugIn
-	3) 如果新得到的scratchComID  可得到心跳包，则该com口可用，  且arduino板子上有固件
-	4) 如果新得到的scratchComID  无法得到心跳包，则该COM口可用，只是arduino的板子上没有固件。
-	*/
-	public function uartAutoConnectButtonDown():void{
-		if(arduinoUart.comStatus != 0x00)			//在串口没有连接上的状态时，按下Auto Connect的按键，则开始侦测可用串口
-		{
-			arduinoUart.checkDefaultScratchComIDCanGetHeartPackage();
-			xuhy_test_log("Scratch" + "arduinoUart.comStatus != 0x00");
-		}
-		else{										//串口可以正常通讯状态下，按下Auto Connect的按键，则关闭串口通讯	
-			arduinoUart.AutoConnectButtonStatus = true;	//按键的LABEL 显示的是AutoConnect
-			clearInterval(arduinoUart.IntervalID);
-			arduinoUart.setUartDisconnect();
-			arduinoUart.ShowUartStatusFlag(false);
-			xuhy_test_log("Scratch" + "arduinoUart.comStatus == 0x00");
-		}	
-	}
+
 	
 	
 	
@@ -1369,6 +1349,28 @@ public class Scratch extends Sprite {
 		uartDialog.addButton("OK",     uartDialogOK);
 		uartDialog.addButton("Cancel", uartDialogCancel);
 	}
+
+	
+	/*
+	//当uartAutoConnectButton 按键按下后，进行如下操作
+	1) 检测是否可以直接连接串口号为scratchComID(默认的)的串口，自动检测是否有相关的串口可以得到心跳包// checkDefaultScratchComIDCanGetHeartPackage()
+	2) 如果scratchComID 的串口连接不上，则通过插拔USB接口检测哪个COM口可用，得到scratchComID。  //checkArduinoCableIsPlugIn
+	3) 如果新得到的scratchComID  可得到心跳包，则该com口可用，  且arduino板子上有固件
+	4) 如果新得到的scratchComID  无法得到心跳包，则该COM口可用，只是arduino的板子上没有固件。
+	*/
+	public function uartAutoConnectButtonDown():void{
+		if(arduinoUart.comStatus != 0x00)			//在串口没有连接上的状态时，按下Auto Connect的按键，则开始侦测可用串口
+		{
+			arduinoUart.checkDefaultScratchComIDCanGetHeartPackage();
+			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + arduinoUart.comStatus);
+		}
+		else{										//串口可以正常通讯状态下，按下Auto Connect的按键，则关闭串口通讯	
+			clearInterval(arduinoUart.IntervalID);
+			arduinoUart.setUartDisconnect();
+			arduinoUart.ShowUartStatusFlag(false);
+			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + arduinoUart.comStatus);
+		}	
+	}
 	
 	public function uartDialogCancel():void
 	{
@@ -1376,20 +1378,21 @@ public class Scratch extends Sprite {
 		uartDialog.cancel();
 	}
 	
-	public var uartDialogOKType:int = 0x00;
-	public function uartDialogOK():void{  //提醒用户重新插拔USB接口或下载固件
+	public var uartDialogOKType:int = 0x00;   //1：第一次点击OK按键  2：第二次点击OK按键
+	public function uartDialogOK():void{  								//提醒用户重新插拔USB接口或下载固件
 		var i:int = 0x00;
 		if(uartDialogOKType == 1){										//usb拔下后读取可用的串口
 			arduinoUart.findComStatusTrue();
-			for(i=0x00;i<arduinoUart.comStatusTrueArray.length;i++){   	//将USB拔下后的串口数据保存在availComInComputer中；
+			for(i=0x00; i< arduinoUart.comStatusTrueArray.length;i++){   	//将USB拔下后的串口数据保存在availComInComputer中；
 				availComInComputer[i] = arduinoUart.comStatusTrueArray[i];
 			}
 			uartDialog.setText("please plugin the cable");
 			uartDialog.showOnStage(stage);
 			uartDialogOKType = 2;
+			return ;
 		}
 		else if(uartDialogOKType == 2){
-			arduinoUart.findComStatusTrue();
+			arduinoUart.findComStatusTrue();			//插入串口之后再次查找串口数量
 			arduinoUart.onTick_searchComChange();
 		}
 		else{
