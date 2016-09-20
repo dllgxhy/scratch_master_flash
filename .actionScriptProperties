@@ -49,7 +49,7 @@
   <flashCatalyst validateFlashCatalystCompatibility="false"/>
   <buildTargets>
     <buildTarget buildTargetName="default" platformId="default">
-      <airSettings airCertificatePath="E:/WH/AS-Block/CFunWorld/WM.p12" airTimestamp="false" anePathSet="true" version="1">
+      <airSettings airCertificatePath="J:/xuhy/git_proj/scratch_flash_master/xuhy.p12" airTimestamp="false" anePathSet="true" version="1">
         <airExcludes/>
         <anePaths>
           <anePathEntry path="libs/ArduinoConnector.ane"/>
@@ -63,4 +63,3 @@
     </buildTarget>
   </buildTargets>
 </actionScriptProperties>
-

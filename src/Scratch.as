@@ -63,6 +63,8 @@ import flash.utils.getTimer;
 import flash.utils.setInterval;
 import flash.utils.*;
 
+import flash.filesystem.FileMode;
+
 import mx.utils.URLUtil;
 
 import arduino.ArduinoLibrary;
@@ -1359,15 +1361,21 @@ public class Scratch extends Sprite {
 	4) 如果新得到的scratchComID  无法得到心跳包，则该COM口可用，只是arduino的板子上没有固件。
 	*/
 	public function uartAutoConnectButtonDown():void{
+		var comID:String = "0";
 		if(arduinoUart.comStatus != 0x00)			//在串口没有连接上的状态时，按下Auto Connect的按键，则开始侦测可用串口
 		{
+			arduinoLib.ArduinoUartIDFileIniFs.open(arduinoLib.ArduinoUartIDFileIni,FileMode.READ);
+			arduinoLib.ArduinoUartIDFileIniFs.position = 0;
+			comID = arduinoLib.ArduinoUartIDFileIniFs.readMultiByte(arduinoLib.ArduinoUartIDFileIniFs.bytesAvailable,'utf-8');
 			arduinoUart.checkDefaultScratchComIDCanGetHeartPackage();
+			arduinoUart.setuartStateLightTimer();
 			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + arduinoUart.comStatus);
 		}
 		else{										//串口可以正常通讯状态下，按下Auto Connect的按键，则关闭串口通讯	
 			clearInterval(arduinoUart.IntervalID);
 			arduinoUart.setUartDisconnect();
 			arduinoUart.ShowUartStatusFlag(false);
+			arduinoUart.resetUartStateLightState();
 			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + arduinoUart.comStatus);
 		}	
 	}
@@ -1375,6 +1383,8 @@ public class Scratch extends Sprite {
 	public function uartDialogCancel():void
 	{
 		clearInterval(arduinoUart.searchComChangeID);
+		arduinoUart.resetUartStateLightState();
+		uartConnectCirSet(0);
 		uartDialog.cancel();
 	}
 	
@@ -1459,7 +1469,7 @@ public class Scratch extends Sprite {
 		//通信正常标志_wh
 		if(state == 1)
 		{
-			uartConnectCir.graphics.beginFill(0x80ff00);
+			uartConnectCir.graphics.beginFill(0x80ff00);				//绿灯
 			uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);
 			uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
 			uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
@@ -1469,7 +1479,7 @@ public class Scratch extends Sprite {
 		else if(state == 0)
 		{
 			
-			uartConnectCir.graphics.beginFill(0xff8060);
+			uartConnectCir.graphics.beginFill(0xff8060);				//红灯
 			uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);
 			uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
 			uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
@@ -1487,6 +1497,43 @@ public class Scratch extends Sprite {
 		}
 		else{
 		}
+	}
+	
+	
+	public function uartConnectCirSetFlow(state:Number):void{
+		switch(state)
+		{
+			case 0x00:
+				uartConnectCir.graphics.beginFill(0x80ff00);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);	
+				uartConnectCir.graphics.beginFill(0xff8060);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+				uartConnectCir.graphics.endFill();
+				addChild(uartConnectCir);
+				break;
+			case 0x01:
+				uartConnectCir.graphics.beginFill(0x80ff00);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
+				
+				uartConnectCir.graphics.beginFill(0xff8060);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);	
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+				uartConnectCir.graphics.endFill();
+				addChild(uartConnectCir);
+				break;
+			case 0x02:
+				uartConnectCir.graphics.beginFill(0x80ff00);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+				uartConnectCir.graphics.beginFill(0xff8060);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
+				uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);	
+				uartConnectCir.graphics.endFill();
+				addChild(uartConnectCir);
+				break;				
+		}
+
+		
 	}
 	
 	/*

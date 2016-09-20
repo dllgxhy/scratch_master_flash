@@ -128,6 +128,7 @@ public class ArduinoUart extends Sprite {
 	
 	private var checkDefaultScratchComIDCanGetHeartPackageTimer:Timer = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
 	private var checkDetectOKComHeartPackageTimer:Timer               = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
+	public  var uartStateLightTimer:Timer                             = new Timer(1000,0);   //串口状态显示灯，1S钟动一次，直到检测到可用串口或关闭串口		
 	public var IntervalID:uint       								  = 0x00; 				//查询UART是否工作正常定时器的ID号，可以用于清除定时器。
 	public var searchComChangeID:uint 								  = 0x00;
 	
@@ -137,6 +138,24 @@ public class ArduinoUart extends Sprite {
 		this.app = app;	
 		checkUartAvail(13);  //测试使用,正常使用时应删除	
 	}
+	
+	public function setuartStateLightTimer():void{
+		uartStateLightTimer.addEventListener(TimerEvent.TIMER,onTickUartStateLightTimer);
+		uartStateLightTimer.start();
+	}
+	
+	private var UartStateLightCount:int = 0x00;	
+	private function onTickUartStateLightTimer(event:TimerEvent):void{	
+		app.uartConnectCirSetFlow(UartStateLightCount%3);
+		UartStateLightCount ++;	
+	}
+	
+	public function resetUartStateLightState():void{
+		uartStateLightTimer.stop();
+		UartStateLightCount = 0x00;
+		app.xuhy_test_log(" resetUartStateLightState ");
+	}
+	
 	
 	/*
 	检测是否可以直接连接串口号为scratchComID(默认的)的串口，自动检测是否有相关的串口可以得到心跳包
@@ -157,9 +176,6 @@ public class ArduinoUart extends Sprite {
 		setUartDisconnect();										//时间到了 没有侦测到可用串口，则关闭已打开的串口
 		checkArduinoCableIsPlugIn();								//通过重新插拔Arduino检测可用串口
 	}
-
-	
-	
 
 	/*	
 	串口检测，输出扫描到的所有有效串口号
@@ -260,6 +276,9 @@ public class ArduinoUart extends Sprite {
 	*/
 	public function ShowUartStatusFlag(flag:Boolean):void{
 		if(flag){											//串口已正常连接
+//			app.arduinoLib.ArduinoUartIDFileIniFs.writeUTFBytes("COM" + scratchComID);
+//			app.arduinoLib.ArduinoUartIDFileIniFs.close();
+			resetUartStateLightState();
 			app.uartConnectCirSet(1);
 			app.uartAutoConnectButton.setLabel("COM"+scratchComID);
 		}

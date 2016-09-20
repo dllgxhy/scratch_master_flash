@@ -117,6 +117,8 @@ public class ArduinoLibrary extends Sprite{
 	public var ArduinoHeadFs:FileStream;//_wh
 	public var ArduinoLoopFile:File;//循环_wh
 	public var ArduinoLoopFs:FileStream;//_wh
+	public var ArduinoUartIDFileIni:File; // arduino 串口初始化设置
+	public var ArduinoUartIDFileIniFs:FileStream;
 	
 	public var ArduinoUs:Boolean = false;//超声波_wh
 	public var ArduinoSeg:Boolean = false;//数码管_wh
@@ -319,6 +321,7 @@ public class ArduinoLibrary extends Sprite{
 	}
 	
 	public function cancel():void {
+		app.arduinoUart.resetUartStateLightState();			//add by xuhy	
 		UpDialog.cancel();
 		if((upLoadFirmTimerCount < 70) && (upLoadFirmTimerCount != 0))
 			upLoadFirmTimerCount = 70;//表示停止_wh
@@ -343,6 +346,8 @@ public class ArduinoLibrary extends Sprite{
 		ArduinoFs = new FileStream();
 		ArduinoFileB= new File(File.userDirectory.resolvePath("AS-Block/ArduinoBuilder/arduinos.ino").nativePath);
 		ArduinoFsB = new FileStream();
+		ArduinoUartIDFileIni = new File(File.userDirectory.resolvePath("AS-Block/ArduinoBuilder/ArduinoUartIDFile.ini").nativePath);
+		ArduinoUartIDFileIniFs = new FileStream();
 		app.xuhy_test_log("GenerateFilesForScratch2ArduinoFirmwareCode");
 	} 
 	
