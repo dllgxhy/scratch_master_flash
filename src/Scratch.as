@@ -1361,12 +1361,18 @@ public class Scratch extends Sprite {
 	4) 如果新得到的scratchComID  无法得到心跳包，则该COM口可用，只是arduino的板子上没有固件。
 	*/
 	public function uartAutoConnectButtonDown():void{
-		var comID:String = "0";
 		if(arduinoUart.comStatus != 0x00)			//在串口没有连接上的状态时，按下Auto Connect的按键，则开始侦测可用串口
 		{
-			arduinoLib.ArduinoUartIDFileIniFs.open(arduinoLib.ArduinoUartIDFileIni,FileMode.READ);
+			arduinoLib.ArduinoUartIDFileIniFs.open(arduinoLib.ArduinoUartIDFileIni,FileMode.UPDATE);
 			arduinoLib.ArduinoUartIDFileIniFs.position = 0;
-			comID = arduinoLib.ArduinoUartIDFileIniFs.readMultiByte(arduinoLib.ArduinoUartIDFileIniFs.bytesAvailable,'utf-8');
+			try
+			{
+				arduinoUart.scratchComID = arduinoLib.ArduinoUartIDFileIniFs.readInt();
+			}
+			catch (EOFError){
+				arduinoLib.ArduinoUartIDFileIniFs.writeInt(arduinoUart.scratchComID);
+			}
+			
 			arduinoUart.checkDefaultScratchComIDCanGetHeartPackage();
 			arduinoUart.setuartStateLightTimer();
 			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + arduinoUart.comStatus);

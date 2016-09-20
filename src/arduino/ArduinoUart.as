@@ -63,10 +63,13 @@ import flash.utils.*;
 import flash.events.TimerEvent;
 import flash.display.Shape;
 
+import flash.filesystem.FileStream;
+import flash.filesystem.FileMode;
+import flash.filesystem.File;
+
 public class ArduinoUart extends Sprite {
 	
 	public var arduinoUart:ArduinoConnector         = new ArduinoConnector();	    //新建串口类
-//	public var arduinoUart:ArduinoConnector;	    //新建串口类
 	public var app:Scratch ;
 
 	public  var scratchComID:int                    = 0x01;					//当前选中打开的COM口,COM口从1开始计数
@@ -128,7 +131,7 @@ public class ArduinoUart extends Sprite {
 	
 	private var checkDefaultScratchComIDCanGetHeartPackageTimer:Timer = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
 	private var checkDetectOKComHeartPackageTimer:Timer               = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
-	public  var uartStateLightTimer:Timer                             = new Timer(1000,0);   //串口状态显示灯，1S钟动一次，直到检测到可用串口或关闭串口		
+	public  var uartStateLightTimer:Timer                             = new Timer(500,0);   //串口状态显示灯，1S钟动一次，直到检测到可用串口或关闭串口		
 	public var IntervalID:uint       								  = 0x00; 				//查询UART是否工作正常定时器的ID号，可以用于清除定时器。
 	public var searchComChangeID:uint 								  = 0x00;
 	
@@ -274,10 +277,17 @@ public class ArduinoUart extends Sprite {
 	/*
 	*状态栏中按钮和灯的显示状态
 	*/
+	private var ArduinoUartIDFileIniFsWriteSuccess:Boolean = false;
+	private var scratchComIDWriteToFile:int                = 0x00;
 	public function ShowUartStatusFlag(flag:Boolean):void{
 		if(flag){											//串口已正常连接
-//			app.arduinoLib.ArduinoUartIDFileIniFs.writeUTFBytes("COM" + scratchComID);
-//			app.arduinoLib.ArduinoUartIDFileIniFs.close();
+			if(scratchComIDWriteToFile != scratchComID)
+			{
+				app.arduinoLib.ArduinoUartIDFileIniFs.open(app.arduinoLib.ArduinoUartIDFileIni,FileMode.UPDATE);
+				app.arduinoLib.ArduinoUartIDFileIniFs.writeInt(scratchComID);
+				app.arduinoLib.ArduinoUartIDFileIniFs.close();
+				scratchComIDWriteToFile = scratchComID;
+			}
 			resetUartStateLightState();
 			app.uartConnectCirSet(1);
 			app.uartAutoConnectButton.setLabel("COM"+scratchComID);
