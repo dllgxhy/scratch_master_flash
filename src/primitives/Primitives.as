@@ -45,82 +45,30 @@ public class Primitives {
 
 	public function addPrimsTo(primTable:Dictionary):void {
 		// operators
-		primTable["+"]				= function(b:*):* { return interp.numarg(b, 0) + interp.numarg(b, 1) };
-		primTable["-"]				= function(b:*):* { return interp.numarg(b, 0) - interp.numarg(b, 1) };
-		primTable["*"]				= function(b:*):* { return interp.numarg(b, 0) * interp.numarg(b, 1) };
-		primTable["/"]				= function(b:*):* { return interp.numarg(b, 0) / interp.numarg(b, 1) };
-		primTable["randomFrom:to:"]	= primRandom;
-		primTable["<"]				= function(b:*):*{
-			if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
-			{
-				app.arduinoLib.ArduinoMathNum++;
-				interp.arg(b, 0);
-				app.arduinoLib.ArduinoMathNum--;
-				if(app.arduinoLib.ArduinoReadFlag == true)
-				{
-					app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + app.arduinoLib.ArduinoReadStr[0] + ") < (";
-					app.arduinoLib.ArduinoReadFlag = false;
-				}
-				else
-					if(app.arduinoLib.ArduinoMathFlag == true)
-					{
-						app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum+1] + ") < (";
-						app.arduinoLib.ArduinoMathFlag = false;
-					}
-					else
-						if(app.arduinoLib.ArduinoValueFlag == true)
-						{
-							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + app.arduinoLib.ArduinoValueStr + ") < (";
-							app.arduinoLib.ArduinoValueFlag = false;
-						}
-						else
-							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + interp.numarg(b, 0) + ") < (";
-				app.arduinoLib.ArduinoMathNum++;
-				interp.arg(b, 1);
-				app.arduinoLib.ArduinoMathNum--;
-				if(app.arduinoLib.ArduinoReadFlag == true)
-				{
-					app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoReadStr[0] + "))";
-					app.arduinoLib.ArduinoReadFlag = false;
-				}
-				else
-					if(app.arduinoLib.ArduinoMathFlag == true)
-					{
-						app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum+1] + "))";
-						app.arduinoLib.ArduinoMathFlag = false;
-					}
-					else
-						if(app.arduinoLib.ArduinoValueFlag == true)
-						{
-							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoValueStr + "))";
-							app.arduinoLib.ArduinoValueFlag = false;
-						}
-						else
-							app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += interp.numarg(b, 1) + "))";
-				app.arduinoLib.ArduinoMathFlag = true;
-			}
-			else
-				return compare(interp.arg(b, 0), interp.arg(b, 1)) < 0
-		};
-		primTable["="]				= function(b:*):* { return compare(interp.arg(b, 0), interp.arg(b, 1)) == 0 };
-		primTable[">"]				= function(b:*):* { return compare(interp.arg(b, 0), interp.arg(b, 1)) > 0 };
-		primTable["&"]				= function(b:*):* { return interp.arg(b, 0) && interp.arg(b, 1) };
-		primTable["|"]				= function(b:*):* { return interp.arg(b, 0) || interp.arg(b, 1) };
-		primTable["not"]			= function(b:*):* { return !interp.arg(b, 0) };
+		primTable["+"]				= function(b:*):* { return app.arduinoLib.funtionAdd(b); };
+		primTable["-"]				= function(b:*):* { return app.arduinoLib.functionSubtracting(b); };
+		primTable["*"]				= function(b:*):* { return app.arduinoLib.functionMultiply(b); };
+		primTable["/"]				= function(b:*):* { return app.arduinoLib.functionDivision(b); };
+		primTable["randomFrom:to:"]	= function(b:*):* { return app.arduinoLib.function_randomFromTo(b);};  
+		primTable["<"]				= function(b:*):* { return app.arduinoLib.funtionLessThan(b);};
+		primTable["="]				= function(b:*):* { return app.arduinoLib.function_equal(b);};
+		primTable[">"]				= function(b:*):* { return app.arduinoLib.funtion_MoreThan(b);};
+		primTable["&"]				= function(b:*):* { return app.arduinoLib.funtion_And(b); };
+		primTable["|"]				= function(b:*):* { return app.arduinoLib.funtion_Or(b);};
+		primTable["not"]			= function(b:*):* { return app.arduinoLib.funtion_Not(b); };
 		primTable["abs"]			= function(b:*):* { return Math.abs(interp.numarg(b, 0)) };
 		primTable["sqrt"]			= function(b:*):* { return Math.sqrt(interp.numarg(b, 0)) };
 
-		primTable["concatenate:with:"]	= function(b:*):* { return ("" + interp.arg(b, 0) + interp.arg(b, 1)).substr(0, 10240); };
-		primTable["letter:of:"]			= primLetterOf;
-		primTable["stringLength:"]		= function(b:*):* { return String(interp.arg(b, 0)).length };
-
-		primTable["%"]					= primModulo;
-		primTable["rounded"]			= function(b:*):* { return Math.round(interp.numarg(b, 0)) };
+		primTable["concatenate:with:"]	= function(b:*):* { return app.arduinoLib.funtion_concatenate_with(b);};
+		primTable["letter:of:"]			= function(b:*):* { return app.arduinoLib.function_primLetterOf(b);};
+		primTable["stringLength:"]		= function(b:*):* { return app.arduinoLib.function_StringLength(b);};
+		primTable["%"]					= function(b:*):* { return app.arduinoLib.function_Remainder(b);};	
+		primTable["rounded"]			= function(b:*):* { return app.arduinoLib.function_Rounded(b);};
 		primTable["computeFunction:of:"] = primMathFunction;
 
 		// clone
-		primTable["createCloneOf"]		= primCreateCloneOf;
-		primTable["deleteClone"]		= primDeleteClone;
+		primTable["createCloneOf"]		= function(b:*):* { return app.arduinoLib.function_CreateCloneOf(b);}; 
+		primTable["deleteClone"]		= function(b:*):* { return app.arduinoLib.function_DeleteClone(b);}; 
 		primTable["whenCloned"]			= interp.primNoop;
 
 		// testing (for development)
@@ -142,7 +90,7 @@ public class Primitives {
 		new ListPrims(app, interp).addPrimsTo(primTable);
 	}
 
-	private function primRandom(b:Block):Number {
+	public function primRandom(b:Block):Number {
 		var n1:Number = interp.numarg(b, 0);
 		var n2:Number = interp.numarg(b, 1);
 		var low:Number = (n1 <= n2) ? n1 : n2;
@@ -160,14 +108,14 @@ public class Primitives {
 		return (Math.random() * (hi - low)) + low;
 	}
 
-	private function primLetterOf(b:Block):String {
+	public function primLetterOf(b:Block):String {
 		var s:String = interp.arg(b, 1);
 		var i:int = interp.numarg(b, 0) - 1;
 		if ((i < 0) || (i >= s.length)) return "";
 		return s.charAt(i);
 	}
 
-	private function primModulo(b:Block):Number {
+	public function primModulo(b:Block):Number {
 		var n:Number = interp.numarg(b, 0);
 		var modulus:Number = interp.numarg(b, 1);
 		var result:Number = n % modulus;
@@ -177,13 +125,15 @@ public class Primitives {
 
 	private function primMathFunction(b:Block):Number {
 		var op:* = interp.arg(b, 0);
+		app.arduinoLib.ArduinoMathNum++;
 		var n:Number = interp.numarg(b, 1);
+		app.arduinoLib.ArduinoMathNum--;
 		switch(op) {
-		case "abs": return Math.abs(n);
-		case "floor": return Math.floor(n);
-		case "ceiling": return Math.ceil(n);
+		case "abs": return app.arduinoLib.function_Abs(n);
+		case "floor": return app.arduinoLib.function_Floor(n);
+		case "ceiling": return app.arduinoLib.function_Ceiling(n);
 		case "int": return n - (n % 1); // used during alpha, but removed from menu
-		case "sqrt": return Math.sqrt(n);
+		case "sqrt": return app.arduinoLib.function_Sqrt(n);
 		case "sin": return Math.sin((Math.PI * n) / 180);
 		case "cos": return Math.cos((Math.PI * n) / 180);
 		case "tan": return Math.tan((Math.PI * n) / 180);
@@ -225,7 +175,7 @@ public class Primitives {
 		return 1;
 	}
 
-	private function primCreateCloneOf(b:Block):void {
+	public function primCreateCloneOf(b:Block):void {
 		var objName:String = interp.arg(b, 0);
 		var proto:ScratchSprite = app.stagePane.spriteNamed(objName);
 		if ('_myself_' == objName) proto = interp.activeThread.target;
@@ -248,7 +198,7 @@ public class Primitives {
 		app.runtime.cloneCount++;
 	}
 
-	private function primDeleteClone(b:Block):void {
+	public function primDeleteClone(b:Block):void {
 		var clone:ScratchSprite = interp.targetSprite();
 		if ((clone == null) || (!clone.isClone) || (clone.parent == null)) return;
 		if (clone.bubble && clone.bubble.parent) clone.bubble.parent.removeChild(clone.bubble);

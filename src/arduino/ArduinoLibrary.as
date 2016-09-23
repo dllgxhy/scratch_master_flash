@@ -32,14 +32,12 @@ import flash.events.TimerEvent;
 import flash.events.ProgressEvent;
 
 import translation.Translator;
-import scratch.ScratchStage;
 
 import uiwidgets.DialogBox;
 import flash.filesystem.FileStream;
 import flash.filesystem.FileMode;
 import flash.filesystem.File;
-import blocks.Block;
-import flash.net.FileReference;
+import primitives.Primitives;
 
 public class ArduinoLibrary extends Sprite{
 	
@@ -70,8 +68,6 @@ public class ArduinoLibrary extends Sprite{
 	public var arduinoAIOPin3:int = 0x00;
 	public var arduinoAIOPin4:int = 0x00;
 	public var arduinoAIOPin5:int = 0x00;
-	
-	
 	
 	//固件下载
 	public var file0:File;
@@ -506,6 +502,1242 @@ public class ArduinoLibrary extends Sprite{
 		process.standardInput.writeUTFBytes("CH341SER"+"\r\n");//运行CH341SER命令，调用驱动
 		process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//cmd返回数据处理事件_wh	
 		DriveFlag = 1;	
+	}
+	
+	
+	
+	
+	
+	
+	/**************************************************************************************************/
+	/* Model Math*/
+	/* function add*/
+	public function funtionAdd(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.numarg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true){
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") + (";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") + (";
+					ArduinoMathFlag = false;
+				}
+				else{
+					if(ArduinoValueFlag == true){
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") + (";
+						ArduinoValueFlag = false;
+					}
+					else{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") + (";
+					}
+				}	
+			}							
+			ArduinoMathNum ++;
+			app.interp.numarg(b, 1);
+			ArduinoMathNum --;
+			if(ArduinoReadFlag == true){
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else{
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+					}
+				}		
+			}
+				
+			ArduinoMathFlag = true;
+			
+		}
+		else{
+			return app.interp.numarg(b, 0) + app.interp.numarg(b, 1);
+		}			
+	} 
+	
+	/* Model Math*/
+	/* function subtracting*/	
+	public function functionSubtracting(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.numarg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") - (";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") - (";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") - (";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") - (";
+					}
+				}
+			}				
+			ArduinoMathNum ++;
+			app.interp.numarg(b, 1);
+			ArduinoMathNum --;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+					}	
+				}		
+				ArduinoMathFlag = true;
+			}
+				
+		}
+		else
+			return app.interp.numarg(b, 0) - app.interp.numarg(b, 1);
+	}
+
+	/* Model Math*/
+	/* function multiply*/	
+	public function functionMultiply(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.numarg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") * (";
+				ArduinoReadFlag = false;
+			}
+			else
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") * (";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") * (";
+						ArduinoValueFlag = false;
+					}
+					else{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") * (";
+					}	
+				}
+			ArduinoMathNum++;
+			app.interp.numarg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+					}	
+					ArduinoMathFlag = true;
+				}	
+			}
+		}
+		else{
+			return app.interp.numarg(b, 0) * app.interp.numarg(b, 1);
+		}
+	}
+
+	/* Model Math*/
+	/* function division*/	
+	public function functionDivision(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.numarg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") / (";
+				ArduinoReadFlag = false;
+			}
+			else
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") / (";
+					ArduinoMathFlag = false;
+				}
+				else
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") / (";
+						ArduinoValueFlag = false;
+					}
+					else
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") / (";
+			ArduinoMathNum++;
+			app.interp.numarg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+			ArduinoMathFlag = true;
+		}
+		else
+			return app.interp.numarg(b, 0) / app.interp.numarg(b, 1);
+	}
+	
+	/*Model Operator*/
+	/*function randomFrom:to:*/
+	public function function_randomFromTo(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.numarg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "random(" + ArduinoReadStr[0] + ",";
+				ArduinoReadFlag = false;
+			}
+			else
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "random(" + ArduinoMathStr[ArduinoMathNum+1] + ",";
+					ArduinoMathFlag = false;
+				}
+				else
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "random(" + ArduinoValueStr + ",";
+						ArduinoValueFlag = false;
+					}
+					else
+						ArduinoMathStr[ArduinoMathNum] = "random(" + app.interp.numarg(b, 0) + ",";
+			ArduinoMathNum++;
+			app.interp.numarg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + ")";
+				ArduinoReadFlag = false;
+			}
+			else
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + ")";
+					ArduinoMathFlag = false;
+				}
+				else
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + ")";
+						ArduinoValueFlag = false;
+					}
+					else
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + ")";
+			ArduinoMathFlag = true;
+		}
+		else
+			return app.primitive.primRandom(b);
+	}	
+	
+	
+	/*Model Operator*/
+	/*function "="  function_equal*/
+	public function function_equal(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.arg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") == (";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") == (";
+					ArduinoMathFlag = false;
+				}
+				else{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") == (";
+						ArduinoValueFlag = false;
+					}
+					else{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") == (";
+					}
+				}
+			}
+			ArduinoMathNum++;
+			app.interp.arg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else{
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+					}
+				}
+			}
+			ArduinoMathFlag = true;
+		}
+		else
+		{
+			return (Primitives.compare(app.interp.arg(b, 0), app.interp.arg(b, 1)) == 0);
+		}
+	}
+	
+	/*Model Operator*/
+	/*function "<" lessthan*/
+	public function funtionLessThan(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.arg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true){
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") < (";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[app.arduinoLib.ArduinoMathNum] = "(" + "(" + app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum+1] + ") < (";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") < (";
+						ArduinoValueFlag = false;
+					}
+					else
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") < (";
+				}		
+			}
+				
+			ArduinoMathNum++;
+			app.interp.arg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.arduinoLib.ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else{
+						app.arduinoLib.ArduinoMathStr[app.arduinoLib.ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+					}	
+				}	
+			}
+				
+			ArduinoMathFlag = true;
+		}
+		else{
+			return Primitives.compare(app.interp.arg(b, 0), app.interp.arg(b, 1)) < 0
+		}
+	}
+	
+	
+	/*Model Operator*/
+	/*function ">" morethan*/
+	public function funtion_MoreThan(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.arg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") > (";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") > (";
+					ArduinoMathFlag = false;
+				}
+				else{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") > (";
+						ArduinoValueFlag = false;
+					}
+					else{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") > (";
+					}
+				}
+			}
+			ArduinoMathNum++;
+			app.interp.arg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else{
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+					}
+				}
+			}
+			ArduinoMathFlag = true;
+		}
+		else{
+			return Primitives.compare(app.interp.arg(b, 0), app.interp.arg(b, 1)) > 0
+		}
+	}
+	
+	/*Model Operator*/
+	/*function "&" And*/
+	public function funtion_And(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.arg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") && (";
+				ArduinoReadFlag = false;
+			}
+			else{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") && (";
+					ArduinoMathFlag = false;
+				}
+			}
+			ArduinoMathNum++;
+			app.interp.arg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+			}	
+			ArduinoMathFlag = true;
+		}
+		else{
+			return (app.interp.arg(b, 0) && app.interp.arg(b, 1));
+		}
+	}
+	
+	/*Model Operator*/
+	/*function "|" Or*/
+	public function funtion_Or(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.arg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") || (";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") || (";
+					ArduinoMathFlag = false;
+				}
+			}
+			ArduinoMathNum++;
+			app.interp.arg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+			}
+			ArduinoMathFlag = true;
+		}
+		else
+		{
+			return (app.interp.arg(b, 0) || app.interp.arg(b, 1));
+		}
+	}
+	
+	/*Model Operator*/
+	/*function "~" NOT*/
+	public function funtion_Not(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.arg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "!(" + ArduinoReadStr[0] + ")";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "!(" + ArduinoMathStr[ArduinoMathNum+1] + ")";
+					ArduinoMathFlag = false;
+				}
+			}
+			ArduinoMathFlag = true;
+		}
+		else
+		{
+			return (!app.interp.arg(b, 0));
+		}	
+	}
+	
+	/*Model Operator*/
+	/*function "concatenate:with:" */
+	public function funtion_concatenate_with(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			DialogBox.warnconfirm(Translator.map("can't support this block,please remove it"),Translator.map("jion ... ..."), null, app.stage);//软件界面中部显示提示框_wh
+		}
+		else
+		{
+			return (("" + app.interp.arg(b, 0) + app.interp.arg(b, 1)).substr(0, 10240));
+		}
+	}
+	
+	/*Model Operator*/
+	/*function "primLetterOf" */
+	public function function_primLetterOf(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			DialogBox.warnconfirm(Translator.map("can't support this block,please remove it"),Translator.map("letter ...of ..."), null, app.stage);//软件界面中部显示提示框_wh
+		}
+		else
+		{
+			return app.primitive.primLetterOf(b);
+		}
+	}
+	
+	/*Model Operator*/
+	/*function "stringLength" */
+	public function function_StringLength(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			DialogBox.warnconfirm(Translator.map("can't support this block,please remove it"),Translator.map("length of ..."), null, app.stage);//软件界面中部显示提示框_wh
+		}
+		else
+		{
+			return (String(app.interp.arg(b, 0)).length);
+		}
+	}
+	
+	
+	/*Model Operator*/
+	/*function "%"   remainder */
+	public function function_Remainder(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.numarg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoReadStr[0] + ") % (";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoMathStr[ArduinoMathNum+1] + ") % (";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + ArduinoValueStr + ") % (";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] = "(" + "(" + app.interp.numarg(b, 0) + ") % (";
+					}
+				}
+			}
+			ArduinoMathNum++;
+			app.interp.numarg(b, 1);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] += ArduinoReadStr[0] + "))";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] += ArduinoMathStr[ArduinoMathNum+1] + "))";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] += ArduinoValueStr + "))";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] += app.interp.numarg(b, 1) + "))";
+					}
+				}
+			}
+			ArduinoMathFlag = true;
+		}
+		else
+		{
+			return app.primitive.primModulo(b);
+		}
+	}
+	
+	
+	
+	/*Model Operator*/
+	/*function "rounded"   rounded */
+	public function function_Rounded(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum++;
+			app.interp.numarg(b, 0);
+			ArduinoMathNum--;
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "round(" + ArduinoReadStr[0] + ")";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "round(" + ArduinoMathStr[ArduinoMathNum+1] + ")";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "round(" + ArduinoValueStr + ")";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] = "round(" + app.interp.numarg(b, 0) + ")";
+					}
+				}
+			}
+			ArduinoMathFlag = true;
+		}
+		else
+		{
+			return Math.round(app.interp.numarg(b, 0));
+		}
+	}
+	
+
+	/*Model Operator*/
+	/*function "createCloneOf"   createCloneOf */
+	public function function_CreateCloneOf(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			DialogBox.warnconfirm(Translator.map("can't support this block,please remove it"),Translator.map("create clone ..."), null, app.stage);//软件界面中部显示提示框_wh
+		}
+		else
+		{
+			app.primitive.primCreateCloneOf(b);
+		}
+	}
+	
+	
+	/*Model Operator*/
+	/*function "deleteClone"   deleteClone */
+	public function function_DeleteClone(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			DialogBox.warnconfirm(Translator.map("can't support this block,please remove it"),Translator.map("delete clone"), null, app.stage);//软件界面中部显示提示框_wh
+		}
+		else
+			app.primitive.primDeleteClone(b);	
+	}
+	
+	/*Model Operator*/
+	/*function "abs"   abs */
+	public function function_Abs(n:Number):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "abs(" + ArduinoReadStr[0] + ")";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "abs(" + ArduinoMathStr[ArduinoMathNum+1] + ")";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "abs(" + ArduinoValueStr + ")";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] = "abs(" + n + ")";
+					}
+				}
+			}
+			ArduinoMathFlag = true; 
+		}
+		else{
+			return Math.abs(n);
+		}
+	}
+	
+	/*Model Operator*/
+	/*function "floor"   floor */
+	public function function_Floor(n:Number):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "floor(" + ArduinoReadStr[0] + ")";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "floor(" + ArduinoMathStr[ArduinoMathNum+1] + ")";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "floor(" + ArduinoValueStr + ")";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] = "floor(" + n + ")";
+					}
+				}
+			}
+			ArduinoMathFlag = true; 
+		}
+		else
+		{
+			return Math.floor(n);
+		}
+	}
+	
+	
+	/*Model Operator*/
+	/*function "ceiling"   ceiling */
+	public function function_Ceiling(n:Number):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "ceil(" + ArduinoReadStr[0] + ")";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "ceil(" + ArduinoMathStr[ArduinoMathNum+1] + ")";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "ceil(" + ArduinoValueStr + ")";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] = "ceil(" + n + ")";
+					}
+				}
+			}
+			ArduinoMathFlag = true; 
+		}
+		else
+			return Math.ceil(n);
+	}
+	
+	/*Model Operator*/
+	/*function "sqrt"   sqrt */
+	
+	
+	public function function_Sqrt(n:Number):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			if(ArduinoReadFlag == true)
+			{
+				ArduinoMathStr[ArduinoMathNum] = "sqrt(" + ArduinoReadStr[0] + ")";
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					ArduinoMathStr[ArduinoMathNum] = "sqrt(" + ArduinoMathStr[ArduinoMathNum+1] + ")";
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoValueFlag == true)
+					{
+						ArduinoMathStr[ArduinoMathNum] = "sqrt(" + ArduinoValueStr + ")";
+						ArduinoValueFlag = false;
+					}
+					else
+					{
+						ArduinoMathStr[ArduinoMathNum] = "sqrt(" + n + ")";
+					}
+				}
+			}
+			ArduinoMathFlag = true; 
+		}
+		else
+		{
+			return Math.sqrt(n);
+		}
+	}
+	/**************************************************************************************************/
+	/* Model Control*/
+	/* function doIF*/
+	public function functionDoIf(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum = 0;
+			app.interp.arg(b, 0);
+			if(ArduinoReadFlag == true)
+			{
+				if(ArduinoLoopFlag == true)
+				{
+					ArduinoLoopFs.writeUTFBytes("if(" + ArduinoReadStr[0] + ")" + " {" + '\n');
+					ArduinoReadFlag = false;
+				}
+				else
+				{
+					ArduinoDoFs.writeUTFBytes("if(" + ArduinoReadStr[0] + ")" + " {" + '\n');
+					ArduinoReadFlag = false;
+				}
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					if(ArduinoLoopFlag == true)
+					{
+						ArduinoLoopFs.writeUTFBytes("if(" + ArduinoMathStr[0] + ")" + " {" + '\n');
+						ArduinoMathFlag = false;
+					}
+					else
+					{
+						ArduinoDoFs.writeUTFBytes("if(" + ArduinoMathStr[0] + ")" + " {" + '\n');
+						ArduinoMathFlag = false;
+					}
+				}
+			}
+			app.interp.startCmdList(b.subStack1);
+			ArduinoBracketFlag ++;
+		}
+		else
+		{
+			var BF:Boolean = app.interp.arg(b, 0);
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			if(BF)
+				app.interp.startCmdList(b.subStack1);
+		}
+	}
+
+	/* Model Control*/
+	/* function wait:wait:elapsed:from:*/
+	public function primWait(b:*):* {
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum = 0;
+			app.interp.numarg(b, 0);
+			if(ArduinoValueFlag == true)
+			{
+				if(ArduinoLoopFlag == true)
+					ArduinoLoopFs.writeUTFBytes("delay(" + "1000*" + ArduinoValueStr + ");" + '\n');
+				else
+					ArduinoDoFs.writeUTFBytes("delay(" + "1000*" + ArduinoValueStr + ");" + '\n');
+				ArduinoValueFlag = false;
+			}
+			else
+				if(ArduinoMathFlag == true)
+				{
+					if(ArduinoLoopFlag == true)
+						ArduinoLoopFs.writeUTFBytes("delay(" + "1000*" + ArduinoMathStr[0] + ");" + '\n');
+					else
+						ArduinoDoFs.writeUTFBytes("delay(" + "1000*" + ArduinoMathStr[0] + ");" + '\n');
+					ArduinoMathFlag = false;
+				}
+				else
+					if(ArduinoReadFlag == true)
+					{
+						if(ArduinoLoopFlag == true)
+							ArduinoLoopFs.writeUTFBytes("delay(" + "1000*" + ArduinoReadStr[0] + ");" + '\n');
+						else
+							ArduinoDoFs.writeUTFBytes("delay(" + "1000*" + ArduinoReadStr[0] + ");" + '\n');
+						ArduinoReadFlag = false;
+					}
+					else
+					{
+						if(ArduinoLoopFlag == true)
+							ArduinoLoopFs.writeUTFBytes("delay(" + "1000*" + app.interp.numarg(b, 0) + ");" + '\n');
+						else
+							ArduinoDoFs.writeUTFBytes("delay(" + "1000*" + app.interp.numarg(b, 0) + ");" + '\n');
+					}
+		}
+		else
+		{
+			if (app.interp.activeThread.firstTime) {
+				app.interp.startTimer(app.interp.numarg(b, 0));
+				app.interp.redraw();
+			} else app.interp.checkTimer();
+		}
+	}
+	
+	/* Model Control*/
+	/* function doIfElse*/
+	public function function_doIfElse(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum = 0;
+			app.interp.arg(b, 0);
+			if(ArduinoReadFlag == true)
+			{
+				if(ArduinoLoopFlag == true)
+				{
+					ArduinoLoopFs.writeUTFBytes("if(" + ArduinoReadStr[0] + ")" + " {" + '\n');
+					ArduinoReadFlag = false;
+				}
+				else
+				{
+					ArduinoDoFs.writeUTFBytes("if(" + ArduinoReadStr[0] + ")" + " {" + '\n');
+					ArduinoReadFlag = false;
+				}
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					if(ArduinoLoopFlag == true)
+					{
+						ArduinoLoopFs.writeUTFBytes("if(" + ArduinoMathStr[0] + ")" + " {" + '\n');
+						ArduinoMathFlag = false;
+					}
+					else
+					{
+						ArduinoDoFs.writeUTFBytes("if(" + ArduinoMathStr[0] + ")" + " {" + '\n');
+						ArduinoMathFlag = false;
+					}
+				}
+			}
+			ArduinoMathNum = 0;
+			ArduinoIEFlagAll ++;
+			app.interp.startCmdList(b.subStack1);
+			if(ArduinoIEFlagAll > (ArduinoIEFlag2+1))
+				ArduinoIEFlagIE = true;
+			ArduinoIfElseB[ArduinoIEFlag ++] = b.subStack2;//在stepActiveThread中处理_wh
+			ArduinoIEFlag2 ++;
+		}
+		else
+		{
+			var BF:Boolean = app.interp.arg(b, 0);
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			if(BF)
+				app.interp.startCmdList(b.subStack1);
+			else
+				app.interp.startCmdList(b.subStack2);
+		}
+	}
+	
+	/* Model Control*/
+	/* function doWaitUntil*/
+	public function function_doWaitUntil(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum = 0;
+			app.interp.arg(b, 0);
+			if(ArduinoReadFlag == true)
+			{
+				if(ArduinoLoopFlag == true)
+				{
+					ArduinoLoopFs.writeUTFBytes("while(!" + ArduinoReadStr[0] + ");" + '\n');
+				}
+				else
+				{
+					ArduinoDoFs.writeUTFBytes("while(!" + ArduinoReadStr[0] + ");" + '\n');
+				}
+				ArduinoReadFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					if(ArduinoLoopFlag == true)
+					{
+						ArduinoLoopFs.writeUTFBytes("while(!" + ArduinoMathStr[0] + ");" + '\n');
+					}
+					else
+					{
+						ArduinoDoFs.writeUTFBytes("while(!" + ArduinoMathStr[0] + ");" + '\n');
+					}
+					ArduinoMathFlag = false;
+				}
+			}
+		}
+		else
+		{
+			var BF:Boolean = !app.interp.arg(b, 0);
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			if(BF)
+				app.interp.yield = true;
+		}
+	}
+	
+	
+	/* Model Control*/
+	/* function doUntil*/
+	public function function_doUntil(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum = 0;
+			app.interp.arg(b, 0);
+			if(ArduinoReadFlag == true)
+			{
+				if(ArduinoLoopFlag == true)
+				{
+					ArduinoLoopFs.writeUTFBytes("while(!" + ArduinoReadStr[0] + ")" + " {" + '\n');
+					ArduinoReadFlag = false;
+				}
+				else
+				{
+					ArduinoDoFs.writeUTFBytes("while(!" + ArduinoReadStr[0] + ")" + " {" + '\n');
+					ArduinoReadFlag = false;
+				}
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					if(ArduinoLoopFlag == true)
+					{
+						ArduinoLoopFs.writeUTFBytes("while(!" + ArduinoMathStr[0] + ")" + " {" + '\n');
+						ArduinoMathFlag = false;
+					}
+					else
+					{
+						ArduinoDoFs.writeUTFBytes("while(!" + ArduinoMathStr[0] + ")" + " {" + '\n');
+						ArduinoMathFlag = false;
+					}
+				}
+			}
+			app.interp.startCmdList(b.subStack1);
+			ArduinoBracketFlag ++;
+		}
+		else
+		{
+			var BF:Boolean = !app.interp.arg(b, 0);
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			if(BF)
+				app.interp.startCmdList(b.subStack1, true);
+		}
+	}
+	
+	
+	/* Model Control*/
+	/* function doUntil*/
+	public function  function_stopAll(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			DialogBox.warnconfirm(Translator.map("can't support this block,please remove it"),Translator.map("stop all"), null, app.stage);//软件界面中部显示提示框_wh
+		}
+		else
+		{
+			app.runtime.stopAll(); app.interp.yield = true;
+		}
+	}
+	
+	/* Model Control*/
+	/* function doUntil*/
+	public function  function_stopScripts(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			DialogBox.warnconfirm(Translator.map("can't support this block,please remove it"),Translator.map("stop ..."), null, app.stage);//软件界面中部显示提示框_wh
+		}
+		else
+			app.interp.primStop(b);
 	}
 	
 }}

@@ -364,37 +364,37 @@ public class CfunPrims {
 			case "double":meter = 2000;break;
 			case "stop":meter = 0;break;
 			default:break;
-		}/*
+		}
 		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
 		{
-			app.ArduinoBuz = true;
-			app.ArduinoMathNum = 0;
+			app.arduinoLib.ArduinoBuz = true;
+			app.arduinoLib.ArduinoMathNum = 0;
 			
-			if(app.ArduinoBlock[ID_SetMUS][pin] == 0)
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetMUS][pin] == 0)
 			{
-				app.ArduinoHeadFs.writeUTFBytes("CFunBuzzer buzzer_cfun" + pin + "(" + pin + ");" + '\n');
-				app.ArduinoBlock[ID_SetMUS][pin] = 1;
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("CFunBuzzer buzzer_cfun" + pin + "(" + pin + ");" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetMUS][pin] = 1;
 			}
 			
-			if(app.ArduinoPin[pin] == 0)
+			if(app.arduinoLib.ArduinoPin[pin] == 0)
 			{
-				app.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",OUTPUT);" + '\n');
-				app.ArduinoPin[pin] = 2;
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin] = 2;
 			}
 			
-			if(app.ArduinoLoopFlag == true)
+			if(app.arduinoLib.ArduinoLoopFlag == true)
 			{
-				app.ArduinoLoopFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
-				app.ArduinoLoopFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
 			}
 			else
 			{
-				app.ArduinoDoFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
-				app.ArduinoDoFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
 			}
 		}
 		else//正常上位机运行模式_wh
-		{*/
+		{
 			var numf:Array = new Array();
 			var numfs:ByteArray = new ByteArray();
 			numfs.writeShort(tone);
@@ -408,18 +408,8 @@ public class CfunPrims {
 			numfms.position = 0;
 			numf[3] = numfms.readByte();
 			numf[4] = numfms.readByte();
-			/*
-			app.arduino.writeByte(0xff);
-			app.arduino.writeByte(0x55);
-			app.arduino.writeByte(app.arduinoUart.ID_SetMUS);
-			app.arduino.writeByte(pin);
-			app.arduino.writeByte(numf[0]);
-			app.arduino.writeByte(numf[1]);
-			app.arduino.writeByte(numfm[0]);
-			app.arduino.writeByte(numfm[1]);*/
 			app.arduinoUart.sendDataToUartBuffer(numf);
-//			app.CFunDelayms(5);//延时15ms_wh
-		//}
+		}
 	}
 	private function primSetLCD1602String(b:Block):void
 	{

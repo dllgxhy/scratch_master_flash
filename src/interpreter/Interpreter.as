@@ -79,7 +79,7 @@ public class Interpreter {
 	private var app:Scratch;
 	private var primTable:Dictionary;		// maps opcodes to functions
 	private var threads:Array = [];			// all threads
-	private var yield:Boolean;				// set true to indicate that active thread should yield control
+	public var yield:Boolean;				// set true to indicate that active thread should yield control
 	private var startTime:int;				// start time for stepThreads()
 	private var doRedraw:Boolean;
 	private var isWaiting:Boolean;
@@ -394,7 +394,7 @@ public class Interpreter {
 		return Number(n);
 	}
 
-	private function startCmdList(b:Block, isLoop:Boolean = false, argList:Array = null):void {
+	public function startCmdList(b:Block, isLoop:Boolean = false, argList:Array = null):void {
 		if (b == null) {
 			if (isLoop) yield = true;
 			return;
@@ -445,7 +445,7 @@ public class Interpreter {
 		primTable["whenKeyPressed"]		= primNoop;
 		primTable["whenClicked"]		= primNoop;
 		primTable["whenSceneStarts"]	= primNoop;
-		primTable["wait:elapsed:from:"]	= primWait;
+		primTable["wait:elapsed:from:"]	= app.arduinoLib.primWait;
 		primTable["doForever"]			= function(b:*):* { startCmdList(b.subStack1, true); };
 		primTable["doRepeat"]			= primRepeat;
 		primTable["broadcast:"]			= function(b:*):* { broadcast(arg(b, 0), false); }
@@ -453,14 +453,14 @@ public class Interpreter {
 		primTable["whenIReceive"]		= primNoop;
 		primTable["doForeverIf"]		= function(b:*):* { if (arg(b, 0)) startCmdList(b.subStack1, true); else yield = true; };
 		primTable["doForLoop"]			= primForLoop;
-		primTable["doIf"]				= function(b:*):* { if (arg(b, 0)) startCmdList(b.subStack1); };
-		primTable["doIfElse"]			= function(b:*):* { if (arg(b, 0)) startCmdList(b.subStack1); else startCmdList(b.subStack2); };
-		primTable["doWaitUntil"]		= function(b:*):* { if (!arg(b, 0)) yield = true; };
+		primTable["doIf"]				= function(b:*):* { app.arduinoLib.functionDoIf(b);};
+		primTable["doIfElse"]			= function(b:*):* { app.arduinoLib.function_doIfElse(b);};
+		primTable["doWaitUntil"]		= function(b:*):* { app.arduinoLib.function_doWaitUntil(b); };
 		primTable["doWhile"]			= function(b:*):* { if (arg(b, 0)) startCmdList(b.subStack1, true); };
-		primTable["doUntil"]			= function(b:*):* { if (!arg(b, 0)) startCmdList(b.subStack1, true); };
+		primTable["doUntil"]			= function(b:*):* { app.arduinoLib.function_doUntil(b); };
 		primTable["doReturn"]			= primReturn;
-		primTable["stopAll"]			= function(b:*):* { app.runtime.stopAll(); yield = true; };
-		primTable["stopScripts"]		= primStop;
+		primTable["stopAll"]			= function(b:*):* { app.arduinoLib.function_stopAll(b); };
+		primTable["stopScripts"]		= function(b:*):* { app.arduinoLib.function_stopScripts(b); };
 		primTable["warpSpeed"]			= primOldWarpSpeed;
 
 		// procedures
@@ -562,20 +562,20 @@ public class Interpreter {
 		}
 	}
 
-	private function primStop(b:Block):void {
+	public function primStop(b:Block):void {
 		var type:String = arg(b, 0);
 		if (type == 'all') { app.runtime.stopAll(); yield = true }
 		if (type == 'this script') primReturn(b);
 		if (type == 'other scripts in sprite') stopThreadsFor(activeThread.target, true);
 		if (type == 'other scripts in stage') stopThreadsFor(activeThread.target, true);
 	}
-
+	/* //xuhy 删除
 	private function primWait(b:Block):void {
 		if (activeThread.firstTime) {
 			startTimer(numarg(b, 0));
 			redraw();
 		} else checkTimer();
-	}
+	}*/
 
 	// Broadcast and scene starting
 

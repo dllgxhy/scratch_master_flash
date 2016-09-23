@@ -40,6 +40,14 @@ public class Thread {
 	public var firstTime:Boolean;	// used by certain control structures
 	public var tmp:int;				// used by repeat and wait
 	public var args:Array;			// arguments to a user-defined procedure
+	
+	//以下内容由王辉更改，还没弄清楚这个方式的理由
+	public var comWaitNum:int       = 0;//读取硬件数据积木模块等待次数_wh
+	public var comATCOMing:Boolean  = false;//当前线程正有外设模块交互通信标志_wh
+	public var startT:Number        = 0;//读取模块开始时间_wh
+	
+	public var ArduinoNA:Boolean    = false;//数据有效性标志_wh
+	
 
 	// the stack
 	private var stack:Vector.<StackFrame>;

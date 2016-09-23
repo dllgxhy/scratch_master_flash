@@ -125,6 +125,7 @@ import util.Transition;
 
 import watchers.ListWatcher;
 import uiwidgets.Button;
+import primitives.Primitives;
 
 public class Scratch extends Sprite {
 	// Version
@@ -208,8 +209,7 @@ public class Scratch extends Sprite {
 	public var ArduinoWarnFlag:Boolean      = false;
 	public var blueFlag:Boolean             = false;
 	
-	
-
+	public var primitive:Primitives = new Primitives(this,interp);		//新生成primitive的对象_xuhy
 	
 	
 	
@@ -1369,6 +1369,7 @@ public class Scratch extends Sprite {
 			{
 				arduinoUart.scratchComID = arduinoLib.ArduinoUartIDFileIniFs.readInt();
 			}
+			
 			catch (EOFError){
 				arduinoLib.ArduinoUartIDFileIniFs.writeInt(arduinoUart.scratchComID);
 			}
