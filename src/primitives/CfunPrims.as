@@ -28,8 +28,6 @@ package primitives {
 	import interpreter.*;
 	import scratch.*;
 	import flash.utils.ByteArray;
-	import arduino.ArduinoLibrary;
-	import arduino.ArduinoUart;
 	import flash.filesystem.FileMode;
 
 public class CfunPrims {
@@ -411,6 +409,8 @@ public class CfunPrims {
 			app.arduinoUart.sendDataToUartBuffer(numf);
 		}
 	}
+	
+	
 	private function primSetLCD1602String(b:Block):void
 	{
 		
