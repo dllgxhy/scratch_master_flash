@@ -117,30 +117,31 @@ public class ArduinoLibrary extends Sprite{
 	public var ArduinoUartIDFileIni:File; // arduino 串口初始化设置
 	public var ArduinoUartIDFileIniFs:FileStream;
 	
-	public var ArduinoUs:Boolean = false;//超声波_wh
+	// 包含头文件时需要这个参数
+	public var ArduinoUs: Boolean = false;//超声波_wh
 	public var ArduinoSeg:Boolean = false;//数码管_wh
 	public var ArduinoRGB:Boolean = false;//三色灯_wh
 	public var ArduinoBuz:Boolean = false;//无源蜂鸣器_wh
 	public var ArduinoCap:Boolean = false;//电容值_wh
 	public var ArduinoDCM:Boolean = false;//方向电机_wh
 	public var ArduinoSer:Boolean = false;//舵机_wh
-	public var ArduinoIR:Boolean = false;//红外遥控_wh
+	public var ArduinoIR: Boolean = false;//红外遥控_wh
 	public var ArduinoTem:Boolean = false;//温度_wh
 	public var ArduinoAvo:Boolean = false;//避障_wh
 	public var ArduinoTra:Boolean = false;//循迹_wh
 	public var ArduinoLCD1602:Boolean = false;//LCD1602_xuhy
 	
-	
-	public var ArduinoPin:Array = new Array;//pinmode无定义：0；输入：1；输出：2_wh
-	public var ArduinoBlock:Array = new Array ;//创趣模块类变量是否定义：无：0；是：1_wh
+	//if--else-- 语句 for 语句等都需要添加{};此处标注哪里有"}" 生成
+	public var ArduinoPin:Array          = new Array;//pinmode无定义：0；输入：1；输出：2_wh
+	public var ArduinoBlock:Array        = new Array ;//创趣模块类变量是否定义：无：0；是：1_wh
 	public var ArduinoBracketFlag:Number = 0;//是否需要加尾部括号（例如if内部代码块尾部）_wh
-	public var ArduinoIEFlag:int = 0;//是否需要加尾部括号（IfElse的if后面）_wh
-	public var ArduinoIEFlag2:int = 0;//_wh
-	public var ArduinoIEFlagIE:Boolean = false;//_wh
-	public var ArduinoIEFlagAll:int = 0;//需要加尾部括号总量（IfElse的if后面）_wh
-	public var ArduinoIEElseNum:int = 0;
-	public var ArduinoIEElseFlag:int = 0;//是否需要加尾部括号（IfElse的else后面）_wh
-	public var ArduinoIEElseFlag2:int = 0;
+	public var ArduinoIEFlag:int         = 0;//是否需要加尾部括号（IfElse的if后面）_wh
+	public var ArduinoIEFlag2:int        = 0;//_wh
+	public var ArduinoIEFlagIE:Boolean   = false;//_wh
+	public var ArduinoIEFlagAll:int      = 0;//需要加尾部括号总量（IfElse的if后面）
+	public var ArduinoIEElseNum:int      = 0;
+	public var ArduinoIEElseFlag:int     = 0;//是否需要加尾部括号（IfElse的else后面）
+	public var ArduinoIEElseFlag2:int    = 0;
 	
 	
 	
@@ -359,12 +360,11 @@ public class ArduinoLibrary extends Sprite{
 				ArduinoFs.writeUTFBytes('/* 少年创客 */' + '\n' + 
 											'/* YoungMaker */' + '\n' +
 											'/* www.youngmaker.com */' + '\n');
-				ArduinoFs.writeUTFBytes('#include "CFunPort.h"' + '\n');
+				ArduinoFs.writeUTFBytes('#include "YoungMakerPort.h"' + '\n');
 				
 				if(ArduinoLCD1602)
 				{
-					ArduinoFs.writeUTFBytes('#include "CFunLiquidCrystal.h" ' + '\n');
-					ArduinoFs.writeUTFBytes('CFunLiquidCrystal lcd(0x20, 16, 2);' + '\n');	
+					ArduinoFs.writeUTFBytes('#include "YoungMakerCrystal.h" ' + '\n');
 				}
 				else
 				{
@@ -372,27 +372,27 @@ public class ArduinoLibrary extends Sprite{
 				}				
 					
 				if(ArduinoUs)
-					ArduinoFs.writeUTFBytes('#include "CFunUltrasonic.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerUltrasonic.h" ' + '\n');
 				if(ArduinoSeg)
-					ArduinoFs.writeUTFBytes('#include "CFun7SegmentDisplay.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMaker7SegmentDisplay.h" ' + '\n');
 				if(ArduinoRGB)
-					ArduinoFs.writeUTFBytes('#include "CFunRGBLed.h" ' + '\n');	
+					ArduinoFs.writeUTFBytes('#include "YoungMakerRGBLed.h" ' + '\n');	
 				if(ArduinoBuz)
-					ArduinoFs.writeUTFBytes('#include "CFunBuzzer.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerBuzzer.h" ' + '\n');
 				if(ArduinoCap)
-					ArduinoFs.writeUTFBytes('#include "CFunreadCapacitive.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerCapacitive.h" ' + '\n');
 				if(ArduinoDCM)
-					ArduinoFs.writeUTFBytes('#include "CFunDCMotor.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerDCMotor.h" ' + '\n');
 				if(ArduinoSer)
 					ArduinoFs.writeUTFBytes('#include "Servo.h" ' + '\n');
 				if(ArduinoIR)
-					ArduinoFs.writeUTFBytes('#include "CFunIR.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerIR.h" ' + '\n');
 				if(ArduinoTem)
-					ArduinoFs.writeUTFBytes('#include "CFunTemperature.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerTemperature.h" ' + '\n');
 				if(ArduinoAvo)
-					ArduinoFs.writeUTFBytes('#include "CFunAvoid.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerAvoid.h" ' + '\n');
 				if(ArduinoTra)
-					ArduinoFs.writeUTFBytes('#include "CFunTrack.h" ' + '\n');
+					ArduinoFs.writeUTFBytes('#include "YoungMakerTrack.h" ' + '\n');
 				
 				ArduinoHeadFs.open(ArduinoHeadFile,FileMode.READ);
 				ArduinoHeadFs.position = 0;
@@ -1453,6 +1453,7 @@ public class ArduinoLibrary extends Sprite{
 		}
 	}
 	/**************************************************************************************************/
+	/**************************************************************************************************/
 	/* Model Control*/
 	/* function doIF*/
 	public function functionDoIf(b:*):*{
@@ -1521,6 +1522,7 @@ public class ArduinoLibrary extends Sprite{
 				ArduinoValueFlag = false;
 			}
 			else
+			{
 				if(ArduinoMathFlag == true)
 				{
 					if(ArduinoLoopFlag == true)
@@ -1530,6 +1532,7 @@ public class ArduinoLibrary extends Sprite{
 					ArduinoMathFlag = false;
 				}
 				else
+				{
 					if(ArduinoReadFlag == true)
 					{
 						if(ArduinoLoopFlag == true)
@@ -1545,13 +1548,19 @@ public class ArduinoLibrary extends Sprite{
 						else
 							ArduinoDoFs.writeUTFBytes("delay(" + "1000*" + app.interp.numarg(b, 0) + ");" + '\n');
 					}
+				}
+			}
 		}
 		else
 		{
 			if (app.interp.activeThread.firstTime) {
 				app.interp.startTimer(app.interp.numarg(b, 0));
 				app.interp.redraw();
-			} else app.interp.checkTimer();
+			} 
+			else 
+			{
+				app.interp.checkTimer();
+			}
 		}
 	}
 	
@@ -1717,7 +1726,7 @@ public class ArduinoLibrary extends Sprite{
 	
 	
 	/* Model Control*/
-	/* function doUntil*/
+	/* function stopAll*/
 	public function  function_stopAll(b:*):*{
 		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
 		{
@@ -1730,7 +1739,7 @@ public class ArduinoLibrary extends Sprite{
 	}
 	
 	/* Model Control*/
-	/* function doUntil*/
+	/* function stopScripts*/
 	public function  function_stopScripts(b:*):*{
 		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
 		{
@@ -1739,5 +1748,75 @@ public class ArduinoLibrary extends Sprite{
 		else
 			app.interp.primStop(b);
 	}
+	
+		
+	/* Model Control*/
+	/* function doForever*/
+	public function  function_doForever(b:*):*{
+		if(ArduinoFlag == true)
+		{
+			ArduinoLoopFlag = true;
+			app.interp.startCmdList(b.subStack1); 
+		}
+		else
+		{
+			app.interp.startCmdList(b.subStack1, true); 
+		}
+	}
+	
+	/* Model Control*/
+	/* function doRepeat*/
+	public function  function_doRepeat(b:*):*{
+		if(ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			ArduinoMathNum = 0;
+			var num:Number = app.interp.numarg(b, 0);
+			if(ArduinoValueFlag == true)
+			{
+				if(ArduinoLoopFlag == true)
+					ArduinoLoopFs.writeUTFBytes("for(int i=0;i<" + ArduinoValueStr + ";i++)" + "{" + '\n');
+				else
+					ArduinoDoFs.writeUTFBytes("for(int i=0;i<" + ArduinoValueStr + ";i++)" + "{" + '\n');
+				ArduinoValueFlag = false;
+			}
+			else
+			{
+				if(ArduinoReadFlag == true)
+				{
+					if(ArduinoLoopFlag == true)
+						ArduinoLoopFs.writeUTFBytes("for(int i=0;i<" + ArduinoReadStr[0] + ";i++)" + "{" + '\n');
+					else
+						ArduinoDoFs.writeUTFBytes("for(int i=0;i<" + ArduinoReadStr[0] + ";i++)" + "{" + '\n');
+					ArduinoReadFlag = false;
+				}
+				else
+				{
+					if(ArduinoMathFlag == true)
+					{
+						if(ArduinoLoopFlag == true)
+							ArduinoLoopFs.writeUTFBytes("for(int i=0;i<" + ArduinoMathStr[0] + ";i++)" + "{" + '\n');
+						else
+							ArduinoDoFs.writeUTFBytes("for(int i=0;i<" + ArduinoMathStr[0] + ";i++)" + "{" + '\n');
+						ArduinoMathFlag = false;
+					}
+					else
+					{
+						if(ArduinoLoopFlag == true)
+							ArduinoLoopFs.writeUTFBytes("for(int i=0;i<" + num + ";i++)" + "{" + '\n');
+						else
+							ArduinoDoFs.writeUTFBytes("for(int i=0;i<" + num + ";i++)" + "{" + '\n');
+				}
+				}
+			}
+			app.interp.startCmdList(b.subStack1);//代码块_wh
+			ArduinoBracketFlag ++;
+		}
+		else
+		{
+			app.interp.primRepeat(b);
+		}
+	}
+	
+	
 	
 }}

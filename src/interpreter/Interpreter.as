@@ -254,7 +254,8 @@ public class Interpreter {
 			if (doRedraw || (runnableCount == 0)) return;
 		}
 	}
-
+	//stepActiveThread()该函数为scratch的原来代码，xuhy没有采用
+	/*
 	private function stepActiveThread():void {
 		if (activeThread.block == null) return;
 		if (activeThread.startDelayCount > 0) { activeThread.startDelayCount--; doRedraw = true; return; }
@@ -282,7 +283,130 @@ public class Interpreter {
 				activeThread.block = activeThread.block.nextBlock;
 
 			while (activeThread.block == null) { // end of block sequence
+				
 				if (!activeThread.popState()) return; // end of script
+				if ((activeThread.block == warpBlock) && activeThread.firstTime) { // end of outer warp block
+					clearWarpBlock();
+					activeThread.block = activeThread.block.nextBlock;
+					continue;
+				}
+				if (activeThread.isLoop) {
+					if (activeThread == warpThread) {
+						if ((currentMSecs - startTime) > warpMSecs) return;
+					} else return;
+				} else {
+					if (activeThread.block.op == Specs.CALL) activeThread.firstTime = true; // in case set false by call
+					activeThread.block = activeThread.block.nextBlock;
+				}
+			}
+		}
+	}*/
+	
+	
+	private function stepActiveThread():void {
+		if (activeThread.block == null) return;
+		if (activeThread.startDelayCount > 0) { activeThread.startDelayCount--; doRedraw = true; return; }
+		if (!(activeThread.target.isStage || (activeThread.target.parent is ScratchStage))) {
+			// sprite is being dragged
+			if (app.editMode) {
+				// don't run scripts of a sprite that is being dragged in edit mode, but do update the screen
+				doRedraw = true;
+				return;
+			}
+		}
+		yield = false;
+		while (true) {
+			if (activeThread == warpThread) currentMSecs = getTimer();
+			evalCmd(activeThread.block);
+			
+			if (yield) {
+				if (activeThread == warpThread) {
+					if ((currentMSecs - startTime) > warpMSecs) return;
+					yield = false;
+					continue;
+				} else return;
+			}
+
+			if (activeThread.block != null)
+				activeThread.block = activeThread.block.nextBlock;
+
+			while (activeThread.block == null) { // end of block sequence
+				
+				//添加尾部括号（例如if内部代码块尾部）_wh
+				if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+				{
+					if(app.arduinoLib.ArduinoBracketFlag  > 0)// && (app.ArduinoIEBracketFlag  == 0))
+					{
+						if(app.arduinoLib.ArduinoLoopFlag == true)
+							app.arduinoLib.ArduinoLoopFs.writeUTFBytes("}" + '\n');
+						else
+							app.arduinoLib.ArduinoDoFs.writeUTFBytes("}" + '\n');
+					}
+					else
+					{
+						if(app.arduinoLib.ArduinoIEElseFlag2 == 0)//若else下不再嵌套if-else，则加尾括号_wh
+						{
+							while(app.arduinoLib.ArduinoIEElseFlag > 0)
+							{
+								if(app.arduinoLib.ArduinoLoopFlag == true)
+									app.arduinoLib.ArduinoLoopFs.writeUTFBytes("}" + '\n');
+								else
+									app.arduinoLib.ArduinoDoFs.writeUTFBytes("}" + '\n');
+								app.arduinoLib.ArduinoIEElseFlag --;
+							}
+							if(app.arduinoLib.ArduinoIEFlag == 0)
+							{
+								//app.ArduinoIEFlag = 0;
+								app.arduinoLib.ArduinoIEElseFlag = 0;
+								app.arduinoLib.ArduinoIEFlagIE = false;
+								app.arduinoLib.ArduinoIEFlagAll = 0;
+								app.arduinoLib.ArduinoIEElseNum = 0;
+								app.arduinoLib.ArduinoWarnFlag = false;
+								app.arduinoLib.ArduinoIEFlag2 = 0;
+							}
+						}
+						
+						if(app.arduinoLib.ArduinoIEFlag)
+						{
+							if(app.arduinoLib.ArduinoLoopFlag == true)
+								app.arduinoLib.ArduinoLoopFs.writeUTFBytes("}" + '\n' + "else" + " {" + '\n');
+							else
+								app.arduinoLib.ArduinoDoFs.writeUTFBytes("}" + '\n' + "else" + " {" + '\n');
+						} 
+					}
+				}
+				
+				if(app.arduinoLib.ArduinoBracketFlag  > 0)// && (app.ArduinoIEBracketFlag  == 0))
+				{
+					app.arduinoLib.ArduinoBracketFlag  --;
+					if (!activeThread.popState()) return; // end of script
+				}
+				else
+				{
+					if(app.arduinoLib.ArduinoIEFlag)//Arduino生成的IfElse的第二个代码块_wh
+					{
+						activeThread.popState(); // end of script
+						var IENumPre:Number = app.arduinoLib.ArduinoIEFlagAll;
+						app.arduinoLib.ArduinoIEElseFlag ++;
+						if(app.arduinoLib.ArduinoIEFlagIE)
+							startCmdList(app.arduinoLib.ArduinoIfElseB[app.arduinoLib.ArduinoIEFlagAll - app.arduinoLib.ArduinoIEFlag]);
+						else
+						{
+							if(app.arduinoLib.ArduinoIEFlagAll == 1)
+								startCmdList(app.arduinoLib.ArduinoIfElseB[0]);
+							else
+								startCmdList(app.arduinoLib.ArduinoIfElseB[app.arduinoLib.ArduinoIEFlag]);
+						}
+	
+						app.arduinoLib.ArduinoIEFlag --;
+						if(IENumPre < app.arduinoLib.ArduinoIEFlagAll)
+							app.arduinoLib.ArduinoIEElseFlag2 ++;
+						else
+							app.arduinoLib.ArduinoIEElseFlag2 = 0;
+					}
+					else
+						if (!activeThread.popState()) return; // end of script
+				}
 				if ((activeThread.block == warpBlock) && activeThread.firstTime) { // end of outer warp block
 					clearWarpBlock();
 					activeThread.block = activeThread.block.nextBlock;
@@ -446,8 +570,8 @@ public class Interpreter {
 		primTable["whenClicked"]		= primNoop;
 		primTable["whenSceneStarts"]	= primNoop;
 		primTable["wait:elapsed:from:"]	= app.arduinoLib.primWait;
-		primTable["doForever"]			= function(b:*):* { startCmdList(b.subStack1, true); };
-		primTable["doRepeat"]			= primRepeat;
+		primTable["doForever"]			= function(b:*):* { app.arduinoLib.function_doForever(b);};
+		primTable["doRepeat"]			= function(b:*):* { app.arduinoLib.function_doRepeat(b);};
 		primTable["broadcast:"]			= function(b:*):* { broadcast(arg(b, 0), false); }
 		primTable["doBroadcastAndWait"]	= function(b:*):* { broadcast(arg(b, 0), true); }
 		primTable["whenIReceive"]		= primNoop;
@@ -548,7 +672,7 @@ public class Interpreter {
 		startCmdList(b.subStack1);
 	}
 
-	private function primRepeat(b:Block):void {
+	public function primRepeat(b:Block):void {
 		if (activeThread.firstTime) {
 			var repeatCount:Number = Math.max(0, Math.min(Math.round(numarg(b, 0)), 2147483647)); // clip to range: 0 to 2^31-1
 			activeThread.tmp = repeatCount;

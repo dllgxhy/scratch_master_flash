@@ -421,6 +421,7 @@ public class Specs {
 		["set motor %m.dppin direct %m.dir speed as %n",   " ", 13, "setdm:",		 "M1",	"forward",	120],//方向电机角度_wh
 		["set digital tube P%m.numpin num as %n",		   " ", 13, "setnum:",	            9,	123.4],//数码管_wh
 		["set pin %m.dpin tone: %m.tone meter: %m.meter",  " ", 13, "setmusic:",	        3,	'C2',	'1/2'],//无源蜂鸣器_wh
+		["set colors LED as R %n G %n B %n",	           " ", 13, "setrgb:",	            60,60,60],//三色LED_wh
 		["set LCD1602 as %s",	                           " ", 13, "setLCD1602string:",	"hello arduino"],//LCD1602_xuhy
 		
 		

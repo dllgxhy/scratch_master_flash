@@ -139,7 +139,7 @@ public class ArduinoUart extends Sprite {
 	public function ArduinoUart(app:Scratch)
 	{	
 		this.app = app;	
-		checkUartAvail(13);  //测试使用,正常使用时应删除	
+//		checkUartAvail(13);  //测试使用,正常使用时应删除	
 	}
 	
 	public function setuartStateLightTimer():void{
@@ -209,6 +209,7 @@ public class ArduinoUart extends Sprite {
 	*/
 	public function findComStatusTrue():Array
 	{
+		comStatusTrueArray.splice(0);
 		for (var i:int = 1; i <= 32;i++)//暂时设定只有32个com口，为com1 到 com32
 		{
 			if (arduinoUart.connect("COM" + i, 115200))
@@ -305,7 +306,8 @@ public class ArduinoUart extends Sprite {
 		var i:int = 0x00;
 		if((comStatusTrueArray.length - app.availComInComputer.length ) > 0)			//串口有变化
 		{
-			app.xuhy_test_log("onTick_searchComChage find avail com  ---- find avail com");	
+			
+			app.xuhy_test_log("find avail com--- availComInComputer："+ app.availComInComputer + "----comStatusTrueArray :"+comStatusTrueArray);	
 			
 			for(i;i<= app.availComInComputer.length;i++)
 			{
@@ -323,9 +325,10 @@ public class ArduinoUart extends Sprite {
 			checkDetectOKComHeartPackageTimer.start();					
 		}
 		
-		else{
+		else
+		{
 			app.uartDialog.setText("please check the cable");
-			app.uartDialogOKType = 3;
+			app.uartDialogOKType = 3;						//
 			app.uartDialog.showOnStage(app.stage);
 			app.xuhy_test_log("onTick_searchComChage not find avail com");
 			return ;
@@ -340,6 +343,7 @@ public class ArduinoUart extends Sprite {
 		app.arduinoLib.dofirm();				//上传固件
 		
 	}
+	
 	/*
 	 * 断开UART连接
 	 * */

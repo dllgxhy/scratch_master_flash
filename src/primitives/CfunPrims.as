@@ -88,6 +88,7 @@ public class CfunPrims {
 		primTable["setsg:"]                = primSetSG;//写舵机输出角度_wh
 		primTable["setdm:"]                = primSetDM;//写电机正负PWM输出_wh
 		primTable["setnum:"]               = primSetNUM;//写数码管输出值_wh
+		primTable["setrgb:"] 			   = primSetRGB;//写RGB颜色
 		primTable["setmusic:"]             = primSetMUS;//写无源蜂鸣器音乐输出值_wh
 		primTable["setLCD1602string:"]     = primSetLCD1602String;
 		
@@ -255,52 +256,421 @@ public class CfunPrims {
 		return false;
 	}
 	
-	private function primReadByte(b:Block):int
-	{
-		app.xuhy_test_log("primReadByte");
-		return 0x00;
-	}
-	
-	private function primReadCap(b:Block):void
-	{
-		
-	}
-	
-	private function primReadFraredR(b:Block):void
-	{
-	
-	}
-	
-	private function primReadFloat(b:Block):void
-	{
-		
-	}
-	
-	private function primReadAFloat(b:Block):void
-	{
-		
-	}
-	
-	private function primReadPFloat(b:Block):void
-	{
-		
-	}
 	
 	private function primSetSG(b:Block):void
 	{
 		
 	}
 	
+		/*
+	模块的作用分为两种：
+	1) 生成固件，直接下载到arduino板子当中
+	2) 通过串口下发控制数据
+	以上两种作用的区分参数为ArduinoFlag。
+	ArduinoFlag = true ：判断为Arduino语句生成过程
+	ArduinoFlag = false：判断为串口下发数据
+	
+	primSetDM():设置直流电机的驱动 方向 转速等
+	*/
 	private function primSetDM(b:Block):void
 	{
-		
+		var pins:String;
+		var pin:Number;
+		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoDCM = true;
+			app.arduinoLib.ArduinoMathNum = 0;
+			pins = interp.arg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh
+			if(pins == "M1")
+				pin = 5;
+			else
+				pin = 6;
+			
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetDM][pin] == 0)
+			{
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("YoungMakerDCMotor   dcMotor" + pin + "(" + pin + ");" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetDM][pin] = 1;
+			}
+//				if(app.ArduinoBlock[ID_DIR] == 0)
+//				{
+//					app.ArduinoHeadFs.writeUTFBytes("double dir_cfun;" + '\n');
+//					app.ArduinoBlock[ID_DIR] = 1;
+//				}
+			
+			if(app.arduinoLib.ArduinoPin[pin] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin] = 2;
+			}
+			if(app.arduinoLib.ArduinoPin[pin+2] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + (pin+2) + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin+1] = 2;
+			}
+			
+			var strcp:Array = new Array;
+			strcp[0] = pin.toString();
+			
+			//注意：方向电机中不能为
+			var dirs:String = interp.arg(b,1);
+			var pwm:Number = interp.numarg(b,2);//角度值，模块参数第一个，参数类型为数字_wh
+			if(app.arduinoLib.ArduinoValueFlag == true)
+			{
+				strcp[1] = app.arduinoLib.ArduinoValueStr;
+				app.arduinoLib.ArduinoValueFlag = false;
+			}
+			else
+				if(app.arduinoLib.ArduinoMathFlag == true)
+				{
+					strcp[1] = app.arduinoLib.ArduinoMathStr[0];
+					app.arduinoLib.ArduinoMathFlag = false;
+				}
+				else
+					if(app.arduinoLib.ArduinoReadFlag == true)
+					{
+						strcp[1] = app.arduinoLib.ArduinoReadStr[0];
+						app.arduinoLib.ArduinoReadFlag = false;
+					}
+					else
+						strcp[1] = pwm.toString();
+			
+			if(app.arduinoLib.ArduinoLoopFlag == true)
+			{
+				if(dirs == "forward")
+					app.arduinoLib.ArduinoLoopFs.writeUTFBytes("dcMotor" + strcp[0] + ".motorrun(1,"  +strcp[1] + ");" + '\n');
+				else
+					app.arduinoLib.ArduinoLoopFs.writeUTFBytes("dcMotor" + strcp[0] + ".motorrun(0,"  +strcp[1] + ");" + '\n');
+			}
+			else
+			{
+				if(dirs == "forward")
+					app.arduinoLib.ArduinoDoFs.writeUTFBytes("dcMotor" + strcp[0] + ".motorrun(1," +  strcp[1] + ");" + '\n');
+				else
+					app.arduinoLib.ArduinoDoFs.writeUTFBytes("dcMotor" + strcp[0] + ".motorrun(0," +  strcp[1] + ");" + '\n');
+			}
+		}
+		else
+		{
+			pins = app.interp.arg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh
+			if(pins == "M1")
+			{
+				pin = 5;
+			}
+			else
+			{
+				pin = 6;
+			}
+			
+			dirs = app.interp.arg(b,1);//角度值，模块参数第一个，参数类型为数字_wh
+			pwm  = app.interp.numarg(b,2);//角度值，模块参数第一个，参数类型为数字_wh
+			if(pwm > 256) 	//设置PWM 最大值为256;
+			{
+				pwm = 256;
+			}
+			//内嵌模块，没有有效返回_wh
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			
+			var dir:uint = 1;
+			if(dirs == "back")
+			{
+				dir = 0;
+			}
+			
+			var numf:Array = new Array();
+			numf[0] = app.arduinoUart.ID_SetDM;
+			numf[1] = pin;
+			numf[2] = dir;
+			numf[3] = pwm;
+				
+			//通信协议：0xff 0x55; 0x86（电机正负PWM类型）; pin（管脚号）; pwm（WPM量）_wh 	
+			app.arduinoUart.sendDataToUartBuffer(numf);
+//			app.CFunDelayms(5);//延时15ms_wh
+		}	
 	}
 	
-	private function primSetNUM(b:Block):void
-	{
-		
+	
+	/*
+	模块的作用分为两种：
+	1) 生成固件，直接下载到arduino板子当中
+	2) 通过串口下发控制数据
+	以上两种作用的区分参数为ArduinoFlag。
+	ArduinoFlag = true ：判断为Arduino语句生成过程
+	ArduinoFlag = false：判断为串口下发数据
+	
+	primSetNUM():设置7段LED显示的数字
+	*/
+	private function primSetNUM(b:Block):void{
+		if(app.arduinoLib.ArduinoFlag == true)				//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoSeg = true;
+			app.arduinoLib.ArduinoMathNum = 0;
+			var pin:Number = app.interp.numarg(b,0);		//引脚号，模块参数第一个，参数类型为数字_wh
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetNUM][pin] == 0)
+			{
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("YoungMaker7SegmentDisplay seg" + pin + "(" + pin + ");" + '\n');
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("unsigned long _distime;" + '\n');
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("float  _disvalue;" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetNUM][pin] = 1;
+			}
+			
+			if(app.arduinoLib.ArduinoPin[pin] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin] = 2;
+			}
+			if(app.arduinoLib.ArduinoPin[pin+1] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + (pin+1) + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin+1] = 2;
+			}
+			if(app.arduinoLib.ArduinoPin[pin+2] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + (pin+2) + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin+2] = 2;
+			}
+			
+			var strcp:Array = new Array;
+			strcp[0] = pin.toString();
+			
+			var num:Number = interp.numarg(b,1);
+			if(app.arduinoLib.ArduinoValueFlag == true)
+			{
+				strcp[1] = app.arduinoLib.ArduinoValueStr;
+				app.arduinoLib.ArduinoValueFlag = false;
+			}
+			else
+			{
+				if(app.arduinoLib.ArduinoMathFlag == true)
+				{
+					strcp[1] = app.arduinoLib.ArduinoMathStr[0];
+					app.arduinoLib.ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(app.arduinoLib.ArduinoReadFlag == true)
+					{
+						strcp[1] = app.arduinoLib.ArduinoReadStr[0];
+						app.arduinoLib.ArduinoReadFlag = false;
+					}
+					else
+					{
+						strcp[1] = num.toString();
+					}
+				}
+			}
+			if(app.arduinoLib.ArduinoLoopFlag == true)
+			{
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("seg" + strcp[0] + ".display(" + strcp[1] + ");" + '\n');
+			}
+			else
+			{
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("seg" + strcp[0] + ".display(" + strcp[1] + ");" + '\n');
+			}
+		}
+		else
+		{
+			pin = app.interp.numarg(b,0);
+			num = app.interp.numarg(b,1);
+			//内嵌模块，没有有效返回_wh
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			
+			var numf:Array = new Array();
+			var numfs:ByteArray = new ByteArray();
+			numfs.writeFloat(num);
+			numfs.position = 0;
+			numf[0] = app.arduinoUart.ID_SetNUM;
+			numf[0] = pin;
+			numf[1] = numfs.readByte();
+			numf[2] = numfs.readByte();
+			numf[3] = numfs.readByte();
+			numf[4] = numfs.readByte();
+					
+			//通信协议：0xff 0x55; 0x85（数码管类型）; pin（管脚号）; 数值_wh 
+			app.arduinoUart.sendDataToUartBuffer(numf);
+		}
 	}
 	
+	/*
+	模块的作用分为两种：
+	1) 生成固件，直接下载到arduino板子当中
+	2) 通过串口下发控制数据
+	以上两种作用的区分参数为ArduinoFlag。
+	ArduinoFlag = true ：判断为Arduino语句生成过程
+	ArduinoFlag = false：判断为串口下发数据
+	
+	primSetRGB():设置RGB LED的颜色
+	*/
+	
+	private function primSetRGB(b:Block):void{
+		if(app.arduinoLib.ArduinoFlag == true)	//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoRGB = true;	//三色灯，包含头文件时需要参数
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetRGB] == 0)
+			{
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("YoungMakerRGBLed RGBled;" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetRGB] = 1;
+			}
+			
+			if(app.arduinoLib.ArduinoPin[9] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(9,OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[9] = 2;
+			}
+			if(app.arduinoLib.ArduinoPin[10] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(10,OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[10] = 2;
+			}
+			if(app.arduinoLib.ArduinoPin[11] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(11,OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[11] = 2;
+			}
+			
+			var strcp:Array = new Array;
+			app.arduinoLib.ArduinoMathNum = 0;
+			var red:Number = app.interp.numarg(b,0);
+			if(app.arduinoLib.ArduinoValueFlag == true)
+			{
+				strcp[0] = ArduinoValueStr;
+				app.arduinoLib.ArduinoValueFlag = false;
+			}
+			else
+			{
+				if(app.arduinoLib.ArduinoMathFlag == true)
+				{
+					strcp[0] = app.arduinoLib.ArduinoMathStr[0];
+					app.arduinoLib.ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(app.arduinoLib.ArduinoReadFlag == true)
+					{
+						strcp[0] = ArduinoReadStr[0];
+						app.arduinoLib.ArduinoReadFlag = false;
+					}
+					else
+					{
+						strcp[0] = red.toString();
+					}
+				}
+			}
+			app.arduinoLib.ArduinoMathNum = 0;
+			var green:Number = app.interp.numarg(b,1);//red_wh
+			if(app.arduinoLib.ArduinoValueFlag == true)
+			{
+				strcp[1] = ArduinoValueStr;
+				ArduinoValueFlag = false;
+			}
+			else
+			{
+				if(app.arduinoLib.ArduinoMathFlag == true)
+				{
+					strcp[1] = ArduinoMathStr[0];
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(app.arduinoLib.ArduinoReadFlag == true)
+					{
+						strcp[1] = ArduinoReadStr[0];
+						ArduinoReadFlag = false;
+					}
+					else
+						strcp[1] = green.toString();
+				}
+			}
+			ArduinoMathNum = 0;
+			var blue:Number = app.interp.numarg(b,2);//red_wh
+			if(ArduinoValueFlag == true)
+			{
+				strcp[2] = ArduinoValueStr;
+				ArduinoValueFlag = false;
+			}
+			else
+			{
+				if(ArduinoMathFlag == true)
+				{
+					strcp[2] = ArduinoMathStr[0];
+					ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(ArduinoReadFlag == true)
+					{
+						strcp[2] = ArduinoReadStr[0];
+						ArduinoReadFlag = false;
+					}
+					else
+					{
+						strcp[2] = blue.toString();
+					}
+				}
+			}
+			if(app.arduinoLib.ArduinoLoopFlag == true)
+			{
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("RGBled.setColorAt(" + strcp[0] + "," + strcp[1] + "," + strcp[2] + ");" + '\n');
+			}
+			else
+			{
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("RGBled.setColorAt(" + strcp[0] + "," + strcp[1] + "," + strcp[2] + ");" + '\n');
+			}
+		}
+		else
+		{
+			red   = interp.numarg(b,0);//red_wh
+			green = interp.numarg(b,1);//red_wh
+			blue  = interp.numarg(b,2);//red_wh
+			//内嵌模块，没有有效返回
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			
+			var numf:Array = new Array();
+			var numfred:ByteArray = new ByteArray();
+			numfred.writeShort(red);
+			numfred.position = 0;
+			numf[0] = app.arduinoUart.ID_SetRGB;
+			numf[1] = 0x09;
+			numf[2] = numfred.readByte();
+			numf[3] = numfred.readByte();
+			
+			var numfgreen:ByteArray = new ByteArray();
+			numfgreen.writeShort(green);
+			numfgreen.position = 0;
+			numf[4] = 0x0a;
+			numf[5] = numfgreen.readByte();
+			numf[6] = numfgreen.readByte();
+			
+			
+			var numfblue:ByteArray = new ByteArray();
+			numfblue.writeShort(blue);
+			numfblue.position = 0;
+			numf[7] = 0x0b;
+			numf[8] = numfblue.readByte();
+			numf[9] = numfblue.readByte();
+			
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			
+			//通信协议：0xfe 0xfd len; 0x87（三色LED）; pin（0x09）; 三色pwm（PWM量）_wh 
+
+			app.arduinoUart.sendDataToUartBuffer(numf);
+		}
+	}
 	/*
 	 * 设置无源蜂鸣器音调和时长
 	 * */
@@ -370,7 +740,7 @@ public class CfunPrims {
 			
 			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetMUS][pin] == 0)
 			{
-				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("CFunBuzzer buzzer_cfun" + pin + "(" + pin + ");" + '\n');
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("YoungMakerBuzzer buzzer" + pin + "(" + pin + ");" + '\n');
 				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetMUS][pin] = 1;
 			}
 			
@@ -382,12 +752,12 @@ public class CfunPrims {
 			
 			if(app.arduinoLib.ArduinoLoopFlag == true)
 			{
-				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("buzzer" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
 				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
 			}
 			else
 			{
-				app.arduinoLib.ArduinoDoFs.writeUTFBytes("buzzer_cfun" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("buzzer" + pin + ".tone(" + pin + "," + tone + "," +meter + ");" + '\n');
 				app.arduinoLib.ArduinoDoFs.writeUTFBytes("delay(" + meter  + ");" + '\n');
 			}
 		}
@@ -413,24 +783,84 @@ public class CfunPrims {
 	
 	private function primSetLCD1602String(b:Block):void
 	{
+		var lcd_string:String = app.interp.arg(b,0);
+		if(app.arduinoLib.ArduinoFlag == true)	//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoLCD1602 = true;	//LCD1602，包含头文件时需要参数
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetLCD1602String] == 0)
+			{
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("YoungMakerCrystal lcd(0x20, 16, 2);" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetLCD1602String] = 1;
+			}
+			
+			var strcp:Array = new Array;
+			app.arduinoLib.ArduinoMathNum = 0;
+			
+			if(app.arduinoLib.ArduinoValueFlag == true)
+			{
+				strcp[0] = ArduinoValueStr;
+				app.arduinoLib.ArduinoValueFlag = false;
+			}
+			else
+			{
+				if(app.arduinoLib.ArduinoMathFlag == true)
+				{
+					strcp[0] = app.arduinoLib.ArduinoMathStr[0];
+					app.arduinoLib.ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(app.arduinoLib.ArduinoReadFlag == true)
+					{
+						strcp[0] = ArduinoReadStr[0];
+						app.arduinoLib.ArduinoReadFlag = false;
+					}
+					else
+					{
+//						strcp[0] = red.toString();
+					}
+				}
+			}
+							
+			app.arduinoLib.ArduinoDoFs.writeUTFBytes("lcd.init();" + '\n');
+			app.arduinoLib.ArduinoDoFs.writeUTFBytes("delay(10);" + '\n');
+			
+			if(app.arduinoLib.ArduinoLoopFlag == true)
+			{
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("lcd.LiquidCrystaldisplay(" + '"' + lcd_string + '"' + ");"+ '\n');
+			}
+			else
+			{
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("lcd.LiquidCrystaldisplay(" + '"' + lcd_string + '"' + ");"+ '\n');
+			}
+		}
+		else
+		{	
+			var numf:Array = new Array();
+			var numfs:Array = new Array();
+			
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			
+			numf = lcd_string.split("");				//将得到的字符串拆成Array格式
+			numfs[0] = app.arduinoUart.ID_SetLCD1602String;	//组合字符，将功能ID加入进去
+			numfs = numfs.concat(numf);
+			
+			for(var i:int = numfs.length; i<32; i++)		//对于LCD没有更改的部分增加空白字符占位，否则出现乱码
+			{
+				numfs[i] = 0x20;
+			}
+			
+			//通信协议：0xfe 0xfd len; ID_SetLCD1602String ; 显示的字符;  
+
+			app.arduinoUart.sendDataToUartBuffer(numfs);
+		}
 		
 	}
-	private function primReadShort(b:Block):void
-	{
-		
-	}
-	private function primReadTrack(b:Block):void
-	{
-		
-	}	
-	private function primReadAvoid(b:Block):void
-	{
-		
-	}
-	private function primReadPower(b:Block):void
-	{
-		
-	}
+	
 	private function primSetgray(b:Block):void
 	{
 		
@@ -448,6 +878,86 @@ public class CfunPrims {
 		
 	}
 	private function primSetright(b:Block):void
+	{
+		
+	}
+	
+	
+	private function primReadShort(b:Block):void
+	{
+		
+	}
+	private function primReadTrack(b:Block):void
+	{
+		
+	}	
+	private function primReadAvoid(b:Block):void
+	{
+		
+	}
+	private function primReadPower(b:Block):void
+	{
+		
+	}
+	
+	
+	private function primReadByte(b:Block):int
+	{
+		app.xuhy_test_log("primReadByte");
+		return 0x00;
+	}
+	
+	
+	
+	
+	
+	private function primReadCap(b:Block):void
+	{
+		var pin:Number = app.interp.numarg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh	
+		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoCap = true;
+			if(app.arduinoLib.ArduinoPin[pin] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",INPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin] = 1;
+			}
+			
+			var strcp:String = new String();
+			strcp = pin.toString();
+			app.arduinoLib.ArduinoReadStr[0] = "readCapacitivePin(" + strcp + ")";
+			app.arduinoLib.ArduinoReadFlag = true;
+		}
+		else//正常上位机运行模式_wh
+		{
+			//通信协议：0xff 0x55; 0x08（IO输入电容值类型）; pin（管脚号）; 00 00 00 00_wh 	
+			var numf:Array = new Array();
+			numf[0] = app.arduinoUart.ID_ReadCap;
+			numf[1] = pin;
+			app.arduinoUart.sendDataToUartBuffer(numf);		
+		}
+	}
+	
+	
+	
+
+	
+	private function primReadFraredR(b:Block):void
+	{
+	
+	}
+	
+	private function primReadFloat(b:Block):void
+	{
+		
+	}
+	
+	private function primReadAFloat(b:Block):void
+	{
+		
+	}
+	
+	private function primReadPFloat(b:Block):void
 	{
 		
 	}

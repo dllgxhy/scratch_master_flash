@@ -547,14 +547,14 @@ public class Scratch extends Sprite {
 		DialogBox.saveconfirm(Translator.map("Save project?"), app.stage, savePro, nosavePro);//软件界面中部显示提示框_wh
 	}
 	
-	//_wh
+	//保存工程
 	protected function savePro():void
 	{
 		exportProjectToFile();
 		closeWait = true;
 	}
 	
-	//_wh
+	//不保存工程
 	protected function nosavePro():void
 	{
 		closeOK = true;
@@ -1411,6 +1411,10 @@ public class Scratch extends Sprite {
 		else if(uartDialogOKType == 2){
 			arduinoUart.findComStatusTrue();			//插入串口之后再次查找串口数量
 			arduinoUart.onTick_searchComChange();
+		}
+		else if(uartDialogOKType == 3){					//窗口提示没有插入USB线后，按OK 或 Concel
+			arduinoUart.resetUartStateLightState();
+			uartConnectCirSet(0);
 		}
 		else{
 		}
