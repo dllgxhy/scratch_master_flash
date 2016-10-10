@@ -224,7 +224,8 @@ public class Scratch extends Sprite {
 		determineJSAccess();
 		initialDll();
 		showComStatusDialog();
-		arduinoUartConnect.availComInComputerSoftWareStart = app.arduinoUartConnect.findComStatusTrue();	//开机检测目前电脑中所有的COM口
+		arduinoUartConnect.availComInComputerSoftWareStart = app.arduinoUartConnect.findComStatusTrue().slice(0);	//开机检测目前电脑中所有的COM口
+		xuhy_test_log("availComInComputerSoftWareStart COM:" + arduinoUartConnect.availComInComputerSoftWareStart);
 	}
 	/*编写代码过程中的调试log，因trace占用时间较多，后续可直接对其关闭*/
 	public function xuhy_test_log(s:String):void
@@ -389,7 +390,7 @@ public class Scratch extends Sprite {
 		//Analyze.checkProjects(56086, 64220);
 		//Analyze.countMissingAssets();
 		uartConnectCirSet(0);
-		uartAutoConnectButtonFunc();
+		AdduartAutoConnectButton();
 		handleStartupParameters();
 	}
 	
@@ -1500,13 +1501,15 @@ public class Scratch extends Sprite {
 		}
 	}
 	
-	
+	/*****************************************************************
+	功能：串口连接状态显示灯 流水显示
+	*****************************************************************/
 	public function uartConnectCirSetFlow(state:Number):void{
 		switch(state)
 		{
 			case 0x00:
 				uartConnectCir.graphics.beginFill(0x80ff00);
-				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);  //位置坐标依照左上角为准
 				uartConnectCir.graphics.beginFill(0xff8060);
 				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 130,15,8);
 				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 150,15,8);
@@ -1537,7 +1540,7 @@ public class Scratch extends Sprite {
 	/*
 	//串口自动连接的按钮
 	*/
-	public function uartAutoConnectButtonFunc():void{
+	public function AdduartAutoConnectButton():void{
 		var ButtonWidth:int = 110;
 		addChild(uartAutoConnectButton);
 		uartAutoConnectButton.x= TopBarPart.UartAutoConnectX;

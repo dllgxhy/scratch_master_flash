@@ -17,7 +17,7 @@ public class ArduinoUartConnect extends Sprite{
 	public  var ArduinoUartIDFileIniFs:FileStream;
 	public  var app:Scratch;
 	public  var uartStateLightTimer:Timer                             = new Timer(500,0);    //串口状态显示灯，1S钟动一次，直到检测到可用串口或关闭串口
-	private var checkDefaultScratchComIDCanGetHeartPackageTimer:Timer = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
+	private var checkScratchCanGetHeartPackageFromArduinoTimer:Timer  = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
 	private var checkDetectOKComHeartPackageTimer:Timer               = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
 	
 	public var availComInComputer:Array                  = new Array();
@@ -40,7 +40,6 @@ public class ArduinoUartConnect extends Sprite{
 	
 	//从默认的文件中获得上一次正常使用的COM口，该函数只有在软件启动时使用一次
 	public function readDefaultComIDFromFile():int{
-		var DefaultComID:int = 0x01;
 		ArduinoUartIDFileIniFs.open(ArduinoUartIDFileIni,FileMode.UPDATE); //
 		ArduinoUartIDFileIniFs.position = 0;
 		
@@ -50,15 +49,21 @@ public class ArduinoUartConnect extends Sprite{
 		}
 
 		catch (EOFError){
-			ArduinoUartIDFileIniFs.writeInt(DefaultComID);	//如果默认地址没有该文件，则生成该文件，并在该文件中写入默认的串口ID号
-			return DefaultComID;
+			ArduinoUartIDFileIniFs.writeInt(app.arduinoUart.scratchComID);	//如果默认地址没有该文件，则生成该文件，并在该文件中写入默认的串口ID号
+			return app.arduinoUart.scratchComID;
 		}	
 		return app.arduinoUart.scratchComID;
 	}
 	
 	//将此次找到的可以正常使用的COM端口存储到文件当中
 	public function writeComIDToFile():void{
-		
+		if(scratchComIDWriteToFile != app.arduinoUart.scratchComID)
+		{
+			ArduinoUartIDFileIniFs.open(ArduinoUartIDFileIni,FileMode.UPDATE);
+			ArduinoUartIDFileIniFs.writeInt(app.arduinoUart.scratchComID);
+			ArduinoUartIDFileIniFs.close();
+			scratchComIDWriteToFile = app.arduinoUart.scratchComID;
+		}
 	}
 	
 	
@@ -103,11 +108,16 @@ public class ArduinoUartConnect extends Sprite{
 	串口检测，输出扫描到的所有有效串口号
 	有效串口号可能有几个，比如在电脑上插入了串口调试助手等，所以还需要检测是否通讯成功。
 	*/	
-	public function checkUartAvail(scratchComID:int):void
+	public function checkUartAvail(scratchComID:int):Boolean
 	{	
-		app.arduinoUart.arduinoUartOpen(scratchComID);
-		app.arduinoUart.addEventListener("socketData", app.arduinoUart.fncArduinoData);	
-		app.xuhy_test_log("checkUartAvail COM: " + scratchComID);
+		if(app.arduinoUart.arduinoUartOpen(scratchComID)){
+			app.arduinoUart.arduinoUart.addEventListener("socketData", app.arduinoUart.fncArduinoData);		
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	/*
@@ -117,13 +127,7 @@ public class ArduinoUartConnect extends Sprite{
 	private var scratchComIDWriteToFile:int                = 0x00;
 	public function ShowUartStatusFlag(flag:Boolean):void{
 		if(flag){											//串口已正常连接
-			if(scratchComIDWriteToFile != app.arduinoUart.scratchComID)
-			{
-				ArduinoUartIDFileIniFs.open(ArduinoUartIDFileIni,FileMode.UPDATE);
-				ArduinoUartIDFileIniFs.writeInt(app.arduinoUart.scratchComID);
-				ArduinoUartIDFileIniFs.close();
-				scratchComIDWriteToFile = app.arduinoUart.scratchComID;
-			}
+			writeComIDToFile();
 			resetUartStateLightState();
 			app.uartConnectCirSet(1);
 			app.uartAutoConnectButton.setLabel("COM" + app.arduinoUart.scratchComID);
@@ -135,7 +139,7 @@ public class ArduinoUartConnect extends Sprite{
 		}
 	}
 	
-		/*
+	/*
 	 * 串口状态轮询时钟，每1S轮询一次
 	**/
 	public function setAutoConnect():uint
@@ -143,7 +147,7 @@ public class ArduinoUartConnect extends Sprite{
 		var intervalDuration:Number = 1000;    
 		IntervalID = setInterval(onTick_searchAndCheckUart, intervalDuration);
 		uartDetectStatustimerStop = uartDetectStatustimerStart = 0x00;
-		app.xuhy_test_log("setAutoConnect" + app.arduinoUart.scratchComID);
+		app.xuhy_test_log("setAutoConnect COM：" + app.arduinoUart.scratchComID);
 		return IntervalID;
 	}
 	
@@ -159,16 +163,14 @@ public class ArduinoUartConnect extends Sprite{
 			comStatus = 0x00;
 			notConnectArduinoCount = 0x00;
 			app.arduinoUart.uartBusyStatus = app.arduinoUart.free;
-			checkDefaultScratchComIDCanGetHeartPackageTimer.stop();
-			checkDetectOKComHeartPackageTimer.stop();
+
 			ShowUartStatusFlag(true);
-			clearInterval(findAvailComIDForArduinoTimerID);
 			app.xuhy_test_log("onTick_searchAndCheckUart com is --OK--");
 		}
 		else
 		{
 			notConnectArduinoCount ++ ;
-			if(notConnectArduinoCount >= 3)
+			if(notConnectArduinoCount >= 5)
 			{	
 				comStatus = 0x01;
 				app.xuhy_test_log("uart disconnect unexpected comStatus = " + comStatus);
@@ -197,12 +199,19 @@ public class ArduinoUartConnect extends Sprite{
 	/*
 	检测是否可以直接连接串口号为ComID的串口，自动检测是否有相关的串口可以得到心跳包
 	*/
-	public function checkDefaultScratchComIDFormFileCanGetHeartPackage(ComID:int):void{
-		checkUartAvail(ComID);
-		setAutoConnect();
-				//开始计时获得串口心跳包的时钟，如果再一定时间内没有获得数据，则执行COMPLETE的程序
-		checkDefaultScratchComIDCanGetHeartPackageTimer.addEventListener(TimerEvent.TIMER_COMPLETE,checkDefaultScratchComIDCanGetHeartPackageTimerOver);
-		checkDefaultScratchComIDCanGetHeartPackageTimer.start();
+	public function checkScratchCanGetHeartPackageFromArduino(ComID:int):Boolean{
+		if(checkUartAvail(ComID))
+		{
+			setAutoConnect();				//开始计时获得串口心跳包的时钟，如果再一定时间内没有获得数据，则执行COMPLETE的程序							
+			checkScratchCanGetHeartPackageFromArduinoTimer.addEventListener(TimerEvent.TIMER_COMPLETE,checkScratchCanGetHeartPackageFromArduinoTimerOver);
+			checkScratchCanGetHeartPackageFromArduinoTimer.start();
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
 	}
 
 	/*
@@ -224,10 +233,10 @@ public class ArduinoUartConnect extends Sprite{
 		return comStatusTrueArray;
 	}
 	
-	/*
+	/********************************************************************************
 	在一定时间内没有得到心跳包，则重新插拔电缆进行串口检测
-	*/
-	private function checkDefaultScratchComIDCanGetHeartPackageTimerOver(event:TimerEvent):void{
+	*******************************************************************************/
+	private function checkScratchCanGetHeartPackageFromArduinoTimerOver(event:TimerEvent):void{
 		app.xuhy_test_log("checkDefaultScratchComIDCanGetHeartPackageTimer time is done");	
 		clearInterval(IntervalID);									//关闭检测心跳包的Timer;
 		setUartDisconnect();										//时间到了 没有侦测到可用串口，则关闭已打开的串口
@@ -235,21 +244,22 @@ public class ArduinoUartConnect extends Sprite{
 		findAvailComIDForArduinoTimerIDOccupy = false;
 	}
 	
-	/*
+	/***************************************************************************
 	可用的串口号已经找到，但是没有接收到心跳包，则说明没有固件，需要下载固件
-	*/
+	***************************************************************************/
 	private function checkDetectOKComHeartPackageOver(event:TimerEvent):void{
-		app.xuhy_test_log("checkDetectOKComHeartPackageOver");
-		findAvailComIDForArduinoTimerIDOccupy = false;	//释放
+		app.xuhy_test_log("得到正确的串口，但没有得到心跳包，没有固件，需要重新下载固件");
 		clearInterval(IntervalID); 						//关闭串口状态轮寻时钟
-//		setUartDisconnect();							//此处不需要关闭串口
+		setUartDisconnect();							//此处不需要关闭串口
 		app.arduinoLib.dofirm();						//上传固件	
+		
 	}
 	
 	/**********************************************************
 	找到专门给Arduino使用的串口
 	1) 鉴定从文件中读取的COM口是否可以使用
 	2) 对比软件开启时读到的电脑中所有的COM口与 点击Auto Connect按键后的COM是否一致，如果不一致则找出不一致的口作为Arduino的串口
+	3) 如果2 中得到的串口
 	3) 如果步骤2中的串口数和串口号一致，并且串口数<=3 ,则对各个串口下载固件，检测串口是否为Arduino串口。
 	4) 如果步骤3 种的串口数 >=3,则手动选择串口
 	**********************************************************/
@@ -265,16 +275,39 @@ public class ArduinoUartConnect extends Sprite{
 		
 	} 
 	
-		
+	/*查找到 供Arduino 使用的串口，做如下清理工作*/
+	/*
+	
+	*/
+	public function setFindAvailComIDForArduinoSuccess():void{
+		app.xuhy_test_log("findAvailComIDForArduino" + "找到COM口 COM"+app.arduinoUart.scratchComID+" 可用,结束查询");
+		resetUartStateLightState()     													//1) 串口LED时钟关闭，常亮绿灯
+		app.uartConnectCirSet(1);														//2) 串口LED灯 常亮绿灯；
+		app.uartAutoConnectButton.setLabel("COM" + app.arduinoUart.scratchComID);		//3) topbarmenu 显示可用串口字符
+		clearInterval(findAvailComIDForArduinoTimerID);									//4) 查询时钟关闭
+		writeComIDToFile();																//5) 将得到的串口号写入文件
+		checkScratchCanGetHeartPackageFromArduinoTimer.stop();
+		checkDetectOKComHeartPackageTimer.stop();
+		findAvailComIDForArduinoTimerIDOccupy = false;
+	}
+	
+	/*
+	串口检测失败做的处理
+	*/
+	public function AutofindAvailComIDForArduinoFailed():void{
+		clearInterval(findAvailComIDForArduinoTimerID);
+		findAvailComIDForArduinoTimerIDOccupy = false;
+	}
+	
 	private var findAvailComIDForArduinoStatus:int = 0x00;
-	private var findAvailComIDForArduinoStatus_ScratchComIDFormFile:int = 0x01;
-	private var findAvailComIDForArduinoStatus_CompareComIDBetweenComIDComputerSoftWareStartAndAutoConnect:int = 0x02;
-	private var findAvailComIDForArduinoStatus_CimIDLengthSameDoFirm:int = 0x03;
-	private var findAvailComIDForArduinoStatus_ManualChooseComID:int = 0x04;
+	private const  findAvailComIDForArduinoStatus_ScratchComIDFormFile:int                                        = 0x01;
+	private const  findAvailComIDForArduinoStatus_CompareComIDBetweenComIDComputerSoftWareStartAndAutoConnect:int = 0x02;
+	private const  findAvailComIDForArduinoStatus_CimIDLengthSameDoFirm:int                                       = 0x03;
+	private const  findAvailComIDForArduinoStatus_ManualChooseComID:int                                           = 0x04;
 	public function findAvailComIDForArduino():void{
-		var ComID:int = 0x00;
-		if(app.arduinoLib.upDialogSuccessFlag){			//下载固件成功，串口已经找到
-			app.xuhy_test_log("findAvailComIDForArduino" + "下载固件成功，找到COM口 COM"+app.arduinoUart.scratchComID+" 可用");
+		
+		if(app.arduinoLib.upDialogSuccessFlag || (comStatus == 0x00)){				//下载固件成功，串口已经找到 或者 得到心跳包
+			setFindAvailComIDForArduinoSuccess();
 			return  ;			
 		}
 		if(findAvailComIDForArduinoTimerIDOccupy)
@@ -284,21 +317,30 @@ public class ArduinoUartConnect extends Sprite{
 	
 		switch(findAvailComIDForArduinoStatus)
 		{
-			case findAvailComIDForArduinoStatus_ScratchComIDFormFile:	
+			case findAvailComIDForArduinoStatus_ScratchComIDFormFile:
 				findAvailComIDForArduinoTimerIDOccupy = true;		
 				app.arduinoUart.scratchComID = readDefaultComIDFromFile();	//从文件中获得可以使用的串口
-				checkDefaultScratchComIDFormFileCanGetHeartPackage(app.arduinoUart.scratchComID);
-				app.xuhy_test_log("Scratch comStatus = " + comStatus);
+				app.xuhy_test_log("findAvailComIDForArduino" + " 阶段1：测试从文件中读到的串口 COM "+app.arduinoUart.scratchComID);
+				
+				if(checkScratchCanGetHeartPackageFromArduino(app.arduinoUart.scratchComID))
+				{
+					
+				}
+				else
+				{
+					findAvailComIDForArduinoTimerIDOccupy = false;
+					findAvailComIDForArduinoStatus = findAvailComIDForArduinoStatus_CompareComIDBetweenComIDComputerSoftWareStartAndAutoConnect;
+				}
 				break;
 			case findAvailComIDForArduinoStatus_CompareComIDBetweenComIDComputerSoftWareStartAndAutoConnect:
-				findAvailComIDForArduinoTimerIDOccupy = true;	
+				app.xuhy_test_log("findAvailComIDForArduino" + "阶段2：测试两次读到的串口号是否有不一致");
 				app.arduinoUart.scratchComID = findComIDArrayChange();
 				if(app.arduinoUart.scratchComID != 0x00){							//得到不一样的串口号						
-					availComInComputer.splice(0);
+					findAvailComIDForArduinoTimerIDOccupy = true;
 					checkUartAvail(app.arduinoUart.scratchComID);					//连接串口取心跳包
+					setAutoConnect();												
 					checkDetectOKComHeartPackageTimer.addEventListener(TimerEvent.TIMER_COMPLETE,checkDetectOKComHeartPackageOver);
 					checkDetectOKComHeartPackageTimer.start();	
-					setAutoConnect();
 				}
 				else
 				{													//两种串口一致
@@ -306,31 +348,27 @@ public class ArduinoUartConnect extends Sprite{
 						findAvailComIDForArduinoStatus = findAvailComIDForArduinoStatus_CimIDLengthSameDoFirm;
 					}
 					else{
-						findAvailComIDForArduinoStatus = findAvailComIDForArduinoStatus_ManualChooseComID;
-						
+
+						AutofindAvailComIDForArduinoFailed();		//串口数量大于3个，则自动检测串口流程失败
 					}
 					findAvailComIDForArduinoTimerIDOccupy = false;	
 				}
 				break;
 			case findAvailComIDForArduinoStatus_CimIDLengthSameDoFirm:	//下载固件
+				app.xuhy_test_log("findAvailComIDForArduino" + "阶段3：两次读到的串口一致，且串口数量小于3，则对每个串口下载固件");
 				findAvailComIDForArduinoTimerIDOccupy = true;
 				app.arduinoUart.scratchComID = availComInComputer[0];
 				if(availComInComputer.length >= 0x01)
 				{
 					app.xuhy_test_log("findAvailComIDForArduino download firmware "+availComInComputer.length + " times");
 					availComInComputer.shift();
-					checkUartAvail(app.arduinoUart.scratchComID);		//开启串口下载固件
+//					checkUartAvail(app.arduinoUart.scratchComID);		//开启串口下载固件
 					app.arduinoLib.dofirm();							//下载固件
 				}
 				else{
-					findAvailComIDForArduinoTimerIDOccupy = false;
-					findAvailComIDForArduinoStatus = findAvailComIDForArduinoStatus_ManualChooseComID;
+					AutofindAvailComIDForArduinoFailed();				//自动检测串口没有得到可用串口号
 					app.xuhy_test_log("findAvailComIDForArduino download firmware failed");
 				}
-				break;
-			case findAvailComIDForArduinoStatus_ManualChooseComID:		//手动选择串口
-				findAvailComIDForArduinoTimerIDOccupy = true;
-				app.xuhy_test_log("manual findAvailComIDForArduino********");
 				break;
 			default:
 			

@@ -136,8 +136,10 @@ public class ArduinoUart extends Sprite {
 	
 		if(arduinoUart.connect("COM" + comID, 115200))
 		{
+			app.xuhy_test_log("open COM:"+comID+ " success");
 			return true;
 		}
+		app.xuhy_test_log("open COM:"+comID+ " failed");
 		return false;
 	}
 	

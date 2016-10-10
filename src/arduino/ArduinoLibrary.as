@@ -152,7 +152,7 @@ public class ArduinoLibrary extends Sprite{
 	public function ArduinoLibrary(app:Scratch)
 	{
 		this.app = app;
-		upLoadFirmTimer = new Timer(500, 75);//每0.5s一个中断，持续75s 在线约10s，无线61s
+		upLoadFirmTimer = new Timer(1000, 75);//每1s一个中断，持续75s 在线约10s，无线61s
 		upLoadFirmTimer.addEventListener(TimerEvent.TIMER, onUpLoadFirmTimerTick); 
 		upLoadFirmTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onupLoadFirmTimerComplete);
 		UpDialog.addTitle('Upload');
@@ -199,6 +199,7 @@ public class ArduinoLibrary extends Sprite{
 	
 	private function onUpLoadFirmTimerTick(event:TimerEvent):void { 
 		upLoadFirmTimerCount ++;
+		app.xuhy_test_log("upLoadFirmTimerCount ="+ upLoadFirmTimerCount);
 		if(ArduinoRPFlag == true)
 		{
 			if(upLoadFirmTimerCount == 71)//70s
@@ -208,8 +209,7 @@ public class ArduinoLibrary extends Sprite{
 					process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
 					process2.start(nativePSInfo);//执行dos命令_wh
 					process2.standardInput.writeUTFBytes("taskkill /f /im ArduinoUploader.exe /t"+"\r\n");//强行关闭avrdude进程_wh
-					UpDialog.setText(Translator.map("upload failed"));
-					upDialogSuccessFlag = false;				
+					UpDialog.setText(Translator.map("upload failed"));		
 				}
 			}
 			if(upLoadFirmTimerCount == 73)//72s
@@ -220,7 +220,8 @@ public class ArduinoLibrary extends Sprite{
 				ArduinoRPFlag = false;
 				app.arduinoUart.arduinoUartClose();
 				app.arduinoUartConnect.findAvailComIDForArduinoTimerIDOccupy = false;
-				app.xuhy_test_log("onUpLoadFirmTimerTick ArduinoRPFlag upLoadFirmTimerCount == 71");
+				app.xuhy_test_log("onUpLoadFirmTimerTick ArduinoRPFlag upLoadFirmTimerCount = 73");
+				upDialogSuccessFlag = false;
 			}
 		}
 		else
@@ -242,7 +243,7 @@ public class ArduinoLibrary extends Sprite{
 				upLoadFirmTimer.reset();
 				app.arduinoUart.arduinoUartClose();
 				app.arduinoUartConnect.findAvailComIDForArduinoTimerIDOccupy = false;
-				app.xuhy_test_log("onUpLoadFirmTimerTick        upLoadFirmTimerCount == 71");
+				app.xuhy_test_log("onUpLoadFirmTimerTick        upLoadFirmTimerCount == 73");
 			}
 		}
 	}
@@ -302,6 +303,7 @@ public class ArduinoLibrary extends Sprite{
 					{
 						if(upLoadFirmTimerCount < 4)
 						{
+							app.xuhy_test_log("str.indexOf  upLoadFirmTimerCount = "+upLoadFirmTimerCount);
 							upLoadFirmTimerCount = 70;//表示停止_wh
 							ArduinoFirmFlag = 9;
 						}
@@ -333,7 +335,7 @@ public class ArduinoLibrary extends Sprite{
 		app.arduinoUartConnect.setUartDisconnect();				//关闭串口
 		UpDialog.cancel();
 		if((upLoadFirmTimerCount < 70) && (upLoadFirmTimerCount != 0))
-			upLoadFirmTimerCount = 70;//表示停止_wh
+			upLoadFirmTimerCount = 0;//表示停止_wh
 	}
 	
 	
