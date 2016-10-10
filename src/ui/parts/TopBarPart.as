@@ -34,6 +34,7 @@ import flash.text.*;
 import translation.Translator;
 
 import uiwidgets.*;
+import uiwidgets.Button;
 
 public class TopBarPart extends UIPart {
 
@@ -52,6 +53,7 @@ public class TopBarPart extends UIPart {
 	private var growTool:IconButton;
 	private var shrinkTool:IconButton;
 	private var helpTool:IconButton;
+	
 	private var toolButtons:Array = [];
 	private var toolOnMouseDown:String;
 
@@ -61,6 +63,9 @@ public class TopBarPart extends UIPart {
 	protected var loadExperimentalButton:Button;
 	protected var exportButton:Button;
 	protected var extensionLabel:TextField;
+	
+	public static  var UartAutoConnectX:int = 0x00;
+	public static  var UartAutoConnectY:int = 0x00;
 
 	public function TopBarPart(app:Scratch) {
 		this.app = app;
@@ -183,8 +188,13 @@ public class TopBarPart extends UIPart {
 		growTool.x = cutTool.right() + space;
 		shrinkTool.x = growTool.right() + space;
 		helpTool.x = shrinkTool.right() + space;
+		
+		
 		copyTool.y = cutTool.y = shrinkTool.y = growTool.y = helpTool.y = buttonY - 3;
 
+		UartAutoConnectX = helpTool.x + 16 * buttonSpace;
+		UartAutoConnectY = helpTool.y - 1;
+		
 		if (offlineNotice) {
 			offlineNotice.x = w - offlineNotice.width - 5;
 			offlineNotice.y = 5;
@@ -266,6 +276,7 @@ public class TopBarPart extends UIPart {
 		SimpleTooltips.add(growTool, {text: 'Grow', direction: 'bottom'});
 		SimpleTooltips.add(shrinkTool, {text: 'Shrink', direction: 'bottom'});
 		SimpleTooltips.add(helpTool, {text: 'Block help', direction: 'bottom'});
+
 	}
 
 	public function clearToolButtons():void {

@@ -78,8 +78,10 @@ public class CfunPrims {
 		
 		primTable["readcap:"]              = primReadByte;//读数字口输入_wh
 		primTable["readcapSend:"]          = primReadCap;//读数字口输入命令发送_wh
+		
 		primTable["readfraredR:"]          = primReadByte;//读红外遥控输入_wh
 		primTable["readfraredRSend:"]      = primReadFraredR;//读红外遥控输入_wh
+		
 		primTable["readAfloat:"]           = primReadFloat;//读模拟口输入float值_wh
 		primTable["readAfloatSend:"]       = primReadAFloat;//读模拟口输入float值命令发送_wh
 		primTable["readPfloat:"]           = primReadFloat;//读超声波输入float值_wh
@@ -248,18 +250,159 @@ public class CfunPrims {
 		// 下发通讯协议			
 	}
 	
-	
-	private function primSetPWM(b:Block):Boolean
+	/************************************
+	Model arduino: 设置PWM输出
+	模块参数
+	@param1：管脚号
+	@param2：PWM值
+	************************************/
+	private function primSetPWM(b:Block):void
 	{
-		app.xuhy_test_log("primSetPWM");
-		var pin:Number = interp.numarg(b,0);
-		return false;
+		app.xuhy_test_log("设置PWM输出");
+		var pin:Number = app.interp.numarg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh
+		var pwm:Number = app.interp.numarg(b,1);//PWM值，模块参数第一个，参数类型为数字_wh
+		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoMathNum = 0;
+			if(app.arduinoLib.ArduinoPin[pin] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin] = 2;
+			}
+			
+			var strcp:Array = new Array();
+			strcp[0] = pin.toString();
+			
+			if(app.arduinoLib.ArduinoValueFlag == true)
+			{
+				strcp[1] = app.arduinoLib.ArduinoValueStr;
+				app.arduinoLib.ArduinoValueFlag = false;
+			}
+			else
+			{
+				if(app.arduinoLib.ArduinoMathFlag == true)
+				{
+					strcp[1] = app.arduinoLib.ArduinoMathStr[0];
+					app.arduinoLib.ArduinoMathFlag = false;
+				}
+				else
+				{
+					if(app.arduinoLib.ArduinoReadFlag == true)
+					{
+						strcp[1] = app.arduinoLib.ArduinoReadStr[0];
+						app.arduinoLib.ArduinoReadFlag = false;
+					}
+					else
+					{
+						strcp[1] = pwm.toString();
+					}
+				}
+			}			
+			if(app.arduinoLib.ArduinoLoopFlag == true)
+			{
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("analogWrite(" + strcp[0] + "," + strcp[1] + ");" + '\n');
+			}
+			else
+			{
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("analogWrite(" + strcp[0] + "," + strcp[1] + ");" + '\n');
+			}
+		}
+		else//正常上位机运行模式_wh
+		{
+			//内嵌模块，没有有效返回_wh
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			
+			//通信协议：0xff 0x55; 0x82（IO输出PWM类型）; pin（管脚号）; pwm（WPM量）_wh 
+
+//			app.arduino.writeByte(ID_SetPWM);
+//			app.arduino.writeByte(pin);
+//			app.arduino.writeByte(pwm);
+//			app.CFunDelayms(5);//延时15ms_wh
+		}
 	}
 	
-	
+	/************************************
+	Model arduino: 设置舵机角度
+	模块参数
+	@param1：管脚号
+	@param2：舵机转动角度
+	************************************/
 	private function primSetSG(b:Block):void
 	{
-		
+		app.xuhy_test_log("设置舵机角度");
+		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoSer = true;
+			app.arduinoLib.ArduinoMathNum = 0;
+			var pin:Number = app.interp.numarg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetSG][pin] == 0)
+			{
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("Servo myservo" + pin +";" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_SetSG][pin] = 1;
+			}
+			
+			if(app.arduinoLib.ArduinoPin[pin] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",OUTPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin] = 2;
+			}
+			
+			var strcp:String = new String();
+			var angle:Number = app.interp.numarg(b,1);//角度值，模块参数第一个，参数类型为数字_wh
+			if(app.arduinoLib.ArduinoValueFlag == true)
+			{
+				strcp = app.arduinoLib.ArduinoValueStr;
+				app.arduinoLib.ArduinoValueFlag = false;
+			}
+			else
+				if(app.arduinoLib.ArduinoMathFlag == true)
+				{
+					strcp = app.arduinoLib.ArduinoMathStr[0];
+					app.arduinoLib.ArduinoMathFlag = false;
+				}
+				else
+					if(app.arduinoLib.ArduinoReadFlag == true)
+					{
+						strcp = app.arduinoLib.ArduinoReadStr[0];
+						app.arduinoLib.ArduinoReadFlag = false;
+					}
+					else
+						strcp = angle.toString();
+			
+			if(app.arduinoLib.ArduinoLoopFlag == true)
+			{
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("myservo" +pin + ".attach(" + pin + ");" + '\n');
+				app.arduinoLib.ArduinoLoopFs.writeUTFBytes("myservo" +pin + ".write(" + strcp + ");" + '\n');
+			}
+			else
+			{
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("myservo" +pin + ".attach(" + pin + ");" + '\n');
+				app.arduinoLib.ArduinoDoFs.writeUTFBytes("myservo" +pin + ".write(" + strcp + ");" + '\n');
+			}
+		}
+		else
+		{
+			pin = app.interp.numarg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh
+			angle = app.interp.numarg(b,1);//角度值，模块参数第一个，参数类型为数字_wh
+			//内嵌模块，没有有效返回_wh
+			if(app.interp.activeThread.ArduinoNA)//加有效性判断_wh
+			{
+				app.interp.activeThread.ArduinoNA = false;
+				return;
+			}
+			
+			//通信协议：0xff 0x55; 0x83（舵机角度类型）; pin（管脚号）; 角度_wh 
+//			app.arduino.writeByte(0xff);
+//			app.arduino.writeByte(0x55);
+//			app.arduino.writeByte(ID_SetSG);
+//			app.arduino.writeByte(pin);
+
+//			app.arduino.writeByte(angle);
+		}
 	}
 	
 		/*
@@ -897,22 +1040,40 @@ public class CfunPrims {
 	}
 	private function primReadPower(b:Block):void
 	{
-		
+		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_ReadPOWER] == 0)
+			{
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("YoungMakerPort  volt;" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_ReadPOWER] = 1;
+			}
+			
+			app.arduinoLib.ArduinoReadStr[0] = "volt.minicarVolt()";
+			app.arduinoLib.ArduinoReadFlag = true;
+		}
+		else
+		{
+			
+//			app.arduino.writeByte(ID_ReadPOWER);
+			
+		}	
 	}
 	
-	
+	/*
+	*/
 	private function primReadByte(b:Block):int
 	{
 		app.xuhy_test_log("primReadByte");
-		return 0x00;
+//		var byte:Number = app.comDataArray[7];
+//		app.comDataArray.length = 0;		
+//		app.comDataArrayOld.length = 0;		
+		return 0;
 	}
-	
-	
-	
 	
 	
 	private function primReadCap(b:Block):void
 	{
+		app.xuhy_test_log("读取电容器的电容值");
 		var pin:Number = app.interp.numarg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh	
 		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
 		{
@@ -944,7 +1105,33 @@ public class CfunPrims {
 	
 	private function primReadFraredR(b:Block):void
 	{
-	
+		app.xuhy_test_log("读取红外遥控器的发送数据：");
+		var pin:Number = app.interp.numarg(b,0);//引脚号，模块参数第一个，参数类型为数字_wh
+		if(app.arduinoLib.ArduinoFlag == true)//判断是否为Arduino语句生成过程_wh
+		{
+			app.arduinoLib.ArduinoIR = true;
+			if(app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_READFRAREDR] == 0)
+			{
+				app.arduinoLib.ArduinoHeadFs.writeUTFBytes("YoungMakerIR  ir" + pin + "(" + pin + ");" + '\n');
+				app.arduinoLib.ArduinoBlock[app.arduinoUart.ID_READFRAREDR] = 1;
+			}
+			
+			if(app.arduinoLib.ArduinoPin[pin] == 0)
+			{
+				app.arduinoLib.ArduinoPinFs.writeUTFBytes("pinMode(" + pin + ",INPUT);" + '\n');
+				app.arduinoLib.ArduinoPin[pin] = 1;
+			}
+			
+			app.arduinoLib.ArduinoReadStr[0] = "ir" + pin + ".getCode()";
+			app.arduinoLib.ArduinoReadFlag = true;
+		}
+		else
+		{
+
+//			app.arduino.writeByte(ID_READFRAREDR);
+//			app.arduino.writeByte(pin);
+
+		}
 	}
 	
 	private function primReadFloat(b:Block):void

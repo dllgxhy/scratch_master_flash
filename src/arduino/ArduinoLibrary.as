@@ -34,10 +34,12 @@ import flash.events.ProgressEvent;
 import translation.Translator;
 
 import uiwidgets.DialogBox;
+
+
+import primitives.Primitives;
+import flash.filesystem.File;
 import flash.filesystem.FileStream;
 import flash.filesystem.FileMode;
-import flash.filesystem.File;
-import primitives.Primitives;
 
 public class ArduinoLibrary extends Sprite{
 	
@@ -114,8 +116,7 @@ public class ArduinoLibrary extends Sprite{
 	public var ArduinoHeadFs:FileStream;//_wh
 	public var ArduinoLoopFile:File;//循环_wh
 	public var ArduinoLoopFs:FileStream;//_wh
-	public var ArduinoUartIDFileIni:File; // arduino 串口初始化设置
-	public var ArduinoUartIDFileIniFs:FileStream;
+
 	
 	// 包含头文件时需要这个参数
 	public var ArduinoUs: Boolean = false;//超声波_wh
@@ -151,7 +152,7 @@ public class ArduinoLibrary extends Sprite{
 	public function ArduinoLibrary(app:Scratch)
 	{
 		this.app = app;
-		upLoadFirmTimer = new Timer(1000, 75);//每1s一个中断，持续75s 在线约10s，无线61s
+		upLoadFirmTimer = new Timer(500, 75);//每0.5s一个中断，持续75s 在线约10s，无线61s
 		upLoadFirmTimer.addEventListener(TimerEvent.TIMER, onUpLoadFirmTimerTick); 
 		upLoadFirmTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onupLoadFirmTimerComplete);
 		UpDialog.addTitle('Upload');
@@ -173,7 +174,7 @@ public class ArduinoLibrary extends Sprite{
 	*/
 	public function dofirm():void {
 		//烧入固件前先判断串口，未打开则之间退出，打开则先关闭（否则串口被占用）_wh
-		app.xuhy_test_log("do firm");
+		app.xuhy_test_log("dofirm()");
 		writeUploaderOrderToCmd(app.arduinoUart.scratchComID);
 	}
 	
@@ -208,7 +209,7 @@ public class ArduinoLibrary extends Sprite{
 					process2.start(nativePSInfo);//执行dos命令_wh
 					process2.standardInput.writeUTFBytes("taskkill /f /im ArduinoUploader.exe /t"+"\r\n");//强行关闭avrdude进程_wh
 					UpDialog.setText(Translator.map("upload failed"));
-					upDialogSuccessFlag = false;
+					upDialogSuccessFlag = false;				
 				}
 			}
 			if(upLoadFirmTimerCount == 73)//72s
@@ -217,6 +218,9 @@ public class ArduinoLibrary extends Sprite{
 				process2.exit(nativePSInfo);
 				upLoadFirmTimer.reset();
 				ArduinoRPFlag = false;
+				app.arduinoUart.arduinoUartClose();
+				app.arduinoUartConnect.findAvailComIDForArduinoTimerIDOccupy = false;
+				app.xuhy_test_log("onUpLoadFirmTimerTick ArduinoRPFlag upLoadFirmTimerCount == 71");
 			}
 		}
 		else
@@ -229,12 +233,16 @@ public class ArduinoLibrary extends Sprite{
 				process2.standardInput.writeUTFBytes("taskkill /f /im avrdude.exe /t"+"\r\n");//强行关闭avrdude进程_wh
 				UpDialog.setText(Translator.map("upload failed"));
 				upDialogSuccessFlag = false;
+				
 			}
 			if(upLoadFirmTimerCount == 73)//72s
 			{
 				upLoadFirmTimerCount = 0;
 				process2.exit(nativePSInfo);
 				upLoadFirmTimer.reset();
+				app.arduinoUart.arduinoUartClose();
+				app.arduinoUartConnect.findAvailComIDForArduinoTimerIDOccupy = false;
+				app.xuhy_test_log("onUpLoadFirmTimerTick        upLoadFirmTimerCount == 71");
 			}
 		}
 	}
@@ -281,8 +289,9 @@ public class ArduinoLibrary extends Sprite{
 					upLoadFirmTimer.reset();
 					upLoadFirmTimerCount = 0;
 					ArduinoRPFlag = false;
-					app.arduinoUart.checkUartAvail(app.arduinoUart.scratchComID);
-					app.arduinoUart.setAutoConnect();
+					app.arduinoUartConnect.findAvailComIDForArduinoTimerIDOccupy = false;
+					app.arduinoUartConnect.checkUartAvail(app.arduinoUart.scratchComID);
+					app.arduinoUartConnect.setAutoConnect();
 				}
 			}
 			else
@@ -306,8 +315,9 @@ public class ArduinoLibrary extends Sprite{
 								process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
 								upLoadFirmTimer.reset();
 								upLoadFirmTimerCount = 0;
-								app.arduinoUart.checkUartAvail(app.arduinoUart.scratchComID);
-								app.arduinoUart.setAutoConnect();
+								app.arduinoUartConnect.findAvailComIDForArduinoTimerIDOccupy = false;
+								app.arduinoUartConnect.checkUartAvail(app.arduinoUart.scratchComID);
+								app.arduinoUartConnect.setAutoConnect();
 							}
 						}
 					}
@@ -319,8 +329,8 @@ public class ArduinoLibrary extends Sprite{
 	}
 	
 	public function cancel():void {
-		app.arduinoUart.resetUartStateLightState();			//关闭串口连接指示灯和时钟add by xuhy	
-		app.arduinoUart.setUartDisconnect();				//关闭串口
+		app.arduinoUartConnect.resetUartStateLightState();			//关闭串口连接指示灯和时钟add by xuhy	
+		app.arduinoUartConnect.setUartDisconnect();				//关闭串口
 		UpDialog.cancel();
 		if((upLoadFirmTimerCount < 70) && (upLoadFirmTimerCount != 0))
 			upLoadFirmTimerCount = 70;//表示停止_wh
@@ -345,9 +355,7 @@ public class ArduinoLibrary extends Sprite{
 		ArduinoFs = new FileStream();
 		ArduinoFileB= new File(File.userDirectory.resolvePath("AS-Block/ArduinoBuilder/arduinos.ino").nativePath);
 		ArduinoFsB = new FileStream();
-		ArduinoUartIDFileIni = new File(File.userDirectory.resolvePath("AS-Block/ArduinoBuilder/ArduinoUartIDFile.ini").nativePath);
 
-		ArduinoUartIDFileIniFs = new FileStream();
 		app.xuhy_test_log("GenerateFilesForScratch2ArduinoFirmwareCode");
 	} 
 	
@@ -457,8 +465,9 @@ public class ArduinoLibrary extends Sprite{
 						ArduinoRPNum = 0;
 						ArduinoFile.copyTo(ArduinoFileB,true);//将arduinos.ino复制到ArduinoBuilder目录下_wh
 						
-						if(app.arduinoUart.comStatus == 0x00)
-							app.arduinoUart.setUartDisconnect();
+						if(app.arduinoUartConnect.comStatus == 0x00)
+							app.arduinoUartConnect.setUartDisconnect();
+
 						else
 						{
 							ArduinoRPFlag = false;

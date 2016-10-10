@@ -127,6 +127,8 @@ import watchers.ListWatcher;
 import uiwidgets.Button;
 import primitives.Primitives;
 
+import arduino.ArduinoUartConnect;
+
 public class Scratch extends Sprite {
 	// Version
 	public static const versionString:String = 'v446';
@@ -195,13 +197,13 @@ public class Scratch extends Sprite {
 	public var logger:Log = new Log(16);
 	
 	//UART Part
-	public var arduinoUart:ArduinoUart      = new ArduinoUart(this);
-	public var arduinoLib:ArduinoLibrary    = new ArduinoLibrary(this);
-	public var showCOMFlag:Boolean          = false;
-	public var uartDialog:DialogBox         = new DialogBox();
-	public var uartConnectCir:Shape         = new Shape();			//通信标志圆
-	public var uartAutoConnectButton:Button = new Button(Translator.map("Auto Connect"),uartAutoConnectButtonDown);
-	public var availComInComputer:Array     = new Array();
+	public var arduinoUart:ArduinoUart                   = new ArduinoUart(this);
+	public var arduinoLib:ArduinoLibrary                 = new ArduinoLibrary(this);
+	public var arduinoUartConnect:ArduinoUartConnect     = new ArduinoUartConnect(this);
+	public var showCOMFlag:Boolean                       = false;
+	public var uartDialog:DialogBox                      = new DialogBox();
+	public var uartConnectCir:Shape                      = new Shape();			//通信标志圆
+	public var uartAutoConnectButton:Button              = new Button(Translator.map("Auto Connect"),uartAutoConnectButtonDown);
 	
 	public var OS:String                    = new String;
 	public var closeOK:Boolean              = false;//是否可以关闭软件_wh
@@ -222,6 +224,7 @@ public class Scratch extends Sprite {
 		determineJSAccess();
 		initialDll();
 		showComStatusDialog();
+		arduinoUartConnect.availComInComputerSoftWareStart = app.arduinoUartConnect.findComStatusTrue();	//开机检测目前电脑中所有的COM口
 	}
 	/*编写代码过程中的调试log，因trace占用时间较多，后续可直接对其关闭*/
 	public function xuhy_test_log(s:String):void
@@ -952,7 +955,7 @@ public class Scratch extends Sprite {
 		imagesPart.step();
 		if(closeOK == true)
 		{
-			arduinoUart.setUartDisconnect();
+			app.arduinoUartConnect.setUartDisconnect();
 			stage.nativeWindow.close();
 		}
 	}
@@ -1361,36 +1364,24 @@ public class Scratch extends Sprite {
 	4) 如果新得到的scratchComID  无法得到心跳包，则该COM口可用，只是arduino的板子上没有固件。
 	*/
 	public function uartAutoConnectButtonDown():void{
-		if(arduinoUart.comStatus != 0x00)			//在串口没有连接上的状态时，按下Auto Connect的按键，则开始侦测可用串口
+		var UartIDFromFile:int = 0x00;
+		if(app.arduinoUartConnect.comStatus != 0x00)					//在串口没有连接上的状态时，按下Auto Connect的按键，则开始侦测可用串口
 		{
-			arduinoLib.ArduinoUartIDFileIniFs.open(arduinoLib.ArduinoUartIDFileIni,FileMode.UPDATE);
-			arduinoLib.ArduinoUartIDFileIniFs.position = 0;
-			try
-			{
-				arduinoUart.scratchComID = arduinoLib.ArduinoUartIDFileIniFs.readInt();
-			}
-			
-			catch (EOFError){
-				arduinoLib.ArduinoUartIDFileIniFs.writeInt(arduinoUart.scratchComID);
-			}
-			
-			arduinoUart.checkDefaultScratchComIDCanGetHeartPackage();
-			arduinoUart.setuartStateLightTimer();
-			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + arduinoUart.comStatus);
+			arduinoUartConnect.findAvailComIDForArduinoTimer();
 		}
 		else{										//串口可以正常通讯状态下，按下Auto Connect的按键，则关闭串口通讯	
-			clearInterval(arduinoUart.IntervalID);
-			arduinoUart.setUartDisconnect();
-			arduinoUart.ShowUartStatusFlag(false);
-			arduinoUart.resetUartStateLightState();
-			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + arduinoUart.comStatus);
+			clearInterval(app.arduinoUartConnect.IntervalID);
+			app.arduinoUartConnect.setUartDisconnect();
+			app.arduinoUartConnect.ShowUartStatusFlag(false);
+			arduinoUartConnect.resetUartStateLightState();
+			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + app.arduinoUartConnect.comStatus);
 		}	
 	}
 	
 	public function uartDialogCancel():void
 	{
-		clearInterval(arduinoUart.searchComChangeID);
-		arduinoUart.resetUartStateLightState();
+//		clearInterval(arduinoUartConnect.searchComChangeID);
+		arduinoUartConnect.resetUartStateLightState();
 		uartConnectCirSet(0);
 		uartDialog.cancel();
 	}
@@ -1399,9 +1390,9 @@ public class Scratch extends Sprite {
 	public function uartDialogOK():void{  								//提醒用户重新插拔USB接口或下载固件
 		var i:int = 0x00;
 		if(uartDialogOKType == 1){										//usb拔下后读取可用的串口
-			arduinoUart.findComStatusTrue();
-			for(i=0x00; i< arduinoUart.comStatusTrueArray.length;i++){   	//将USB拔下后的串口数据保存在availComInComputer中；
-				availComInComputer[i] = arduinoUart.comStatusTrueArray[i];
+			arduinoUartConnect.findComStatusTrue();
+			for(i=0x00; i< arduinoUartConnect.comStatusTrueArray.length;i++){   	//将USB拔下后的串口数据保存在availComInComputer中；
+				arduinoUartConnect.availComInComputer[i] = arduinoUartConnect.comStatusTrueArray[i];
 			}
 			uartDialog.setText("please plugin the cable");
 			uartDialog.showOnStage(stage);
@@ -1409,30 +1400,29 @@ public class Scratch extends Sprite {
 			return ;
 		}
 		else if(uartDialogOKType == 2){
-			arduinoUart.findComStatusTrue();			//插入串口之后再次查找串口数量
-			arduinoUart.onTick_searchComChange();
+			app.arduinoUartConnect.findComStatusTrue();			//插入串口之后再次查找串口数量
+			app.arduinoUartConnect.findComIDArrayChange();
 		}
 		else if(uartDialogOKType == 3){					//窗口提示没有插入USB线后，按OK 或 Concel
-			arduinoUart.resetUartStateLightState();
+			arduinoUartConnect.resetUartStateLightState();
 			uartConnectCirSet(0);
 		}
 		else{
 		}
 		
 	}
-	
-	
+		
 	public function showCOMMenu(b:*):void {
 		var m:Menu = new Menu(null, 'COM', CSS.topBarColor(), 28);
 	
-		if (arduinoUart.comStatus != 0x00)
+		if (arduinoUartConnect.comStatus != 0x00)
 		{
-			m.addItem("Auto Connect", arduinoUart.setAutoConnect);
+			m.addItem("Auto Connect", arduinoUartConnect.setAutoConnect);
 			app.xuhy_test_log("topbar show Auto Connect");
 		}
 		else
 		{
-			m.addItem("COM" + arduinoUart.scratchComID, arduinoUart.setUartDisconnect, true, true);
+			m.addItem("COM" + arduinoUart.scratchComID, arduinoUartConnect.setUartDisconnect, true, true);
 			app.xuhy_test_log("topbar show COMID");
 		}
 		
@@ -1481,9 +1471,9 @@ public class Scratch extends Sprite {
 		if(state == 1)
 		{
 			uartConnectCir.graphics.beginFill(0x80ff00);				//绿灯
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 130,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 150,15,8);
 			uartConnectCir.graphics.endFill();
 			addChild(uartConnectCir);
 		}
@@ -1491,18 +1481,18 @@ public class Scratch extends Sprite {
 		{
 			
 			uartConnectCir.graphics.beginFill(0xff8060);				//红灯
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 130,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 150,15,8);
 			uartConnectCir.graphics.endFill();
 			addChild(uartConnectCir);
 		}
 		else if(state == 2)
 		{
 			uartConnectCir.graphics.beginFill(0xE0E000);
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
-			uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 130,15,8);
+			uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 150,15,8);
 			uartConnectCir.graphics.endFill();
 			addChild(uartConnectCir);
 		}
@@ -1516,35 +1506,32 @@ public class Scratch extends Sprite {
 		{
 			case 0x00:
 				uartConnectCir.graphics.beginFill(0x80ff00);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);	
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);
 				uartConnectCir.graphics.beginFill(0xff8060);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 130,15,8);
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 150,15,8);
 				uartConnectCir.graphics.endFill();
 				addChild(uartConnectCir);
 				break;
 			case 0x01:
 				uartConnectCir.graphics.beginFill(0x80ff00);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
-				
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 130,15,8);
 				uartConnectCir.graphics.beginFill(0xff8060);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);	
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);	
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 150,15,8);
 				uartConnectCir.graphics.endFill();
 				addChild(uartConnectCir);
 				break;
 			case 0x02:
 				uartConnectCir.graphics.beginFill(0x80ff00);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 50,15,8);
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 150,15,8);
 				uartConnectCir.graphics.beginFill(0xff8060);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 70,15,8);
-				uartConnectCir.graphics.drawCircle(stage.stageWidth - 90,15,8);	
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 110,15,8);	
+				uartConnectCir.graphics.drawCircle(TopBarPart.UartAutoConnectX + 130,15,8);
 				uartConnectCir.graphics.endFill();
 				addChild(uartConnectCir);
 				break;				
 		}
-
-		
 	}
 	
 	/*
@@ -1553,7 +1540,8 @@ public class Scratch extends Sprite {
 	public function uartAutoConnectButtonFunc():void{
 		var ButtonWidth:int = 110;
 		addChild(uartAutoConnectButton);
-		uartAutoConnectButton.x= stage.stageWidth - ButtonWidth - 90;
+		uartAutoConnectButton.x= TopBarPart.UartAutoConnectX;
+		uartAutoConnectButton.y= TopBarPart.UartAutoConnectY;
 	}
 	
 	

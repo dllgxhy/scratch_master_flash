@@ -136,18 +136,23 @@ public class Interpreter {
 		} else {
 			var topBlock:Block = b;
 			if (b.isReporter) {
-				// click on reporter shows value in bubble
-				if (bubbleThread) {
-					toggleThread(bubbleThread.topBlock, bubbleThread.target);
+				if((b.op == "readfraredR:")||(b.op == "readpower:")||(b.op == "readavoid:")||(b.op == "readtrack:")||(b.op == "readdigitals:")||(b.op == "readanalogs:")||(b.op == "readcap:")||(b.op == "readanalogsj:")||(b.op == "readdigital:")||(b.op == "readanalog:")||(b.op == "readckkey1")||(b.op == "readckkey2")||(b.op == "readcksound")||(b.op == "readckslide")||(b.op == "readcklight")||(b.op == "readckjoyx")||(b.op == "readckjoyy")||(b.op == "readAfloat:")||(b.op == "readPfloat:"))//||(b.op == "readdigitalj:")||(b.op == "readultrs:")
+					;
+				else
+				{
+					// click on reporter shows value in bubble
+					if (bubbleThread) {
+						toggleThread(bubbleThread.topBlock, bubbleThread.target);
+					}
+					var reporter:Block = b;
+					var interp:Interpreter = this;
+					b = new Block("%s", "", -1);
+					b.opFunction = function(b:Block):void {
+						var p:Point = reporter.localToGlobal(new Point(0, 0));
+						app.showBubble(String(interp.arg(b, 0)), p.x, p.y, reporter.getRect(app.stage).width);
+					};
+					b.args[0] = reporter;
 				}
-				var reporter:Block = b;
-				var interp:Interpreter = this;
-				b = new Block("%s", "", -1);
-				b.opFunction = function(b:Block):void {
-					var p:Point = reporter.localToGlobal(new Point(0, 0));
-					app.showBubble(String(interp.arg(b, 0)), p.x, p.y, reporter.getRect(app.stage).width);
-				};
-				b.args[0] = reporter;
 			}
 			if (app.editMode && ! isBackground) topBlock.showRunFeedback();
 			var t:Thread = new Thread(b, targetObj, startupDelay);
@@ -447,7 +452,42 @@ public class Interpreter {
 		// Debug code
 		if(debugFunc != null)
 			debugFunc(b);
-
+		
+		if(app.arduinoLib.ArduinoFlag == false)//Arduino程序生成流程下不需要以下处理_wh
+		{
+			switch(op)
+			{
+				case "readfraredR:": break;
+			}
+		}
+		else
+		{
+			switch(op)
+			{
+				case "readdigital:":   b.opFunction = primTable["readdigitalSend:"];break;
+				case "readanalog:":    b.opFunction = primTable["readanalogSend:"];break;				
+				case "readckkey1":     b.opFunction = primTable["readckkey1Send"];break;
+				case "readckkey2":     b.opFunction = primTable["readckkey2Send"];break;
+				case "readcksound":    b.opFunction = primTable["readcksoundSend"];break;
+				case "readckslide":    b.opFunction = primTable["readckslideSend"];break;
+				case "readcklight":    b.opFunction = primTable["readcklightSend"];break;
+				case "readckjoyx":     b.opFunction = primTable["readckjoyxSend"];break;
+				case "readckjoyy":     b.opFunction = primTable["readckjoyySend"];break;
+				
+				case "readavoid:":     b.opFunction = primTable["readavoidSend:"];break;
+				case "readtrack:":     b.opFunction = primTable["readtrackSend:"];break;
+				case "readpower:":     b.opFunction = primTable["readpowerSend:"];break;
+				case "readfraredR:":   b.opFunction = primTable["readfraredRSend:"];break;
+				
+				case "readdigitals:":  b.opFunction = primTable["readdigitalsSend:"];break;
+				case "readanalogs:":   b.opFunction = primTable["readanalogsSend:"];break;
+				case "readanalogsj:":  b.opFunction = primTable["readanalogsjSend:"];break;
+				case "readcap:":       b.opFunction = primTable["readcapSend:"];break;
+				case "readAfloat:":	   b.opFunction = primTable["readAfloatSend:"];break;
+				case "readPfloat:":	   b.opFunction = primTable["readPfloatSend:"];break;			
+				default:break;			
+			}
+		}	
 		return b.opFunction(b);
 	}
 
