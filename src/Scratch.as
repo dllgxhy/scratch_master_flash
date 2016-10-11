@@ -1350,10 +1350,10 @@ public class Scratch extends Sprite {
 	
 	public function showComStatusDialog():void
 	{
-		uartDialog.addTitle("uart status");
+		uartDialog.addTitle("自动连接失败，请将硬件设备连接断开并重新连接");
 		uartDialog.addText ("please plugout the cable");
-		uartDialog.addButton("OK",     uartDialogOK);
-		uartDialog.addButton("Cancel", uartDialogCancel);
+//		uartDialog.addButton("放弃",     uartDialogOK);
+		uartDialog.addButton("放弃",   uartDialogCancel);
 	}
 
 	
@@ -1378,15 +1378,14 @@ public class Scratch extends Sprite {
 	
 	public function uartDialogCancel():void
 	{
-//		clearInterval(arduinoUartConnect.searchComChangeID);
-		arduinoUartConnect.resetUartStateLightState();
+		arduinoUartConnect.AutofindAvailComIDForArduinoFailed();
 		uartConnectCirSet(0);
 		uartDialog.cancel();
 	}
-
+	/*
 	public function uartDialogOK():void{  								//提醒用户重新插拔USB接口或下载固件
-		
-	}
+		uartDialog.
+	}*/
 		
 	public function showCOMMenu(b:*):void {
 		var m:Menu = new Menu(null, 'COM', CSS.topBarColor(), 28);
