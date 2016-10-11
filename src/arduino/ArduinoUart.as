@@ -166,8 +166,7 @@ public class ArduinoUart extends Sprite {
 	/*如果scratchComID 的串口连接不上，则通过插拔USB接口检测哪个COM口可用，得到scratchComID。*/	
 	public function checkArduinoCableIsPlugIn():void{								
 		app.uartDialog.setText("please Check the cable plugout");
-		app.uartDialog.showOnStage(app.stage);
-		app.uartDialogOKType = 0x01;	
+		app.uartDialog.showOnStage(app.stage);	
 	}
 		
 	

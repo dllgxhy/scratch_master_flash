@@ -1370,11 +1370,8 @@ public class Scratch extends Sprite {
 		{
 			arduinoUartConnect.findAvailComIDForArduinoTimer();
 		}
-		else{										//串口可以正常通讯状态下，按下Auto Connect的按键，则关闭串口通讯	
-			clearInterval(app.arduinoUartConnect.IntervalID);
-			app.arduinoUartConnect.setUartDisconnect();
-			app.arduinoUartConnect.ShowUartStatusFlag(false);
-			arduinoUartConnect.resetUartStateLightState();
+		else{															//串口可以正常通讯状态下，按下Auto Connect的按键，则关闭串口通讯	
+			arduinoUartConnect.AutofindAvailComIDForArduinoFailed();
 			xuhy_test_log("Scratch" + "arduinoUart.comStatus = " + app.arduinoUartConnect.comStatus);
 		}	
 	}
@@ -1386,30 +1383,8 @@ public class Scratch extends Sprite {
 		uartConnectCirSet(0);
 		uartDialog.cancel();
 	}
-	
-	public var uartDialogOKType:int = 0x00;   //1：第一次点击OK按键  2：第二次点击OK按键
+
 	public function uartDialogOK():void{  								//提醒用户重新插拔USB接口或下载固件
-		var i:int = 0x00;
-		if(uartDialogOKType == 1){										//usb拔下后读取可用的串口
-			arduinoUartConnect.findComStatusTrue();
-			for(i=0x00; i< arduinoUartConnect.comStatusTrueArray.length;i++){   	//将USB拔下后的串口数据保存在availComInComputer中；
-				arduinoUartConnect.availComInComputer[i] = arduinoUartConnect.comStatusTrueArray[i];
-			}
-			uartDialog.setText("please plugin the cable");
-			uartDialog.showOnStage(stage);
-			uartDialogOKType = 2;
-			return ;
-		}
-		else if(uartDialogOKType == 2){
-			app.arduinoUartConnect.findComStatusTrue();			//插入串口之后再次查找串口数量
-			app.arduinoUartConnect.findComIDArrayChange();
-		}
-		else if(uartDialogOKType == 3){					//窗口提示没有插入USB线后，按OK 或 Concel
-			arduinoUartConnect.resetUartStateLightState();
-			uartConnectCirSet(0);
-		}
-		else{
-		}
 		
 	}
 		

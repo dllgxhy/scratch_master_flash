@@ -81,7 +81,7 @@ public class ArduinoLibrary extends Sprite{
 	public var ArduinoFirmFlag:Number = 0;
 	public var ArduinoRPFlag:Boolean = false;//Arduino生成模块右键选择相关项是否按下
 	public var ArduinoRPNum:Number = 0;//Arduino生成模块右键选择相关项编号
-	public var UpDialog:DialogBox = new DialogBox();
+	//public var UpDialog:DialogBox = new DialogBox();
 	public var upDialogSuccessFlag:Boolean = false;
 	
 	//CH340安装驱动
@@ -152,12 +152,12 @@ public class ArduinoLibrary extends Sprite{
 	public function ArduinoLibrary(app:Scratch)
 	{
 		this.app = app;
-		upLoadFirmTimer = new Timer(1000, 75);//每1s一个中断，持续75s 在线约10s，无线61s
+		upLoadFirmTimer = new Timer(300, 75);//每1s一个中断，持续75s 在线约10s，无线61s
 		upLoadFirmTimer.addEventListener(TimerEvent.TIMER, onUpLoadFirmTimerTick); 
 		upLoadFirmTimer.addEventListener(TimerEvent.TIMER_COMPLETE, onupLoadFirmTimerComplete);
-		UpDialog.addTitle('Upload');
-		UpDialog.addButton('Close',cancel);
-		UpDialog.addText(Translator.map("uploading") + " ... ");
+		//UpDialog.addTitle('Upload');
+		//UpDialog.addButton('Close',cancel);
+		//UpDialog.addText(Translator.map("uploading") + " ... ");
 		GenerateFilesForScratch2ArduinoFirmwareCode();
 		
 		ArduinoBlock[app.arduinoUart.ID_ReadAFloat] = new Array();//二维数组新建，Arduino生成过程避免变量反复定义用_wh
@@ -188,8 +188,8 @@ public class ArduinoLibrary extends Sprite{
 		process.standardInput.writeUTFBytes("avrdude -p m328p -c arduino -b 115200 -P COM"+scratchComID+" -U flash:w:S4A.hex"+"\r\n");//avrdude命令行_wh
 		
 		//等待文本框提示_wh
-		UpDialog.setText(Translator.map("uploading") + " ... ");
-		UpDialog.showOnStage(app.stage);
+		//UpDialog.setText(Translator.map("uploading") + " ... ");
+		//UpDialog.showOnStage(app.stage);
 		ArduinoFirmFlag = 0;
 		
 		process.addEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//cmd返回数据处理事件_wh	
@@ -209,7 +209,7 @@ public class ArduinoLibrary extends Sprite{
 					process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
 					process2.start(nativePSInfo);//执行dos命令_wh
 					process2.standardInput.writeUTFBytes("taskkill /f /im ArduinoUploader.exe /t"+"\r\n");//强行关闭avrdude进程_wh
-					UpDialog.setText(Translator.map("upload failed"));		
+					//UpDialog.setText(Translator.map("upload failed"));		
 				}
 			}
 			if(upLoadFirmTimerCount == 73)//72s
@@ -232,7 +232,7 @@ public class ArduinoLibrary extends Sprite{
 				process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
 				process2.start(nativePSInfo);//执行dos命令_wh
 				process2.standardInput.writeUTFBytes("taskkill /f /im avrdude.exe /t"+"\r\n");//强行关闭avrdude进程_wh
-				UpDialog.setText(Translator.map("upload failed"));
+				//UpDialog.setText(Translator.map("upload failed"));
 				upDialogSuccessFlag = false;
 				
 			}
@@ -279,11 +279,11 @@ public class ArduinoLibrary extends Sprite{
 			{
 				if(str.indexOf("Compiliation:") != -1)
 				{
-					UpDialog.setText(Translator.map("uploading") + " ... ");
+					//UpDialog.setText(Translator.map("uploading") + " ... ");
 				}
 				if(str.indexOf("Writing | ") != -1)
 				{
-					UpDialog.setText(Translator.map("upload success"));
+					//UpDialog.setText(Translator.map("upload success"));
 					upDialogSuccessFlag = true;
 					process.exit(nativePSInfo);//退出cmd.exe_wh
 					process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
@@ -311,7 +311,7 @@ public class ArduinoLibrary extends Sprite{
 						{
 							if(ArduinoFirmFlag < 9)
 							{
-								UpDialog.setText(Translator.map("upload success"));
+								//UpDialog.setText(Translator.map("upload success"));
 								upDialogSuccessFlag = true;
 								process.exit(nativePSInfo);//退出cmd.exe_wh
 								process.removeEventListener(ProgressEvent.STANDARD_OUTPUT_DATA, cmdDataHandler);//移除侦听器_wh
@@ -333,7 +333,7 @@ public class ArduinoLibrary extends Sprite{
 	public function cancel():void {
 		app.arduinoUartConnect.resetUartStateLightState();			//关闭串口连接指示灯和时钟add by xuhy	
 		app.arduinoUartConnect.setUartDisconnect();				//关闭串口
-		UpDialog.cancel();
+		//UpDialog.cancel();
 		if((upLoadFirmTimerCount < 70) && (upLoadFirmTimerCount != 0))
 			upLoadFirmTimerCount = 0;//表示停止_wh
 	}
@@ -486,8 +486,8 @@ public class ArduinoLibrary extends Sprite{
 						process.standardInput.writeUTFBytes("cd /d "+ File.userDirectory.resolvePath("AS-Block/ArduinoBuilder").nativePath +"\r\n");//cmd命令路径，回车符，/r/n_wh
 						process.standardInput.writeUTFBytes("ArduinoUploader arduinos.ino 1 " + app.arduinoUart. scratchComID + " 16MHZ" + "\r\n");//avrdude命令行_wh
 
-						UpDialog.setText(Translator.map("compiliation") + " ... ");
-						UpDialog.showOnStage(app.stage);
+						//UpDialog.setText(Translator.map("compiliation") + " ... ");
+						//UpDialog.showOnStage(app.stage);
 
 						upLoadFirmTimer.start();//开启定时器_wh
 						upLoadFirmTimerCount = 1;
