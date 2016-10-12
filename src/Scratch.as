@@ -1379,6 +1379,7 @@ public class Scratch extends Sprite {
 	public function uartDialogCancel():void
 	{
 		arduinoUartConnect.AutofindAvailComIDForArduinoFailed();
+		clearInterval(arduinoUartConnect.manualChooseComIDTimerID);
 		uartConnectCirSet(0);
 		uartDialog.cancel();
 	}

@@ -292,6 +292,8 @@ public class ArduinoUartConnect extends Sprite{
 		findAvailComIDForArduinoTimerIDOccupy = false;	
 		findAvailComIDForArduinoStatus = 0x00;
 		app.uartDialog.cancel();
+		dotCount = 0x00;
+		dot = '.';
 	}
 	
 	/*
@@ -306,6 +308,8 @@ public class ArduinoUartConnect extends Sprite{
 		comStatus = 0x03;
 		app.arduinoLib.upDialogSuccessFlag = false;
 		app.xuhy_test_log("AutofindAvailComIDForArduinoFailed");
+		dotCount = 0x00;
+		dot = '.';
 	}
 	
 	private var    findAvailComIDForArduinoStatus:int                                                             = 0x00;
@@ -385,23 +389,35 @@ public class ArduinoUartConnect extends Sprite{
 	通过提示框显示自动连接失败
 	*************************************************************/
 	
-	private var manualChooseComIDTimerID:int     = 0x00;
-		private var manualChooseComIDOld:Array   = new Array();
+	public var manualChooseComIDTimerID:int     = 0x00;
+	private var manualChooseComIDOld:Array   = new Array();
 	private var manualChooseComIDNew:Array       = new Array();
 	public function manualChooseComID():void{
 		var intervalDuration:Number = 1000; 
 		manualChooseComIDTimerID = setInterval(manualChooseComIDDetect, intervalDuration);
 		AutofindAvailComIDForArduinoFailed();					//串口数量大于3个，则自动检测串口流程失败
-		app.uartDialog.setText ("系统实时检测中 ...");
+		setuartStateLightTimer();								//开启串口LED灯
+		app.uartDialog.setText ("系统实时检测中 .");
 		app.uartDialog.showOnStage(app.stage);
 		manualChooseComIDNew = manualChooseComIDOld = availComInComputerSoftWareStart;
 	}
 
-	
+	private var dotCount:int = 0x00;
+	private var dot:String = '.';
 	public function manualChooseComIDDetect():void{
-	
+
 		manualChooseComIDOld = manualChooseComIDNew.slice(0);
 		manualChooseComIDNew = findComStatusTrue().slice(0);
+		dotCount++;
+		dot = dot + '.';
+		if(dotCount > 0x0a)
+		{
+			dotCount = 0x00;
+			dot = '.';
+		}
+		app.uartDialog.setText ("系统实时检测中 ."+dot);
+		app.uartDialog.showOnStage(app.stage);
+		
 		if(manualChooseComIDNew.length > manualChooseComIDOld.length)
 		{
 			app.arduinoUart.scratchComID = findComIDArrayChange(manualChooseComIDNew,manualChooseComIDOld);
