@@ -149,7 +149,7 @@ public class ArduinoUartConnect extends Sprite{
 	*/
 	public function setAutoConnect():uint
 	{
-		var intervalDuration:Number = 1000;    
+		var intervalDuration:Number = 500;    
 		IntervalID = setInterval(onTick_searchAndCheckUart, intervalDuration);
 		uartDetectStatustimerStop = uartDetectStatustimerStart = 0x00;
 		app.xuhy_test_log("setAutoConnect COM：" + app.arduinoUart.scratchComID);
@@ -174,7 +174,7 @@ public class ArduinoUartConnect extends Sprite{
 		else
 		{
 			notConnectArduinoCount ++ ;
-			if(notConnectArduinoCount >= 5)
+			if(notConnectArduinoCount >= 14)
 			{	
 				comStatus = 0x01;
 				app.xuhy_test_log("uart disconnect unexpected comStatus = " + comStatus);
@@ -199,8 +199,6 @@ public class ArduinoUartConnect extends Sprite{
 		ShowUartStatusFlag(false);
 	}
 	
-	
-
 
 	/*
 	 *检查电脑中所有存在的UART接口 
@@ -224,7 +222,7 @@ public class ArduinoUartConnect extends Sprite{
 	/********************************************************************************
 	检测是否可以直接连接串口号为ComID的串口，自动检测是否有相关的串口可以得到心跳包
 	*********************************************************************************/
-	private var checkScratchCanGetHeartPackageFromArduinoTimer:Timer  = new Timer(4000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
+	private var checkScratchCanGetHeartPackageFromArduinoTimer:Timer  = new Timer(5000,1);	 //留有5S钟的时间，在该时间内，检测默认的串口号是否可以接收到心跳包
 	public function checkScratchCanGetHeartPackageFromArduino(ComID:int):Boolean{
 		if(checkUartAvail(ComID))
 		{
@@ -393,7 +391,7 @@ public class ArduinoUartConnect extends Sprite{
 	private var manualChooseComIDOld:Array   = new Array();
 	private var manualChooseComIDNew:Array       = new Array();
 	public function manualChooseComID():void{
-		var intervalDuration:Number = 1000; 
+		var intervalDuration:Number = 2000; 
 		manualChooseComIDTimerID = setInterval(manualChooseComIDDetect, intervalDuration);
 		AutofindAvailComIDForArduinoFailed();					//串口数量大于3个，则自动检测串口流程失败
 		setuartStateLightTimer();								//开启串口LED灯

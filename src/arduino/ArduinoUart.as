@@ -75,18 +75,16 @@ public class ArduinoUart extends Sprite {
 	public  var scratchComID:int                    = 0x01;					//当前选中打开的COM口,COM口从1开始计数
 	public  var scratchUartStayAlive:Boolean        = false;				//串口是否还可以正常通讯
 	
-	public  var comStatusTrueFlag:Boolean           = false;
-	private var uartCloseFlag:Boolean 			    = false;
-	
-	
-	public var busy:int 					       = 0x01;
-	public var free:int 					       = 0x00;
+	public  const busy:int 					       = 0x01;
+	public  const free:int 					       = 0x00;
 	public  var uartBusyStatus:int                 = free;           //是否有通讯占用串口,取值为busy 或 free
 	/*串口通讯协议*/
 	public var comDataBuffer:Array                 = new Array();       //串口接收数据缓存
 	public var comDataBufferOld:Array              = new Array();       //串口接收数据缓存未处理数据
 	public var comDataBufferSend:Array             = new Array();       //要发送的数据，但由于串口被占用而没有发送出去的数据
 	public var comDataBufferSend_flag:Boolean      = false;             //comDataBufferSend中是否有数据
+	
+	public var uartOpenTrue:Boolean 			   = false;				//串口连接成功标志
 	
 	public const uartDataID_checkUartAvail:int     = 0x01;  			//串口通讯心跳包，数据包括各种板载传感器的数据
 	public const uartDataID_Readshort:int          = 0x00;
@@ -118,15 +116,14 @@ public class ArduinoUart extends Sprite {
 	public const ID_ReadPOWER:int        = 0x53;//读机器人电量输入_wh
 	public const ID_READFRAREDR:int      = 0x54;//读机器人红外遥控输入_wh
 	
-	public const ID_CarDC:int = 0x0100;//机器人前进方式_wh
-	public const ID_DIR:int = 0x0101;//方向电机变量_wh	
+	public const ID_CarDC:int            = 0x0100;//机器人前进方式_wh
+	public const ID_DIR:int              = 0x0101;//方向电机变量_wh	
 
 	
 	 
 	public function ArduinoUart(app:Scratch)
 	{	
 		this.app = app;	
-//		checkUartAvail(13);  //测试使用,正常使用时应删除	
 	}
 	
 	/************************************************
@@ -136,10 +133,8 @@ public class ArduinoUart extends Sprite {
 	
 		if(arduinoUart.connect("COM" + comID, 115200))
 		{
-			app.xuhy_test_log("open COM:"+comID+ " success");
 			return true;
 		}
-		app.xuhy_test_log("open COM:"+comID+ " failed");
 		return false;
 	}
 	
@@ -149,6 +144,7 @@ public class ArduinoUart extends Sprite {
 	public function arduinoUartClose():void{	
 		arduinoUart.flush();
 		arduinoUart.close();
+		uartOpenTrue = false;
 	}
 	
 	
@@ -161,16 +157,6 @@ public class ArduinoUart extends Sprite {
 		app.arduinoLib.arduinoLightValue = data[0] * 256 + data[1];
 		app.arduinoLib.arduinoUltrasonicValue =  data[5];
 	}
-		
-	
-	/*如果scratchComID 的串口连接不上，则通过插拔USB接口检测哪个COM口可用，得到scratchComID。*/	
-	public function checkArduinoCableIsPlugIn():void{								
-		app.uartDialog.setText("please Check the cable plugout");
-		app.uartDialog.showOnStage(app.stage);	
-	}
-		
-	
-	
 
 	/*********************************************************************
 	串口数据发送事件处理

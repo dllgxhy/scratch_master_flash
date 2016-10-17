@@ -69,6 +69,7 @@ import mx.utils.URLUtil;
 
 import arduino.ArduinoLibrary;
 import arduino.ArduinoUart;
+import arduino.ArduinoUartConnectManual;
 
 import blocks.Block;
 
@@ -198,6 +199,7 @@ public class Scratch extends Sprite {
 	
 	//UART Part
 	public var arduinoUart:ArduinoUart                   = new ArduinoUart(this);
+	public var arduinoUartConnectManual:ArduinoUartConnectManual = new ArduinoUartConnectManual(this);
 	public var arduinoLib:ArduinoLibrary                 = new ArduinoLibrary(this);
 	public var arduinoUartConnect:ArduinoUartConnect     = new ArduinoUartConnect(this);
 	public var showCOMFlag:Boolean                       = false;
@@ -1391,16 +1393,68 @@ public class Scratch extends Sprite {
 	public function showCOMMenu(b:*):void {
 		var m:Menu = new Menu(null, 'COM', CSS.topBarColor(), 28);
 	
-		if (arduinoUartConnect.comStatus != 0x00)
+		if(app.arduinoUartConnectManual.showCOMFlag)
+			return;
+		app.arduinoUartConnectManual.showCOMFlag = true;
+		if(arduinoLib.upLoadFirmTimerCount == 0)//固件下载过程中不允许操作COM口_wh
 		{
-			m.addItem("Auto Connect", arduinoUartConnect.setAutoConnect);
-			app.xuhy_test_log("topbar show Auto Connect");
+			var comArrays:Array = new Array();
+			//COM口未开启_wh
+			if(arduinoUart.uartOpenTrue == false)
+			{
+				comArrays = app.arduinoUartConnect.findComStatusTrue();//获取扫描到的COM口编号(可用未开启的)_wh
+				for(var i:int = 0; i < comArrays.length; i++)//显示扫描到的COM号_wh
+				{
+					//comID = comArrays[i];//当前显示ID号赋给comID作为全局变量_wh
+					switch(comArrays[i])
+					{
+						case 1:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen1);break;
+						case 2:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen2);break;
+						case 3:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen3);break;
+						case 4:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen4);break;
+						case 5:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen5);break;
+						case 6:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen6);break;
+						case 7:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen7);break;
+						case 8:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen8);break;
+						case 9:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen9);break;
+						case 10:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen10);break;//
+						case 11:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen11);break;//
+						case 12:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen12);break;//
+						case 13:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen13);break;//
+						case 14:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen14);break;//
+						case 15:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen15);break;//
+						case 16:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen16);break;//
+						case 17:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen17);break;
+						case 18:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen18);break;
+						case 19:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen19);break;
+						case 20:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen20);break;
+						case 21:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen21);break;
+						case 22:m.addItem("COM" + comArrays[i], arduinoUartConnectManual.comOpen22);break;
+						
+						default:break;
+					}
+				}
+			}
+			//COM口已开启_wh
+			else
+			{
+				arduinoUart.arduinoUartClose();
+				arduinoUart.uartOpenTrue == false;
+				arduinoUart.comDataBufferOld.splice();//数组清零_wh
+
+				if(arduinoUart.arduinoUartOpen(arduinoUart.scratchComID))//判断是否能打开成功_wh
+				{
+					arduinoUart.uartOpenTrue = true;
+					m.addItem("COM"+arduinoUart.scratchComID, arduinoUart.arduinoUartClose, true, true);//选中则关闭；只显示选中的COM口且前面勾对号(最后一个true)_wh
+				}
+				else
+				{
+					arduinoUart.arduinoUartClose();//重新关闭_wh
+					uartConnectCirSet(0);
+				}
+			}
 		}
-		else
-		{
-			m.addItem("COM" + arduinoUart.scratchComID, arduinoUartConnect.setUartDisconnect, true, true);
-			app.xuhy_test_log("topbar show COMID");
-		}
+			m.addLine();
 		
 		//蓝牙通信模式_wh
 		if(blueFlag == false)
@@ -1425,8 +1479,8 @@ public class Scratch extends Sprite {
 			UpDialog.addButton('Close',cancel);
 			UpDialog.addText(Translator.map("uploading") + " ... ");
 		}
-		
-		showCOMFlag = false;*/
+		*/
+		app.arduinoUartConnectManual.showCOMFlag = false;
 	}
 	
 	protected function BlueOpen():void {
