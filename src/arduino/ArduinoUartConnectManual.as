@@ -52,7 +52,6 @@ import flash.utils.*;
 			app.arduinoUart.scratchComID = 6;
 			app.arduinoUart.arduinoUartOpen(app.arduinoUart.scratchComID);
 			app.uartConnectCirSet(1);
-			CreateCheckManualUartConnectStatusTimer();
 		}
 		public function comOpen7():void {
 			app.arduinoUart.uartOpenTrue = true;//COM口开启标志量赋值
@@ -152,7 +151,7 @@ import flash.utils.*;
 		}
 		
 		/************************************************************
-		如果USB接口断开，则LED灯显示红灯
+		如果USB接口断开,则LED灯显示红灯,该部分代码暂时屏蔽
 		************************************************************/
 		private var CheckManualUartConnectStatusTimerID:int          = 0x00;
 		public function CreateCheckManualUartConnectStatusTimer():void
@@ -160,6 +159,7 @@ import flash.utils.*;
 			var intervalDuration:Number = 1000; 
 			CheckManualUartConnectStatusTimerID = setInterval(On_tickCheckManualUartConnectStatus, intervalDuration);
 		}
+		
 		//此处连续对串口进行关闭连接操作，对软件整体性能产生
 		private function On_tickCheckManualUartConnectStatus():void{			
 			app.arduinoUart.arduinoUartClose();

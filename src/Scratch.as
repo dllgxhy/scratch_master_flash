@@ -1402,6 +1402,7 @@ public class Scratch extends Sprite {
 			//COM口未开启_wh
 			if(arduinoUart.uartOpenTrue == false)
 			{
+				uartConnectCirSet(0);
 				comArrays = app.arduinoUartConnect.findComStatusTrue();//获取扫描到的COM口编号(可用未开启的)_wh
 				for(var i:int = 0; i < comArrays.length; i++)//显示扫描到的COM号_wh
 				{

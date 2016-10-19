@@ -396,12 +396,13 @@ public class CfunPrims {
 			}
 			
 			//通信协议：0xff 0x55; 0x83（舵机角度类型）; pin（管脚号）; 角度_wh 
-//			app.arduino.writeByte(0xff);
-//			app.arduino.writeByte(0x55);
-//			app.arduino.writeByte(ID_SetSG);
-//			app.arduino.writeByte(pin);
-
-//			app.arduino.writeByte(angle);
+			var numf:Array = new Array();
+			numf[0] = app.arduinoUart.ID_SetSG;
+			numf[1] = pin;
+			numf[2] = angle;
+				
+			//通信协议：0xff 0x55; 0x86（电机正负PWM类型）; pin（管脚号）; pwm（WPM量）_wh 	
+			app.arduinoUart.sendDataToUartBuffer(numf);
 		}
 	}
 	
@@ -527,11 +528,8 @@ public class CfunPrims {
 			numf[0] = app.arduinoUart.ID_SetDM;
 			numf[1] = pin;
 			numf[2] = dir;
-			numf[3] = pwm;
-				
-			//通信协议：0xff 0x55; 0x86（电机正负PWM类型）; pin（管脚号）; pwm（WPM量）_wh 	
+			numf[3] = pwm;	
 			app.arduinoUart.sendDataToUartBuffer(numf);
-//			app.CFunDelayms(5);//延时15ms_wh
 		}	
 	}
 	

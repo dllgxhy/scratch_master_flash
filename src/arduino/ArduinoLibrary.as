@@ -516,10 +516,7 @@ public class ArduinoLibrary extends Sprite{
 	}
 	
 	
-	
-	
-	
-	
+
 	/**************************************************************************************************/
 	/* Model Math*/
 	/* function add*/
