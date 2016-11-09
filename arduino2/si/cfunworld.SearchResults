@@ -1,0 +1,154 @@
+---- cfunPort Matches (156 in 33 files) ----
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFun7SegmentDisplay::CFun7SegmentDisplay():CFunPort()
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFun7SegmentDisplay::CFun7SegmentDisplay(uint8_t port):CFunPort(port)
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware):	s1 = cfunPort[port].s1;
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware):	s2 = cfunPort[port].s2;
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware):        s3 = cfunPort[port].s3;
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfun7segmentdisplay):CFun7SegmentDisplay::CFun7SegmentDisplay():CFunPort()
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfun7segmentdisplay):CFun7SegmentDisplay::CFun7SegmentDisplay(uint8_t port):CFunPort(port)
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfun7segmentdisplay):	s1 = cfunPort[port].s1;
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfun7segmentdisplay):	s2 = cfunPort[port].s2;
+CFun7SegmentDisplay.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfun7segmentdisplay):        s3 = cfunPort[port].s3;
+CFun7SegmentDisplay.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFun7SegmentDisplay.h (j:\xuhy\git_proj\cfunworld\firmware):class CFun7SegmentDisplay:public CFunPort
+CFun7SegmentDisplay.h (j:\xuhy\git_proj\cfunworld\firmware\cfun7segmentdisplay):#include "CFunPort.h"
+CFun7SegmentDisplay.h (j:\xuhy\git_proj\cfunworld\firmware\cfun7segmentdisplay):class CFun7SegmentDisplay:public CFunPort
+CFunAvoid.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunAvoid::CFunAvoid(): CFunPort(0)
+CFunAvoid.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunAvoid::CFunAvoid(uint8_t port): CFunPort(port)
+CFunAvoid.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunavoid):CFunAvoid::CFunAvoid(): CFunPort(0)
+CFunAvoid.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunavoid):CFunAvoid::CFunAvoid(uint8_t port): CFunPort(port)
+CFunAvoid.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunAvoid.h (j:\xuhy\git_proj\cfunworld\firmware):class CFunAvoid: public CFunPort
+CFunAvoid.h (j:\xuhy\git_proj\cfunworld\firmware\cfunavoid):#include "CFunPort.h"
+CFunAvoid.h (j:\xuhy\git_proj\cfunworld\firmware\cfunavoid):class CFunAvoid: public CFunPort
+CFunBuzzer.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunBuzzer.h (j:\xuhy\git_proj\cfunworld\firmware\cfunbuzzer):#include "CFunPort.h"
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunDCMotor::CFunDCMotor(): CFunPort(0)
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunDCMotor::CFunDCMotor(uint8_t port): CFunPort(port)
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware):        CFunPort::aWrite1(s);
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware):        CFunPort::dWrite3(HIGH);
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware):        CFunPort::aWrite1(s);
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware):        CFunPort::dWrite3(LOW);
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):CFunDCMotor::CFunDCMotor(): CFunPort(0)
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):CFunDCMotor::CFunDCMotor(uint8_t port): CFunPort(port)
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):        CFunPort::aWrite1(s);
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):        CFunPort::dWrite3(HIGH);
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):        CFunPort::aWrite1(s);
+CFunDCMotor.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):        CFunPort::dWrite3(LOW);
+CFunDCMotor.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunDCMotor.h (j:\xuhy\git_proj\cfunworld\firmware):class CFunDCMotor: public CFunPort
+CFunDCMotor.h (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):#include "CFunPort.h"
+CFunDCMotor.h (j:\xuhy\git_proj\cfunworld\firmware\cfundcmotor):class CFunDCMotor: public CFunPort
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunPort_Sig cfunPort[32] = {{0,1,2},{1,2,3},{2,3,4},{3,4,5},{4,5,6},{5,6,7},{6,7,8},{7,8,9},{8,9,10},{9,10,11},{10,11,12},{11,12,13}
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunPort_Sig cfunPort[18] = {{0,1,2},{1,2,3},{2,3,4},{3,4,5},{4,5,6},{5,6,7},{6,7,8},{7,8,9},{8,9,10},{9,10,11},{10,11,12},{11,12,13},{A0,A1,A2},{A1,A2,A3},{A2,A3,A4},{A3,A4,A5},{A4,A5,A0},{A5,A0,A1}
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunPort::CFunPort(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s1 = cfunPort[0].s1;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s2 = cfunPort[0].s2;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s3 = cfunPort[0].s3;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunPort::CFunPort(uint8_t port)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s1 = cfunPort[port].s1;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s2 = cfunPort[port].s2;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s3 = cfunPort[port].s3;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):uint8_t CFunPort::getPort(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):bool CFunPort::dRead1()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):bool CFunPort::dRead2()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):bool CFunPort::dRead3()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):void CFunPort::dWrite1(bool value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):void CFunPort::dWrite2(bool value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):void CFunPort::dWrite3(bool value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):int CFunPort::aRead1()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):int CFunPort::aRead2()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):int CFunPort::aRead3()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):void CFunPort::aWrite1(int value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):void CFunPort::aWrite2(int value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):void CFunPort::aWrite3(int value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):void CFunPort::reset(uint8_t port){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s1 = cfunPort[port].s1;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s2 = cfunPort[port].s2;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):    s3 = cfunPort[port].s3;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):uint8_t CFunPort::pin1(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):uint8_t CFunPort::pin2(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):uint8_t CFunPort::pin3(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware):double CFunPort::minicarVolt()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):#include "CFunPort.h"
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):CFunPort_Sig cfunPort[32] = {{0,1,2},{1,2,3},{2,3,4},{3,4,5},{4,5,6},{5,6,7},{6,7,8},{7,8,9},{8,9,10},{9,10,11},{10,11,12},{11,12,13}
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):CFunPort_Sig cfunPort[18] = {{0,1,2},{1,2,3},{2,3,4},{3,4,5},{4,5,6},{5,6,7},{6,7,8},{7,8,9},{8,9,10},{9,10,11},{10,11,12},{11,12,13},{A0,A1,A2},{A1,A2,A3},{A2,A3,A4},{A3,A4,A5},{A4,A5,A0},{A5,A0,A1}
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):CFunPort::CFunPort(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s1 = cfunPort[0].s1;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s2 = cfunPort[0].s2;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s3 = cfunPort[0].s3;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):CFunPort::CFunPort(uint8_t port)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s1 = cfunPort[port].s1;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s2 = cfunPort[port].s2;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s3 = cfunPort[port].s3;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):uint8_t CFunPort::getPort(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):bool CFunPort::dRead1()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):bool CFunPort::dRead2()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):bool CFunPort::dRead3()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):void CFunPort::dWrite1(bool value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):void CFunPort::dWrite2(bool value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):void CFunPort::dWrite3(bool value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):int CFunPort::aRead1()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):int CFunPort::aRead2()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):int CFunPort::aRead3()
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):void CFunPort::aWrite1(int value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):void CFunPort::aWrite2(int value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):void CFunPort::aWrite3(int value)
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):void CFunPort::reset(uint8_t port){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s1 = cfunPort[port].s1;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s2 = cfunPort[port].s2;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    s3 = cfunPort[port].s3;
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):uint8_t CFunPort::pin1(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):uint8_t CFunPort::pin2(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):uint8_t CFunPort::pin3(){
+CFunPort.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunport):double CFunPort::minicarVolt()
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware):extern CFunPort_Sig cfunPort[18];
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware):///@brief class of CFunPort,it contains two pin.
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware):class CFunPort
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware):    CFunPort();
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware):     CFunPort(uint8_t port);
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware\cfunport):extern CFunPort_Sig cfunPort[18];
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware\cfunport):///@brief class of CFunPort,it contains two pin.
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware\cfunport):class CFunPort
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware\cfunport):    CFunPort();
+CFunPort.h (j:\xuhy\git_proj\cfunworld\firmware\cfunport):     CFunPort(uint8_t port);
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunRGBLed::CFunRGBLed():CFunPort(0) {
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunRGBLed::CFunRGBLed(uint8_t port):CFunPort(port) {
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware)://	s1 = cfunPort[port].s1;
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware)://        s2 = cfunPort[port].s2;
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware)://        s3 = cfunPort[port].s3;
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunrgbled):CFunRGBLed::CFunRGBLed():CFunPort(0) {
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunrgbled):CFunRGBLed::CFunRGBLed(uint8_t port):CFunPort(port) {
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunrgbled):	s1 = cfunPort[port].s1;
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunrgbled):        s2 = cfunPort[port].s2;
+CFunRGBLed.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfunrgbled):        s3 = cfunPort[port].s3;
+CFunRGBLed.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunRGBLed.h (j:\xuhy\git_proj\cfunworld\firmware):class CFunRGBLed:public CFunPort {
+CFunRGBLed.h (j:\xuhy\git_proj\cfunworld\firmware\cfunrgbled):#include "CFunPort.h"
+CFunRGBLed.h (j:\xuhy\git_proj\cfunworld\firmware\cfunrgbled):class CFunRGBLed:public CFunPort {
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunTemperature::CFunTemperature():CFunPort(){
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunTemperature::CFunTemperature(uint8_t port):CFunPort(port){
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware):	s1 = cfunPort[port+12].s1;
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware):	s1 = cfunPort[port+12].s1;
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfuntemperature):CFunTemperature::CFunTemperature():CFunPort(){
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfuntemperature):CFunTemperature::CFunTemperature(uint8_t port):CFunPort(port){
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfuntemperature):	s1 = cfunPort[port+12].s1;
+CFunTemperature.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfuntemperature):	s1 = cfunPort[port+12].s1;
+CFunTemperature.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunTemperature.h (j:\xuhy\git_proj\cfunworld\firmware):class CFunTemperature:public CFunPort{
+CFunTemperature.h (j:\xuhy\git_proj\cfunworld\firmware\cfuntemperature):#include "CFunPort.h"
+CFunTemperature.h (j:\xuhy\git_proj\cfunworld\firmware\cfuntemperature):class CFunTemperature:public CFunPort{
+CFunTrack.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunTrack::CFunTrack(): CFunPort(0)
+CFunTrack.cpp (j:\xuhy\git_proj\cfunworld\firmware):CFunTrack::CFunTrack(uint8_t port): CFunPort(port)
+CFunTrack.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfuntrack):CFunTrack::CFunTrack(): CFunPort(0)
+CFunTrack.cpp (j:\xuhy\git_proj\cfunworld\firmware\cfuntrack):CFunTrack::CFunTrack(uint8_t port): CFunPort(port)
+CFunTrack.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunTrack.h (j:\xuhy\git_proj\cfunworld\firmware):class CFunTrack: public CFunPort
+CFunTrack.h (j:\xuhy\git_proj\cfunworld\firmware\cfuntrack):#include "CFunPort.h"
+CFunTrack.h (j:\xuhy\git_proj\cfunworld\firmware\cfuntrack):class CFunTrack: public CFunPort
+CFunUltrasonic.h (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+CFunUltrasonic.h (j:\xuhy\git_proj\cfunworld\firmware\cfunultrasonic):#include "CFunPort.h"
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):#include "CFunPort.h"
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):CFunPort cp;//CFunport
+Firmware.c (j:\xuhy\git_proj\cfunworld\firmware):CFunPort generalDevice;

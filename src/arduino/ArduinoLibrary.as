@@ -146,9 +146,7 @@ public class ArduinoLibrary extends Sprite{
 	
 	
 	
-	//Arduino
-	
-	
+	//Arduino	
 	public function ArduinoLibrary(app:Scratch)
 	{
 		this.app = app;
@@ -378,7 +376,7 @@ public class ArduinoLibrary extends Sprite{
 				}
 				else
 				{
-					ArduinoFs.writeUTFBytes('#include <Wire.h>' + '\n');
+//					ArduinoFs.writeUTFBytes('#include <Wire.h>' + '\n');
 				}				
 					
 				if(ArduinoUs)

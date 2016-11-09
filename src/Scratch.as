@@ -1572,7 +1572,7 @@ public class Scratch extends Sprite {
 	*/
 	public function AdduartAutoConnectButton():void{
 		var ButtonWidth:int = 110;
-		addChild(uartAutoConnectButton);
+//		addChild(uartAutoConnectButton);
 		uartAutoConnectButton.x= TopBarPart.UartAutoConnectX;
 		uartAutoConnectButton.y= TopBarPart.UartAutoConnectY;
 	}

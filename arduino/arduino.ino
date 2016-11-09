@@ -1,47 +1,51 @@
+////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////
+//#include <Wire.h>
 #include <Servo.h>
 #include "YoungMakerPort.h"
 #include "YoungMakerDCMotor.h"
 #include "YoungMakerAvoid.h"
 #include "YoungMakerTrack.h"
+#include "YoungMakerUltrasonic.h"
 #include "YoungMaker7SegmentDisplay.h"
+#include "YoungMakerTemperature.h"
+//#include "CFunTemperature2.h"
 #include "YoungMakerRGBLed.h"
 #include "YoungMakerIR.h"
 #include "YoungMakerCapacitive.h"
 #include "YoungMakerBuzzer.h"
 #include "YoungMakerCrystal.h"
-#include "YoungMakerTemperature.h"
-#include "YoungMakerUltrasonic.h"
 
-#define TIMER2_PRELOAD 100
-
-char outputs[10];
-int states[10];
-
-unsigned long initialPulseTime;
-unsigned long lastDataReceivedTime;
-
-volatile boolean updateServoMotors;
-volatile boolean newInterruption;
-
-Servo servo;
-YoungMakerPort 					cp;//CFunport
-YoungMakerDCMotor 				dcmotor;
-YoungMakerAvoid 				iravoid;
-YoungMakerTrack 				irtrack;
-YoungMakerTemperature 			ts;
-YoungMakerRGBLed 				led;
-YoungMaker7SegmentDisplay 		seg_led;
-YoungMakerIR 					ir;
-YoungMakerBuzzer 				buzz;
-
-YoungMakerCrystal lcd(0x20, 16, 2);  //LCD1602显示
-
+///////////////////////////////Servo/////////////
+Servo myservo2;
+Servo myservo3;
+Servo myservo4;
+Servo myservo5;
+Servo myservo6;
+Servo myservo7;
+Servo myservo8;
+Servo myservo9;
+Servo myservo10;
+Servo myservo11;
+Servo myservo12;
+Servo myservo13;
+///////////////////////////////
+YoungMakerPort cp;//CFunport
+YoungMakerDCMotor dc;
+YoungMakerAvoid av;
+YoungMakerTrack tr;
+YoungMakerTemperature ts;
+YoungMakerRGBLed led;
+YoungMaker7SegmentDisplay seg;
+YoungMakerPort generalDevice;
+YoungMakerIR ir;
+YoungMakerBuzzer buzz;
+YoungMakerCrystal lcd(0x20, 16, 2); // set the LCD address to 0x20 for a 16 chars and 2 line display
 
 long ultraSonicValue = 0;			 //超声波传感器
 #define TRIG_PIN 2
 #define ECHO_PIN 3 
 YoungMakerUltrasonic ultraSonic = YoungMakerUltrasonic(ECHO_PIN,TRIG_PIN);	//将超声波传感器设置为全局变量，随时可以进行调用
-
 ///////////////////////////////////////////////////
 #if defined(ARDUINO) && ARDUINO >= 100
 #define printByte(args)  write(args);
@@ -49,35 +53,15 @@ YoungMakerUltrasonic ultraSonic = YoungMakerUltrasonic(ECHO_PIN,TRIG_PIN);	//将
 #define printByte(args)  print(args,BYTE);
 #endif
 //////////////////////////////////////////////////
-/***************************
-串口工作信号量
-以信号量的方法设定串口数据可否发送与接收
-***************************/
-char uartSignal = 0x00;
-void setUartBusy()
-{
-	uartSignal = 0x01;
-}
-
-void setUartFree()
-{
-	uartSignal = 0x00;
-}
-
-bool checkUartStatus()
-{
-	if(uartSignal) return true;
-	else return false;
-}
-
-//串口发送数据的Buffer
-char uartTxBuffer[] = {0x00};
-char uartRxBuffer[] = {0x00};
 
 union {
   byte byteVal[4];
   float floatVal;
+  // long longVal;
 } val;
+
+//3个模拟口 2个数字口，每个口有2Byte数据，超声波 4个Byte数据
+char CKSensorValue[14] = {0x00};
 
 //CFunModule modules[12];
 #if defined(__AVR_ATmega32U4__)
@@ -85,288 +69,115 @@ int analogs[12] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11};
 #else
 int analogs[8] = {A0, A1, A2, A3, A4, A5, A6, A7};
 #endif
+boolean isAvailable = false;
+boolean isBluetooth = false;
 
-typedef enum Sensor_Type{
-	HEART_PACKAGE 				= 0x01,  //心跳包数据
-	READ_DIGITAL_DATA   		= 0x02,
-	READ_ANALOG_DATA   			= 0x03,
-	READ_LM35_TEMPERATURE_DATA  = 0x04, //读取LM35温度传感器
-	READ_ROCKER_XY 				= 0X05,
-	
-	/**********Scratch写入Arduino的数据******************/
-	ID_SetDigital 		   = 0x81,
-	ID_SetPWM 			   = 0x82,
-	ID_SetSG 			   = 0x83,
-	ID_SetMUS 			   = 0x84,
-	ID_SetNUM			   = 0x85,
-	ID_SetDM 			   = 0x86,
-	ID_SetRGB 			   = 0x87,
-	ID_SetLCD1602String    = 0x88,
-}Sensor_Type;
-Sensor_Type sensor_type;
+//int states[10];
+//volatile boolean newInterruption;
+//unsigned long initialPulseTime;
+//unsigned long lastDataReceivedTime;
+//#define TIMER2_PRELOAD 2000
 
-/*
-解析接收到的串口数据
-串口协议的定义详见《通讯协议》
-*/
-void parseReceiveData()
-{
-	char uartRxBufferSize = sizeof(uartRxBuffer);
-	if((uartRxBuffer[0] == 0xfe)&	//检查接收到的包头和包尾是否正确
-		(uartRxBuffer[1] == 0xfd) & 
-		(uartRxBuffer[uartRxBufferSize -1] == 0xfb) &
-		(uartRxBuffer[uartRxBufferSize -2] == 0xfe))
- 	{
- 		if(uartRxBuffer[2] == uartRxBufferSize)//检查接收到的数据长度是否准确
-		{
-			processData(&uartRxBuffer[3]);
-		}
-		else
-		{
-		}
- 	}
- 	else
-	{
-		
-	}
+unsigned char Bt[4];
+char buffer[52];
+char bufferBt[52];
+byte index = 0;
+byte dataLen;
+
+boolean isStart = false;
+unsigned char irRead;
+unsigned char irAvaliable = 0; //0:no. 1:yes
+char serialRead;
+unsigned char prevc = 0;
+
+unsigned int Tgray = 600;//xunxian
+float CFun_last_time = 0; //时间清零模块
+char _LCD[32] = {0};//LCD1602
+///////////////////////////////////////////////////
+//boolean _buzz_ir;
+//boolean _servo_flag;                //for avoiding servo initial again and again
+//boolean _servo_num;                 //for several servo work at the same time
+boolean ir_begin = 1;              //for avoiding IR initial again and again
+
+unsigned long _itime;               //for Ultrasonic interrupt function
+unsigned long _iustime;             //for Ultrasonic interrupt function
+
+unsigned long _distime;            //seg current time
+float _disvalue;                   // store last dispaly value
+
+char _LCD_flag=1;                //ensure LCD intialize only once
+/////////////////////////////////////////////////////////////
+unsigned char readBuffer(int index);
+void writeBuffer(int index, unsigned char c);
+void writeEnd();
+void writeSerial(unsigned char c) ;
+void readSerial();
+void dec2bit(int value);
+void sendValue(float value);
+void parseData();
+////////////////////////////////////////////////////////////
+void setup() {
+  pinMode(13, OUTPUT);
+  digitalWrite(13, HIGH);
+  delay(300);
+  digitalWrite(13, LOW);
+#if defined(__AVR_ATmega32U4__)
+  Serial1.begin(115200);
+  gyro.begin();
+#endif
+  Serial.begin(115200);
+//  lastDataReceivedTime = millis();
 }
-/*
-解析数据段
-*/
-void processData(char *data)
-{
-	char *data_tmp = data;
-	switch(data_tmp[0])
-	{
-/***********************************************/
-		case READ_DIGITAL_DATA:
-			break;
-		case READ_ANALOG_DATA:
-			break;
-		case READ_LM35_TEMPERATURE_DATA:
-			break;
-/***********************************************/
-		case ID_SetDigital:
-			write_digital(&data_tmp[1]);
-			break;
-		case ID_SetPWM:
-			write_pwm(&data_tmp[1]);
-			break;
-		case ID_SetSG:
-			write_Servo(&data_tmp[1]);
-			break;
-		case ID_SetMUS:
-			write_beep(&data_tmp[1]);
-			break;	
-		case ID_SetNUM:
-			write_7seg_led(&data_tmp[1]);
-			break;
-		case ID_SetDM:
-			write_dcmotor(&data_tmp[1]);
-			break;
-		case ID_SetRGB:
-			write_dcmotor(&data_tmp[1]);
-			break;
-                case ID_SetLCD1602String:
-                        write_LCD1602String(&data_tmp[1]);
-		default :
-			break;
-	}
-}
+///////////////////////////////////////////////////////////////////////
+void loop() {
+// if (updateServoMotors)   //此处后续添加对超声波的兼容
+// {
+//	sendUpdateServomotors();
+//	ScratchBoardSensorReport();
+//	updateServoMotors = false;
+// }
+  delay(200);
+  ScratchBoardSensorReport();
+  readSerial();
+  if (isAvailable) {                         //ruguo you shuju shuru
+    unsigned char c = serialRead & 0xff;     //duqu shuru shuju
+    if (c == 0x55 && isStart == false ) {    //
+      if (prevc == 0xff) {
+        index = 1;
+        isStart = true;
+      }
+    } else {
+      prevc = c;
+      if (isStart) {
+        if (index == 2) {
+          if(prevc == 0x88){
+          dataLen = 32+1; //加复杂模块，字节数要改变，建议加上一个用于表示后面有多少字节的标志位
+          }
+          else
+          dataLen =4+1;
+        } else if (index > 2) {
+          dataLen--;
+        }
+        writeBuffer(index, c);
+      }
+    }
+    index++;
+    if (index > 40) {
+      index = 0;
+      isStart = false;
+    }
+    if (isStart && dataLen == 0 && index > 3) {
+      isStart = false;
+      parseData();
+      index = 0;
+    }
+  }
 
-void write_digital(char* data)
-{
-	char pin = 0x00;
-	pin = data[0];
-	val.byteVal[0] = data[1];
-	pinMode(pin, OUTPUT);
-    digitalWrite(pin, val.byteVal[0] >= 1 ? HIGH : LOW);
-}
-
-void write_Servo(char* data)
-{
-	char pin = 0x00;
-	char angel = 0x00;
-	pin = data[0];	
-	angel = data[1];
-  servo.attach(pin);
-  servo.write(angel);
-}
-
-void write_pwm(char* data)
-{
-}
-void write_beep(char* data)
-{
-}
-
-void write_7seg_led(char* data)
-{
-	char pin = 0x00;
-	pin = data[0];
-	val.byteVal[3] = data[1];
-	val.byteVal[2] = data[2];
-	val.byteVal[1] = data[3];
-	val.byteVal[0] = data[4];
-	seg_led.reset(pin);
-    seg_led.display(val.floatVal);
-}
-
-void write_dcmotor(char* data)
-{
-	char pin = 0x00;
-	char direction = 0x00;
-	char time = 0x00;
-	pin = data[0];	
-	direction = data[1];
-	time = data[2];
-  dcmotor.reset(pin);
-  dcmotor.motorrun(direction, time);
-}
-void write_LCD1602String(char* data)
-{
-}
-
-/****************************************
-//板载传感器的数据//
-包括如下种类的传感器,顺序具有唯一性,与scratch是一一对应的关系：
-1) 光敏传感器：A5
-2) 声音传感器: A3
-3) 滑动变阻器: A4
-4) 红色按键  : D2
-5) 绿色按键  : D3
-6) 超声波测距:  占用4个字节  需要单独处理
-注：测试代码只有光敏和超声波两种传感器
-
-***************************************/
-struct CKSensorVale
-{
-	unsigned char lightValue_H;
-	unsigned char lightValue_L;
-	
-	unsigned char ultraSonicValue_H;
-	unsigned char ultraSonicValue_MH;
-	unsigned char ultraSonicValue_ML;
-	unsigned char ultraSonicValue_L;
-}cksensorValue;
-
-//存储传感器数据的数组
-char CKSensorValue[6] = {0x00};
-
-/*IO口设置*/
-/*  */
-void setup()
-{
- Serial.begin(115200);  
- Serial.flush();
- configurePins();
- configureServomotors();
- lastDataReceivedTime = millis();
- pinMode(A0,INPUT_PULLUP);
- pinMode(A1,INPUT_PULLUP);
- pinMode(A2,INPUT_PULLUP);
- pinMode(A3,INPUT_PULLUP);
- pinMode(A4,INPUT_PULLUP);
- pinMode(A5,INPUT_PULLUP);
 }
 
 
 
-void loop()
-{
- 
- if (updateServoMotors)
- {
-	sendUpdateServomotors();
-	ScratchBoardSensorReport();
-	updateServoMotors = false;
- }
- else
- {
-   readSerialPort();
- }
-}
-
-void configurePins()
-{
- for (int index = 0; index < 10; index++)
- {
-    states[index] = 0;
-    pinMode(index+4, OUTPUT);
-    digitalWrite(index+4, LOW); //reset pins
- }
-
- //pinMode(2,INPUT);
- //pinMode(3,INPUT);
- 
- outputs[0] = 'c'; //pin 4
- outputs[1] = 'a'; //pin 5
- outputs[2] = 'a'; //pin 6
- outputs[3] = 'c'; //pin 7
- outputs[4] = 's'; //pin 8
- outputs[5] = 'a'; //pin 9
- outputs[6] = 'd'; //pin 10
- outputs[7] = 'd'; //pin 11
- outputs[8] = 'd'; //pin 12
- outputs[9] = 'd'; //pin 13
-}
-
-void configureServomotors() //servomotors interruption configuration (interruption each 10 ms on timer2)
-{
- newInterruption = false;
- updateServoMotors = false;
-
- TCCR2A = 0;
- TCCR2B = 1<<CS22 | 1<<CS21 | 1<<CS20;
- TIMSK2 = 1<<TOIE2; //timer2 Overflow Interrupt
- TCNT2 = TIMER2_PRELOAD; //start timer
-}
-
-/*
-直接读取模拟口和数字口的数据
-*/
-void readSensorValues()
-{
-	int sensorValues, readings[5]; 
-	int sensorIndex = 0x05;
-
-	for (int p = 0; p < 5; p++)
-		readings[p] = analogRead(sensorIndex);   //
-		InsertionSort(readings, 5); 						//sort readings
-    CKSensorValue[0] = (readings[2] >> 8 & B11 );   
-    CKSensorValue[1] = (readings[2]  &  B11111111);  
-}
-
-/*读取超声波传感器的数据*/
-void readUltraSonicValues()
-{
-		ultraSonicValue = ultraSonic.Distance();  //读取超声波的值
-
-		CKSensorValue[2] = (ultraSonicValue >> 24) & B11111111;
-		CKSensorValue[3] = (ultraSonicValue >> 16) & B11111111;
-		CKSensorValue[4] = (ultraSonicValue >> 8) & B11111111;
-		CKSensorValue[5] = (ultraSonicValue) & B11111111;
-		
-}
-
-
-void InsertionSort(int* array, int n)
-{
-  for (int i = 1; i < n; i++)
-    for (int j = i; (j > 0) && ( array[j] < array[j-1] ); j--)
-      swap( array, j, j-1 );
-}
-
-void swap (int* array, int a, int b)
-{
-  int temp = array[a];
-  array[a] = array[b];
-  array[b] = temp;
-}
-
-/*
-ScratchBoardSensorReport
-//通讯协议拟定为
+/*通讯协议拟定为
 包头       数据长度  数据类型      数据     包尾
 0xfe 0xfd      n        0x01       xxxxx   0xfe 0xfb
 数据类型
@@ -375,13 +186,13 @@ void ScratchBoardSensorReport() //PicoBoard protocol, 2 bytes per sensor
 {
   char i = 0x00; 
   readSensorValues();
-  readUltraSonicValues();
+//  readUltraSonicValues();
   delay(10);
   Serial.write(0xfe);
   Serial.write(0xfd);  
-  Serial.write(0x0C);  
+  Serial.write(0x14);  
   Serial.write(0x01);
-  for(i = 0x00;i <= 0x05;i++)
+  for(i = 0x00;i < sizeof(CKSensorValue);i++)
   {
 	  Serial.write(CKSensorValue[i]);   //通过串口上报数据
   }  
@@ -389,34 +200,641 @@ void ScratchBoardSensorReport() //PicoBoard protocol, 2 bytes per sensor
   Serial.write(0xfb);
 }
 
-
-/************************************************************
-readSerialPort:读取串口接收到的数据
-************************************************************/
-void readSerialPort()
+/*
+直接读取模拟口和数字口的数据
+模拟口：3 4 5 共3个
+数字口：2 3   共2个
+超声波：
+*/
+void readSensorValues()
 {
-  int pin, inByte, sensorHighByte;
-
-  if (Serial.available() > 1)
-  {
-    lastDataReceivedTime = millis();
-    inByte = Serial.read();
-    Serial.println(__LINE__);
-    if (inByte >= 128) // Are we receiving the word's header?
+	int sensorValues, readings[5]; 
+	int sensorIndex = 0x03;
+	
+	for (sensorIndex = 3; sensorIndex <= 5; sensorIndex++) //for analog sensors, calculate the median of 5 sensor readings in order to avoid variability and power surges
     {
-      sensorHighByte = inByte;
-      pin = ((inByte >> 3) & 0x0F);
-      while (!Serial.available()); // Wait for the end of the word with data
-      inByte = Serial.read();
-      if (inByte <= 127) // This prevents Linux ttyACM driver to fail
-      {
-        states[pin - 4] = ((sensorHighByte & 0x07) << 7) | (inByte & 0x7F);
-          updateActuator(pin - 4);
-      }
+		for (int p = 0; p < 5; p++)
+		{
+			readings[p] = analogRead(sensorIndex); 
+		}
+			
+		InsertionSort(readings, 5); //sort readings
+		
+		CKSensorValue[(sensorIndex - 3)*2] = 	 (readings[2] >> 8 & B11 ); 
+		CKSensorValue[(sensorIndex - 3)*2 + 1] = (readings[2]  &  B11111111); 
     }
-  }
-  else checkScratchDisconnection();
+	//读取数字口
+	if(digitalRead(2))
+	{
+		CKSensorValue[6] = (1023 >> 8) && 0xff;
+		CKSensorValue[7] = 1023 && 0xff;
+	}
+	else
+	{
+		CKSensorValue[6] = 0x00;
+		CKSensorValue[7] = 0x00;
+	}
+	
+	if(digitalRead(3))
+	{
+		CKSensorValue[8] = (1023 >> 8) && 0xff;
+		CKSensorValue[9] = 1023 && 0xff;
+	}
+	else
+	{
+		CKSensorValue[8] = 0x00;
+		CKSensorValue[9] = 0x00;
+	}
 }
+
+void InsertionSort(int* array, int n)
+{
+  for (int i = 1; i < n; i++)
+    for (int j = i; (j > 0) && ( array[j] < array[j-1] ); j--)
+      swap( array, j, j-1 );
+}
+
+
+void swap (int* array, int a, int b)
+{
+  int temp = array[a];
+  array[a] = array[b];
+  array[b] = temp;
+}
+/*读取超声波传感器的数据*/
+void readUltraSonicValues()
+{
+		ultraSonicValue = ultraSonic.Distance();  //读取超声波的值
+
+		CKSensorValue[10] = (ultraSonicValue >> 24) & B11111111;
+		CKSensorValue[11] = (ultraSonicValue >> 16) & B11111111;
+		CKSensorValue[12] = (ultraSonicValue >> 8) & B11111111;
+		CKSensorValue[13] = (ultraSonicValue) & B11111111;
+		
+}
+///////////////////////////////////////////////////////////////////////
+unsigned char readBuffer(int index) {
+  return isBluetooth ? bufferBt[index] : buffer[index];
+}
+void writeBuffer(int index, unsigned char c) {
+  if (isBluetooth) {
+    bufferBt[index] = c;
+  } else {
+    buffer[index] = c;
+  }
+}
+void writeEnd() {
+
+#if defined(__AVR_ATmega32U4__)
+  isBluetooth ? Serial1.println() : Serial.println();
+#else
+  Serial.println();
+#endif
+}
+void writeSerial(unsigned char c) {
+#if defined(__AVR_ATmega32U4__)
+  isBluetooth ? Serial1.write(c) : Serial.write(c);
+#else
+  Serial.write(c);
+#endif
+}
+void readSerial() {
+  isAvailable = false;
+  if (Serial.available() > 0) {
+    isAvailable = true;
+    isBluetooth = false;
+    serialRead = Serial.read();
+  }
+#if defined(__AVR_ATmega32U4__)
+  else if (Serial1.available() > 0) {
+    isAvailable = true;
+    isBluetooth = true;
+    serialRead = Serial1.read();
+  }
+#endif
+//	lastDataReceivedTime = millis();
+}
+void parseData() {
+  isStart = false;
+  float value = 0.0;
+  switch (readBuffer(2)) {
+    case 0x01: { //数字量读取
+        int pin = readBuffer(3);
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x01);
+        writeSerial(pin);
+        pinMode(pin, INPUT);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(digitalRead(pin));
+        //writeEnd();
+      }
+      break;
+    case 0x02: { //模拟量读取
+        char pin = readBuffer(3);
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x02);
+        writeSerial(pin);
+        pinMode(analogs[pin], INPUT);
+        dec2bit(analogRead(analogs[pin]));
+        /*
+        writeSerial(Bt[3]);
+        writeSerial(Bt[2]);
+        writeSerial(Bt[1]);
+        writeSerial(Bt[0]);
+        */
+        // writeEnd();
+      }
+      break;
+    case 0x03: { //LM35温度传感器
+        int pin = readBuffer(3);
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x03);
+        writeSerial(pin);
+        ts.reset(pin);
+        sendValue(ts.temperature());
+        // writeEnd();
+      }
+      break;
+
+ /*   case 0x04: { //超声波传感器
+        value = us.distanceCm();
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x04);
+        writeSerial(0x00);
+        sendValue(value);
+      }
+      break;*/
+    case 0x05: { //摇杆模块(X)
+        int pin = readBuffer(3);
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x05);
+        writeSerial(pin);
+        pinMode(analogs[pin], INPUT);
+        dec2bit(analogRead(analogs[pin]));
+        /*
+        writeSerial(Bt[3]);
+        writeSerial(Bt[2]);
+        writeSerial(Bt[1]);
+        writeSerial(Bt[0]);
+        */
+        //writeEnd();
+      }
+      break;
+    case 0x06: { //摇杆模块(Y)
+        int pin = readBuffer(3);
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x06);
+        writeSerial(pin);
+        pinMode(analogs[pin], INPUT);
+        dec2bit(analogRead(analogs[pin]));
+        /*
+        writeSerial(Bt[3]);
+        writeSerial(Bt[2]);
+        writeSerial(Bt[1]);
+        writeSerial(Bt[0]);
+        */
+        // writeEnd();
+      }
+      break;
+    case 0x07: { //摇杆模块(K)
+        int pin = readBuffer(3);
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x07);
+        writeSerial(pin);
+        pinMode(analogs[pin], INPUT);
+        dec2bit(analogRead(analogs[pin]));
+        /*
+        writeSerial(Bt[3]);
+        writeSerial(Bt[2]);
+        writeSerial(Bt[1]);
+        writeSerial(Bt[0]);
+        */
+        //writeEnd();
+      }
+      break;
+    case 0x08: { //触摸模块
+        int pin = readBuffer(3);
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x08);
+        writeSerial(pin);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(readCapacitivePin(pin));
+        //writeEnd();
+      }
+
+      break;
+      //     case 0x09:{ //DS18B20测温模块
+      //      int pin = readBuffer(3);
+      //        writeSerial(0xEE);
+      //        writeSerial(0x66);
+      //        writeSerial(0x09);
+      //        writeSerial(pin);
+      //        sendValue(value);
+      //
+      //        //writeEnd();
+      //     }
+      //     break;
+    case 0x0A: { //计时模块
+
+        value = millis() - CFun_last_time;
+        value = value / 1000.0;
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x0A);
+        writeSerial(0x00);
+        sendValue(value);
+      }
+      break;
+      ////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////minicar part//////////////////////
+      ///////////////////////////////////////////////////////////////////////////////////////////
+    case 0x50: { //avoid
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x50);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(av.Avoid());
+        //writeEnd();
+      }
+      break;
+      //    case 0x51: { //ultransonic
+      //        value = us.distanceCm();
+      //        writeSerial(0xEE);
+      //        writeSerial(0x66);
+      //        writeSerial(0x51);
+      //        writeSerial(0x00);
+      //        sendValue(value);
+      //      }
+      //      break;
+    case 0x52: { //track
+        ///////////////////////digital////////////////////////////
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x52);
+        writeSerial(0x00);
+        dec2bit(tr.Track(Tgray));
+        /*
+        writeSerial(Bt[3]);
+        writeSerial(Bt[2]);
+        writeSerial(Bt[1]);
+        writeSerial(Bt[0]);
+        */
+        //writeEnd();
+      }
+      break;
+    case 0x53: { //voltage measure
+        value = cp.minicarVolt();
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x53);
+        writeSerial(0x00);
+        sendValue(value);
+      }
+      break;
+    case 0x54: { //IR:
+        int pin = readBuffer(3);
+        if (ir_begin)
+        {
+          ir.begin(pin);
+          ir_begin = 0;
+        }
+        irAvaliable = 1;
+        writeSerial(0xEE);
+        writeSerial(0x66);
+        writeSerial(0x54);
+        writeSerial(pin);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(0x00);
+        writeSerial(ir.getCode());
+        // irRead = 0;
+      }
+      break;
+
+
+    case 0xA0: { //forward
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+
+        dc.forward(val.byteVal[0]);
+      }
+      break;
+
+    case 0xA1: { //back
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        dc.back(val.byteVal[0]);
+      }
+      break;
+
+
+    case 0xA2: { //turnleft
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        dc.turnleft(val.byteVal[0]);
+      }
+      break;
+
+    case 0xA3: { //turnright
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        dc.turnright(val.byteVal[0]);
+      }
+      break;
+
+    case 0xA5: { //track value
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        Tgray = val.byteVal[1] * 256 + val.byteVal[0];
+
+      }
+      break;
+
+      ///////////////////////////////////////////////////////
+      ////////////////keep for others sensor///////////////
+      //////////////////////////////////////////////////////
+    case 0x81: { //digital write
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        pinMode(pin, OUTPUT);
+        digitalWrite(pin, val.byteVal[0] >= 1 ? HIGH : LOW);
+      }
+      break;
+    case 0x82: { //PWM
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        pinMode(pin, OUTPUT);
+        analogWrite(pin, val.byteVal[0]);
+      }
+      break;
+    case 0x83: { //舵机模块
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        //     _servo_flag = 1;
+        // int angle;
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        //        if (val.byteVal[0] != angle) {
+        //          angle = val.byteVal[0];
+        //          if (_servo_flag)
+        //          {
+        //            _servo_flag = 0;
+        //            myservo.attach(pin);  // attaches the servo on pin 9 to the servo object
+        //          }
+        //          //  myservo.attach(pin);  // attaches the servo on pin 9 to the servo object
+        //          myservo.write(val.byteVal[0]);              // tell servo to go to position in variable 'pos'
+        //        }
+        switch (pin) {
+          case 2: {
+              myservo2.attach(2);
+              myservo2.write(val.byteVal[0]);
+
+            }
+            break;
+          case 3: {
+              myservo3.attach(3);
+              myservo3.write(val.byteVal[0]);
+
+            }
+            break;
+          case 4: {
+              myservo4.attach(4);
+              myservo4.write(val.byteVal[0]);
+
+            }
+            break;
+          case 5: {
+              myservo5.attach(5);
+              myservo5.write(val.byteVal[0]);
+
+            }
+            break;
+          case 6: {
+              myservo6.attach(6);
+              myservo6.write(val.byteVal[0]);
+
+            }
+            break;
+          case 7: {
+              myservo7.attach(7);
+              myservo7.write(val.byteVal[0]);
+
+            }
+            break;
+          case 8: {
+              myservo8.attach(8);
+              myservo8.write(val.byteVal[0]);
+
+            }
+            break;
+          case 9: {
+              myservo9.attach(9);
+              myservo9.write(val.byteVal[0]);
+
+            }
+            break;
+          case 10: {
+              myservo10.attach(10);
+              myservo10.write(val.byteVal[0]);
+
+            }
+            break;
+          case 11: {
+              myservo11.attach(11);
+              myservo11.write(val.byteVal[0]);
+
+            }
+            break;
+          case 12: {
+              myservo12.attach(12);
+              myservo12.write(val.byteVal[0]);
+
+            }
+            break;
+          case 13: {
+              myservo13.attach(13);
+              myservo13.write(val.byteVal[0]);
+
+            }
+            break;
+        }
+      }
+      break;
+    case 0x84: { //无源蜂鸣器
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        pinMode(pin, OUTPUT);
+        int toneHz = val.byteVal[3] * 256 + val.byteVal[2];
+        int timeMs = val.byteVal[1] * 255 + val.byteVal[0];
+        if (timeMs != 0) {
+          buzz.tone(pin, toneHz, timeMs);
+        }
+        else
+          buzz.noTone(pin);
+
+      }
+      break;
+    case 0x85: { //串行数码管
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        seg.reset(pin);
+        seg.display(val.floatVal);
+      }
+      break;
+    case 0x86: { //电机模块
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        ///////////////////////digital////////////////////////////
+        val.byteVal[3] = readBuffer(dataIndex++);
+        val.byteVal[2] = readBuffer(dataIndex++);
+        val.byteVal[1] = readBuffer(dataIndex++);
+        val.byteVal[0] = readBuffer(dataIndex++);
+        dc.reset(pin);
+        dc.motorrun(val.byteVal[1], val.byteVal[0]);
+      }
+      break;
+    case 0x87: { //三色LED
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        int index = readBuffer(dataIndex++);
+        int red = readBuffer(dataIndex++);
+        int green = readBuffer(dataIndex++);
+        int blue = readBuffer(dataIndex++);
+        led.setColorAt(red, green, blue);
+      }
+      break;
+
+    case 0x88: { //LCD1602
+        if(_LCD_flag)
+       { 
+         lcd.init();
+         _LCD_flag = 0; 
+       } 
+        
+        int dataIndex = 3;
+        int pin = readBuffer(dataIndex++);
+        for (int i = 0; i < 32; i++)
+        {
+          _LCD[i] = readBuffer(dataIndex++);
+        }
+        lcd.LiquidCrystaldisplay(_LCD);
+      }
+      break;
+
+    case 0x89: { //Timer清零
+        CFun_last_time = millis();
+      }
+      break;
+  }
+}
+
+void sendValue(float value) {
+  val.floatVal = value;
+  writeSerial(val.byteVal[3]);
+  writeSerial(val.byteVal[2]);
+  writeSerial(val.byteVal[1]);
+  writeSerial(val.byteVal[0]);
+}
+void dec2bit(int value) {
+  int dec = value;
+  Bt[3] = 0x00;
+  Bt[2] = 0x00;
+  Bt[1] = (dec >> 8) & 0xff;
+  Bt[0] = dec;
+  writeSerial(Bt[3]);
+  writeSerial(Bt[2]);
+  writeSerial(Bt[1]);
+  writeSerial(Bt[0]);
+}
+////////////////////////////interrupt/////////////////////////////////////////
+
+void ius() {
+  _iustime = micros() - _itime;
+  noInterrupts();
+}
+/*
+ISR(TIMER2_OVF_vect) //timer1 overflow interrupt vector handler
+{ //timer2 => 8 bits counter => 256 clock ticks
+  //preeescaler = 1024 => this routine is called 61 (16.000.000/256/1024) times per second approximately => interruption period =  1 / 16.000.000/256/1024 = 16,384 ms
+  //as we need a 20 ms interruption period but timer2 doesn't have a suitable preescaler for this, we program the timer with a 10 ms interruption period and we consider an interruption every 2 times this routine is called.
+  //to have a 10 ms interruption period, timer2 counter must overflow after 156 clock ticks => interruption period = 1 / 16.000.000/156/1024 = 9,984 ms => counter initial value (TCNT) = 100
+  if (newInterruption)
+  {
+//    updateServoMotors = true;
+  }
+  newInterruption = !newInterruption;
+  TCNT2 = TIMER2_PRELOAD;  //reset timer
+}
+
+void checkScratchDisconnection() //the reset is necessary when using an wireless arduino board (because we need to ensure that arduino isn't waiting the actuators state from Scratch) or when scratch isn't sending information (because is how serial port close is detected)
+{
+  if (millis() - lastDataReceivedTime > 1000) reset(); //reset state if actuators reception timeout = one second
+}
+
+
 
 void reset() //with xbee module, we need to simulate the setup execution that occurs when a usb connection is opened or closed without this module
 {
@@ -428,73 +846,10 @@ void reset() //with xbee module, we need to simulate the setup execution that oc
 
   //reset servomotors
   newInterruption = false;
-  updateServoMotors = false;
+//  updateServoMotors = false;
   TCNT2 = TIMER2_PRELOAD;
 
   //protocol handshaking
   ScratchBoardSensorReport();
   lastDataReceivedTime = millis();
-}
-
-void updateActuator(int pinNumber)
-{
-  if (outputs[pinNumber] == 'd')  digitalWrite(pinNumber + 4, states[pinNumber]);
-  else if (outputs[pinNumber] == 'a')  analogWrite(pinNumber + 4, states[pinNumber]);
-}
-
-void sendUpdateServomotors()
-{
-  for (int p = 0; p < 10; p++)
-  {
-    if (outputs[p] == 'c') servomotorC(p + 4, states[p]);
-    if (outputs[p] == 's') servomotorS(p + 4, states[p]);
-  }
-}
-
-void servomotorC (int pinNumber, int dir)
-{
-  if (dir == 1) pulse(pinNumber, 1300); //clockwise rotation
-  else if (dir == 2) pulse(pinNumber, 1700); //anticlockwise rotation
-}
-
-void servomotorS (int pinNumber, int angle)
-{
-  if (angle < 0) pulse(pinNumber, 600);
-  else if (angle > 180) pulse(pinNumber, 2400);
-  else pulse(pinNumber, (angle * 10) + 600);
-}
-
-void pulse (int pinNumber, int pulseWidth)
-{
-  initialPulseTime = micros();
-  digitalWrite(pinNumber, HIGH);
-
-  while (micros() < pulseWidth + initialPulseTime){}
-  digitalWrite(pinNumber, LOW);
-}
-
-void checkScratchDisconnection() //the reset is necessary when using an wireless arduino board (because we need to ensure that arduino isn't waiting the actuators state from Scratch) or when scratch isn't sending information (because is how serial port close is detected)
-{
-  if (millis() - lastDataReceivedTime > 1000) reset(); //reset state if actuators reception timeout = one second
-}
-
-ISR(TIMER2_OVF_vect) //timer1 overflow interrupt vector handler
-{ //timer2 => 8 bits counter => 256 clock ticks
-  //preeescaler = 1024 => this routine is called 61 (16.000.000/256/1024) times per second approximately => interruption period =  1 / 16.000.000/256/1024 = 16,384 ms
-  //as we need a 20 ms interruption period but timer2 doesn't have a suitable preescaler for this, we program the timer with a 10 ms interruption period and we consider an interruption every 2 times this routine is called.
-  //to have a 10 ms interruption period, timer2 counter must overflow after 156 clock ticks => interruption period = 1 / 16.000.000/156/1024 = 9,984 ms => counter initial value (TCNT) = 100
-  if (newInterruption)
-  {
-    updateServoMotors = true;
-  }
-  newInterruption = !newInterruption;
-  TCNT2 = TIMER2_PRELOAD;  //reset timer
-}
-/*
-//IO口中断
-void ius() {
-  _iustime = micros() - _itime;
-  noInterrupts();
 }*/
-
-

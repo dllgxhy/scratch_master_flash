@@ -530,7 +530,7 @@ public class CfunPrims {
 			numf[2] = dir;
 			numf[3] = pwm;	
 			app.arduinoUart.sendDataToUartBuffer(numf);
-		}	
+		}
 	}
 	
 	

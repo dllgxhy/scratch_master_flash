@@ -295,6 +295,7 @@ public class MediaLibrary extends Sprite {
 		function gotLibraryData(data:ByteArray):void {
 			if (!data) return; // failure
 			var s:String = data.readUTFBytes(data.length);
+			app.xuhy_test_log(s);
 			libraryCache[assetType] = util.JSON.parse(stripComments(s)) as Array;
 			collectEntries();
 		}

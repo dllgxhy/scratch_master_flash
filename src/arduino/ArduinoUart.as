@@ -154,8 +154,10 @@ public class ArduinoUart extends Sprite {
 	**************************************************/
 	public function paraUartData_OnTick(data:Array):void
 	{		
-		app.arduinoLib.arduinoLightValue = data[0] * 256 + data[1];
+		app.arduinoLib.arduinoLightValue = ((data[0] * 256 + data[1]) >> 10) * 100;
+
 		app.arduinoLib.arduinoUltrasonicValue =  data[5];
+		
 	}
 
 	/*********************************************************************
